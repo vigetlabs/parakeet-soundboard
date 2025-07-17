@@ -15,19 +15,19 @@
 TODO
 
 ### Set up
-   ```bash
-   cd api && bundle install
-   cd web-ui && pnpm install
-   ```
+```bash
+cd api && bundle install
+cd web-ui && pnpm install
+```
 
 ### Database
 TODO
 
 ### Run servers
-    ```bash
-    cd api && bundle exec rails sever
-    cd web-ui && pnpm start
-    ```
+```bash
+cd api && bundle exec rails server
+cd web-ui && pnpm start
+```
 
 ### Load extension
     - Go to `chrome://extensions`
