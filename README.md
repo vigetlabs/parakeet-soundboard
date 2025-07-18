@@ -7,7 +7,6 @@
 - `api/` - Rails API backend
 - `web-ui/` - React TypeScript frontend
 - `extension/` - Chrome extension (injects + plays sounds)
-- `sounds/` - sample audio files (temporary location)
 
 ## Development
 
