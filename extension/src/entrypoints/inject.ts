@@ -8,6 +8,7 @@ declare global {
       fxNode?: AudioBufferSourceNode;
       fxGain?: GainNode;
       initialized?: boolean;
+      micMuted?: boolean;
     };
   }
 }
@@ -34,7 +35,7 @@ export default defineUnlistedScript(() => {
         const destNode = audioCtx.createMediaStreamDestination();
 
         const micGain = audioCtx.createGain();
-        micGain.gain.value = 1;
+        micGain.gain.value = window.soundboard?.micMuted ?? false ? 0 : 1;
         srcNode.connect(micGain).connect(destNode);
 
         async function playSoundEffect(url: string, volume: number) {
@@ -126,11 +127,13 @@ export default defineUnlistedScript(() => {
         }
         break;
       case "muteMicrophone":
+        window.soundboard.micMuted = true;
         if (window.soundboard.muteMicrophone) {
           window.soundboard.muteMicrophone();
         }
         break;
       case "unmuteMicrophone":
+        window.soundboard.micMuted = false;
         if (window.soundboard.unmuteMicrophone) {
           window.soundboard.unmuteMicrophone();
         }
