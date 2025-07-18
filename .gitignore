@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# WXT (Extension Framework)
+.output
+stats.html
+stats-*.json
+.wxt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
