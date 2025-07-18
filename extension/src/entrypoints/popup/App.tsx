@@ -44,6 +44,15 @@ function App() {
     browser.tabs.create({ url: browser.runtime.getURL("/fullpage.html") });
   }
 
+  const [isMeet, setIsMeet] = useState<boolean>(false);
+
+  useEffect(() => {
+    browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const url = tabs[0]?.url ?? "";
+      setIsMeet(url.startsWith("https://meet.google.com"));
+    });
+  }, []);
+
   useEffect(() => {
     async function loadStates() {
       setFxVolume(await fxVolumeStorage.getValue());
@@ -55,13 +64,19 @@ function App() {
   return (
     <>
       <body>
-        <button onClick={() => playSound("/sounds/bg-music.mp3")}>
-          Play Sound FX 1
-        </button>
-        <button onClick={() => playSound("/sounds/deltarune-explosion.mp3")}>
-          Play Sound FX 2
-        </button>
-        <button onClick={stopSound}>Stop Sound FX</button>
+        {isMeet && (
+          <>
+            <button onClick={() => playSound("/sounds/bg-music.mp3")}>
+              Play Sound FX 1
+            </button>
+            <button
+              onClick={() => playSound("/sounds/deltarune-explosion.mp3")}
+            >
+              Play Sound FX 2
+            </button>
+            <button onClick={stopSound}>Stop Sound FX</button>
+          </>
+        )}
         <button onClick={() => playAudio("/sounds/deltarune-explosion.mp3")}>
           Play Sound
         </button>
