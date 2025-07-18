@@ -98,6 +98,12 @@ export default defineUnlistedScript(() => {
             };
           }
         }
+        window.postMessage(
+          {
+            command: "getMicMuted",
+          },
+          "*"
+        );
 
         console.log("Made it to return!");
         // 5) Return the mixed audio track

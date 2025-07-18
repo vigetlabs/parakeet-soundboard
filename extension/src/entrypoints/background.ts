@@ -1,6 +1,21 @@
 export default defineBackground(() => {
   console.log("Background loaded!", { id: browser.runtime.id });
 
+  browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.type === "getMicMuted") {
+      storage
+        .getItem("session:micMuted", { defaultValue: false })
+        .then((val) => {
+          sendResponse(val);
+        })
+        .catch((err) => {
+          console.error("Error fetching mic muted status", err);
+          sendResponse(false);
+        });
+      return true; // tells the caller that there will be a response
+    }
+  });
+
   // If we want to disable to chrome extension outside google meet:
   // browser.runtime.onInstalled.addListener(() => {
   //   browser.action.disable();
