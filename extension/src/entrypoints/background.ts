@@ -1,8 +1,10 @@
+import { CrossFunctions } from "@/utils/constants";
+
 export default defineBackground(() => {
   console.log("Background loaded!", { id: browser.runtime.id });
 
   browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    if (msg.type === "getMicMuted") {
+    if (msg.type === CrossFunctions.GET_MIC_MUTED) {
       storage
         .getItem("session:micMuted", { defaultValue: false })
         .then((val) => {

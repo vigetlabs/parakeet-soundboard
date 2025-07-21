@@ -3,6 +3,7 @@ import "./App.css";
 import { PublicPath } from "wxt/browser";
 import { postMessage, playAudio } from "@/utils";
 import { storage } from "#imports";
+import { CrossFunctions } from "@/utils/constants";
 
 function App() {
   const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
@@ -20,23 +21,23 @@ function App() {
   }
 
   async function playSound(file: PublicPath) {
-    postMessage("playAudio", {
+    postMessage(CrossFunctions.INJECT_AUDIO, {
       url: browser.runtime.getURL(file),
       volume: fxVolume,
     });
   }
 
   async function stopSound() {
-    postMessage("stopAudio");
+    postMessage(CrossFunctions.STOP_AUDIO);
   }
 
   async function handleMicMute(muteMic: boolean) {
     micMutedStorage.setValue(muteMic);
     setMicMuted(muteMic);
     if (muteMic) {
-      postMessage("muteMicrophone");
+      postMessage(CrossFunctions.MUTE_MICROPHONE);
     } else {
-      postMessage("unmuteMicrophone");
+      postMessage(CrossFunctions.UNMUTE_MICROPHONE);
     }
   }
 

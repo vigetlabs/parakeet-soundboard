@@ -1,3 +1,5 @@
+import { CrossFunctions } from "@/utils/constants";
+
 declare global {
   interface Window {
     soundboard: {
@@ -118,7 +120,7 @@ export default defineUnlistedScript(() => {
   window.addEventListener("message", (event) => {
     if (event.source !== window) return;
     switch (event.data.command) {
-      case "playAudio":
+      case CrossFunctions.INJECT_AUDIO:
         console.log("recieved play " + event.data.url);
         if (window.soundboard.triggerAudio) {
           window.soundboard.triggerAudio(
@@ -127,18 +129,18 @@ export default defineUnlistedScript(() => {
           );
         }
         break;
-      case "stopAudio":
+      case CrossFunctions.STOP_AUDIO:
         if (window.soundboard.stopAudio) {
           window.soundboard.stopAudio();
         }
         break;
-      case "muteMicrophone":
+      case CrossFunctions.MUTE_MICROPHONE:
         window.soundboard.micMuted = true;
         if (window.soundboard.muteMicrophone) {
           window.soundboard.muteMicrophone();
         }
         break;
-      case "unmuteMicrophone":
+      case CrossFunctions.UNMUTE_MICROPHONE:
         window.soundboard.micMuted = false;
         if (window.soundboard.unmuteMicrophone) {
           window.soundboard.unmuteMicrophone();

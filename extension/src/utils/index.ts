@@ -1,4 +1,5 @@
 import { PublicPath } from "wxt/browser";
+import { CrossFunctions } from "./constants";
 
 export async function getActiveTabID() {
   const [tab] = await browser.tabs.query({
@@ -8,7 +9,7 @@ export async function getActiveTabID() {
   return tab.id ?? -1;
 }
 
-export async function postMessage(command: string, args?: {}) {
+export async function postMessage(command: CrossFunctions, args?: {}) {
   browser.scripting.executeScript({
     target: { tabId: await getActiveTabID() },
     func: function (command: string, args?: {}) {
