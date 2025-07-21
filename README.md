@@ -1,34 +1,40 @@
-# intern-project-2025
-
-# Soundboard Extension + Web App
+# Intern Project 2025: Soundboard Extension + Web App
 
 ## Structure
 
 - `api/` - Rails API backend
-- `web-ui/` - React TypeScript frontend
 - `extension/` - Chrome extension (injects + plays sounds)
-- `sounds/` - sample audio files (temporary location)
+- `ui/` - React TypeScript frontend for Website
 
 ## Development
 
 ### Prerequisites
+
 TODO
 
 ### Set up
+
 ```bash
 cd api && bundle install
-cd web-ui && pnpm install
+cd ui && pnpm install
+cd extension && pnpm install
 ```
 
 ### Database
+
 TODO
 
 ### Run servers
+
 ```bash
 cd api && bundle exec rails server
-cd web-ui && pnpm start
+cd ui && pnpm run dev
+cd extension && pnpm run dev
 ```
 
 ### Load extension
-    - Go to `chrome://extensions`
-    - Load unpacked: `./extension` folder
+
+- Go to `chrome://extensions/`
+- Enabled developer mode in the top right
+- Click Load unpacked in the top left
+- Choose the folder that `pnpm run dev` told you to
