@@ -24,14 +24,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_21_212023) do
   create_table "sounds_tags", id: false, force: :cascade do |t|
     t.integer "sound_id", null: false
     t.integer "tag_id", null: false
-    t.index [ "sound_id", "tag_id" ], name: "index_sounds_tags_on_sound_id_and_tag_id", unique: true
+    t.index ["sound_id", "tag_id"], name: "index_sounds_tags_on_sound_id_and_tag_id", unique: true
   end
 
   create_table "tags", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index [ "name" ], name: "index_tags_on_name", unique: true
+    t.index ["name"], name: "index_tags_on_name", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -44,8 +44,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_21_212023) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "jti", null: false
-    t.index [ "email" ], name: "index_users_on_email", unique: true
-    t.index [ "jti" ], name: "index_users_on_jti", unique: true
-    t.index [ "reset_password_token" ], name: "index_users_on_reset_password_token", unique: true
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["jti"], name: "index_users_on_jti", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
 end
