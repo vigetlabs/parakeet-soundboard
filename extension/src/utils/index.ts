@@ -31,16 +31,8 @@ declare global {
   }
 }
 
-const restrictedSchemes = [
-  "chrome:",
-  "chrome-extension:",
-  "edge:",
-  "about:",
-  "moz-extension:",
-];
-
 export async function playLocalAudio(file: PublicPath, volume: number) {
-  if (await checkIfRestricted()) {
+  if (!(await URLIsValid())) {
     return;
   }
 
@@ -76,7 +68,7 @@ export async function playLocalAudio(file: PublicPath, volume: number) {
 }
 
 export async function stopLocalAudio() {
-  if (await checkIfRestricted()) {
+  if (!(await URLIsValid())) {
     return;
   }
 
@@ -92,15 +84,17 @@ export async function stopLocalAudio() {
   });
 }
 
-export async function checkIfRestricted() {
+const allowedSchemes = ["http:", "https:"];
+
+export async function URLIsValid() {
   const [tab] = await browser.tabs.query({
     active: true,
     currentWindow: true,
   });
   const url = tab.url ?? "";
-  if (restrictedSchemes.some((scheme) => url.startsWith(scheme))) {
-    console.log("Can't play audio in this tab"); // TODO: Change this to a toast
+  if (allowedSchemes.some((scheme) => url.startsWith(scheme))) {
     return true;
   }
+  console.log("Can't control audio in this tab"); // TODO: Change this to a toast
   return false;
 }
