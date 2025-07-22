@@ -69,4 +69,6 @@ Rails.application.configure do
   # config.generators.apply_rubocop_autocorrect_after_generate!
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3001 }
+
+  config.allowed_cors_origins = "*"
 end
