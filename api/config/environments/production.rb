@@ -84,4 +84,7 @@ Rails.application.configure do
   #
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  # TODO: Replace with the actual frontend domain when ready
+  config.allowed_cors_origins = [ "https://placeholder.com" ]
 end
