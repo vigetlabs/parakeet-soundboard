@@ -6,6 +6,8 @@ import { storage } from "#imports";
 import { CrossFunctions } from "@/utils/constants";
 
 function App() {
+  const [currentlyPlaying, setCurrentlyPlaying] = useState("");
+
   const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
     fallback: 25,
   });
@@ -28,13 +30,15 @@ function App() {
       });
     }
     playLocalAudio(file, fxVolume);
+    setCurrentlyPlaying(file);
   }
 
   async function stopSound() {
-    stopLocalAudio();
     if (isMeet) {
       postMessage(CrossFunctions.STOP_AUDIO);
     }
+    stopLocalAudio();
+    setCurrentlyPlaying("");
   }
 
   async function handleMicMute(muteMic: boolean) {
@@ -70,6 +74,21 @@ function App() {
     loadStates();
   }, []);
 
+  useEffect(() => {
+    // TODO: Make it check if the audio is still playing on reopen
+    const listener = (msg: any) => {
+      if (msg.type === CrossFunctions.AUDIO_ENDED) {
+        setCurrentlyPlaying("");
+      }
+    };
+
+    browser.runtime.onMessage.addListener(listener);
+
+    return () => {
+      browser.runtime.onMessage.removeListener(listener);
+    };
+  }, []);
+
   const tempButtons: Array<{
     label: string;
     color: string;
@@ -80,55 +99,55 @@ function App() {
       label: "Applause",
       color: "cornsilk",
       emoji: "👏",
-      url: "/sounds/bg-music.mp3",
+      url: "/sounds/applause.mp3",
     },
     {
       label: "Airhorn",
       color: "crimson",
       emoji: "🔉",
-      url: "/sounds/bg-music.mp3",
+      url: "/sounds/airhorn.mp3",
     },
     {
       label: "Anime Wow",
       color: "deeppink",
       emoji: "🎉",
-      url: "/sounds/bg-music.mp3",
+      url: "/sounds/anime-wow.mp3",
     },
     {
       label: "Crickets",
       color: "darkolivegreen",
       emoji: "🦗",
-      url: "/sounds/bg-music.mp3",
+      url: "/sounds/crickets.mp3",
     },
     {
       label: "Explosion",
       color: "orange",
       emoji: "💥",
-      url: "/sounds/bg-music.mp3",
+      url: "/sounds/explosion.mp3",
     },
     {
       label: "Duck",
       color: "darkgreen",
       emoji: "🦆",
-      url: "/sounds/bg-music.mp3",
+      url: "/sounds/quack.mp3",
     },
     {
       label: "Splat",
       color: "midnightblue",
       emoji: "♠️",
-      url: "/sounds/bg-music.mp3",
+      url: "/sounds/splat.mp3",
     },
     {
       label: "Drumroll",
       color: "moccasin",
       emoji: "🥁",
-      url: "/sounds/bg-music.mp3",
+      url: "/sounds/drumroll.mp3",
     },
     {
       label: "Yippee",
       color: "aliceblue",
       emoji: "🏳️‍🌈",
-      url: "/sounds/bg-music.mp3",
+      url: "/sounds/yippee.mp3",
     },
     {
       label: "Music",
@@ -144,6 +163,7 @@ function App() {
         <div className="topBar">
           <p className="name">LOGO</p>
           <input type="text" placeholder="Search" className="searchBar"></input>
+          <IconButton icon="gear" onClick={openTab} />
         </div>
         <div className="soundButtonContainer">
           {tempButtons.map((button) => (
@@ -153,23 +173,13 @@ function App() {
                 color={button.color}
                 emoji={button.emoji}
                 onClick={() => playSound(button.url)}
+                isPlaying={currentlyPlaying === button.url}
               />
             </div>
           ))}
-          {/* <button onClick={() => playSound("/sounds/bg-music.mp3")}>
-              Play Sound FX 1
-            </button>
-            <button
-              onClick={() => playSound("/sounds/deltarune-explosion.mp3")}
-            >
-              Play Sound FX 2
-            </button> */}
         </div>
-        <button onClick={stopSound}>Stop Sounds</button>
-        <button onClick={openTab}>Open Tab</button>
-
-        <label>
-          Sound Effect Volume
+        <label className="rangeWrapper">
+          Sound Volume
           <input
             type="range"
             min="1"
@@ -180,15 +190,18 @@ function App() {
             name="fxVolume"
           />
         </label>
-        <label>
-          Mute Microphone
-          <input
-            type="checkbox"
-            name="micVolume"
-            checked={micMuted}
-            onChange={(e) => handleMicMute(e.target.checked)}
-          />
-        </label>
+        <div className="flexRow">
+          <label className="verticalCheckboxWrapper">
+            Mute Microphone
+            <input
+              type="checkbox"
+              name="micVolume"
+              checked={micMuted}
+              onChange={(e) => handleMicMute(e.target.checked)}
+            />
+          </label>
+          <button onClick={stopSound}>Stop Sounds</button>
+        </div>
         <p style={{ color: isMeet ? "green" : "red" }}>
           {isMeet ? "C" : "Not c"}onnected to meet
         </p>
