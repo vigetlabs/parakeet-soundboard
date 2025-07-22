@@ -9,9 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: api
     services:
       postgres:
         image: postgres:14
@@ -32,23 +29,23 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: ruby-3.4.4
       - name: Install dependencies
         run: |
+          cd api
           gem install bundler
           bundle install --jobs 4 --retry 3
       - name: Set up database
         run: |
+          cd api
           bundle exec rails db:create db:schema:load
       - name: Run tests
         run: |
+          cd api
           bundle exec rspec
 
   lint:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: api
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -56,18 +53,14 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: ruby-3.4.4
           bundler-cache: true
 
       - name: Lint code for consistent style
-        run: bin/rubocop -f github
+        run: api/bin/rubocop -f github
 
   scan_ruby:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: api
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -75,8 +68,8 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: ruby-3.4.4
           bundler-cache: true
 
       - name: Scan for common Rails security vulnerabilities using static analysis
-        run: bin/brakeman --no-pager
+        run: api/bin/brakeman --no-pager
