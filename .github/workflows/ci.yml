@@ -46,6 +46,9 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -57,10 +60,14 @@ jobs:
           bundler-cache: true
 
       - name: Lint code for consistent style
-        run: api/bin/rubocop -f github
+        run: bin/rubocop -f github
 
   scan_ruby:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -72,4 +79,4 @@ jobs:
           bundler-cache: true
 
       - name: Scan for common Rails security vulnerabilities using static analysis
-        run: api/bin/brakeman --no-pager
+        run: bin/brakeman --no-pager
