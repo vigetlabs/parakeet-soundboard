@@ -9,12 +9,13 @@ class Users::RegistrationsController < Devise::RegistrationsController
     if resource.persisted?
       sign_in(resource, store: false) # triggers devise-jwt to issue token
       render json: {
-        status: {code: 200, message: 'Signed up and logged in successfully.'},
+        status: { code: 200, message: "Signed up and logged in successfully." },
         data: UserSerializer.new(resource).serializable_hash[:data][:attributes]
       }, status: :ok
     else
       render json: {
-        status: {code: 422, message: "User couldn't be created successfully. #{resource.errors.full_messages.to_sentence}"}
+        status: { code: 422, message: "User couldn't be created successfully." },
+        errors: resource.errors
       }, status: :unprocessable_entity
     end
   end
@@ -25,5 +26,4 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def sign_up(resource_name, resource)
     # Do nothing here to avoid session write errors
   end
-
 end
