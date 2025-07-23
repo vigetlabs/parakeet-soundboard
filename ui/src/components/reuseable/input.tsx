@@ -1,25 +1,31 @@
 import * as React from "react";
 import { unstable_PasswordToggleField as PasswordToggleField } from "radix-ui";
-import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
+import {
+  MagnifyingGlassIcon,
+  EyeClosedIcon,
+  EyeOpenIcon,
+} from "@radix-ui/react-icons";
 import "./input.css";
 
 export interface TextInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   email?: boolean;
+  icon?: boolean;
 }
 
 const TextInput: React.FC<TextInputProps> = ({
   className = "",
   email = false,
-  children,
+  icon = false,
   ...props
 }) => {
-  const classes = `textInput ${className}`.trim();
+  const classes = `textInputWrapper ${className}`.trim();
 
   return (
-    <input type={email ? "email" : "text"} className={classes} {...props}>
-      {children}
-    </input>
+    <div className={classes}>
+      {icon && <MagnifyingGlassIcon className="textInputIcon" />}
+      <input type={email ? "email" : "text"} className="textInput" {...props} />
+    </div>
   );
 };
 

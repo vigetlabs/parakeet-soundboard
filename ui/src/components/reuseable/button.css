@@ -1,0 +1,82 @@
+.button {
+  background-color: var(--primary-active);
+  color: var(--elevated-background);
+  padding: 8px 24px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: fit-content;
+  font-weight: 700;
+  border: none;
+}
+
+.soundButtonWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  margin-bottom: 1rem;
+}
+
+.soundButton {
+  padding: 16px;
+  border: 4px solid transparent;
+  margin: 0 auto;
+}
+
+.soundButton:hover {
+  border-color: deepskyblue;
+}
+
+.buttonEmoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.soundButtonLabel {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+  user-select: none;
+  text-align: center;
+  font-size: 12px;
+}
+
+.iconButtonWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.iconButton {
+  width: 48px;
+  height: 48px;
+  background-color: var(--primary-foreground);
+  color: var(--elevated-background);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: color, background-color 0.2s ease-in-out;
+  border-radius: 8px;
+}
+
+.iconButtonSelected {
+  background-color: var(--elevated-background);
+  color: var(--primary-foreground);
+}
+
+.innerIcon {
+  width: 32px;
+  height: 32px;
+}
+
+.iconButtonLabel {
+  margin-top: 4px;
+  font-weight: 700;
+  font-size: 12px;
+}

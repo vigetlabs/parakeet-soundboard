@@ -1,0 +1,45 @@
+.sidebarWrapper {
+  color: var(--elevated-background);
+  background-color: var(--primary-foreground);
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarTop {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  padding: 32px;
+  padding-bottom: 16px;
+  gap: 42px;
+}
+
+.logo {
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.sidebarSearch {
+  flex-grow: 1;
+}
+
+.sidebarRest {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+}
+
+.contentArea {
+  flex-grow: 1;
+}
+
+.sidebarLeft {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}

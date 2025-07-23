@@ -1,16 +1,22 @@
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { tempButtons as sounds } from "../util/tempData";
+import SoundGroup from "./SoundGroup";
 
 const Home = () => {
-  useEffect(() => {
-    console.log(`Login mounted`);
-  }, []);
-
   return (
     <>
-      <div className="Login-component">Home</div>
-      You're not logged in!
-      <Link to="/login"> Log in</Link>
+      <div className="childBackground">
+        <h1>Welcome to Soundboard!</h1>
+        <p>Want to upload your own sounds? Sign up or log in</p>
+        {sounds.some((button) => button.folders.includes("Favorites")) && (
+          <SoundGroup
+            title="Favorites"
+            icon="star"
+            folder="Favorites"
+            sounds={sounds}
+          />
+        )}
+        <SoundGroup title="All Sounds" icon="disc" sounds={sounds} />
+      </div>
     </>
   );
 };

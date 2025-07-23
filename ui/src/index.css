@@ -11,23 +11,23 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --primary-foreground: #0d3d38; /* teal 12 */
+  --primary-active: #008573; /* teal 11 */
+  --elevated-background: #fafefd; /* teal 1 */
+  --inner-background: #faf9f2; /* gold 2 */
+
+  --primary-font: "Instrument Sans", sans-serif;
+  font-family: var(--primary-font);
 }
 
 a {
-  font-weight: 500;
-  color: #646cff;
+  color: inherit;
   text-decoration: inherit;
-}
-a:hover {
-  color: #747bff;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {
@@ -53,6 +53,16 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 
 /* @media (prefers-color-scheme: dark) {
