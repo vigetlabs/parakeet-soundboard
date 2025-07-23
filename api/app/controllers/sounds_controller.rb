@@ -12,7 +12,7 @@ class SoundsController < ApplicationController
 
   def create
     sound = Sound.new(sound_params)
-    sound.audio_file.attach(sound_params[:audio_file]) if sound_params[:audio_file]
+    sound.audio_file.attach(sound_params[:audio_file])
     sound.tag_ids = sound_params[:tag_ids] if sound_params[:tag_ids]
     if sound.save
       render json: SoundSerializer.new(sound).serializable_hash.to_json, status: :created
