@@ -23,12 +23,30 @@ RSpec.describe "Sounds API", type: :request do
     end
   end
 
+  describe "GET /my_sounds" do
+    it "returns user's sounds" do
+      sound = Sound.create!(name: "Test Sound Belongs to User", audio_file: audio, user: user)
+      get "/my_sounds", headers: auth_headers
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)["data"].first["id"]).to eq(sound.id.to_s)
+      expect(JSON.parse(response.body)["data"].first["attributes"]["name"]).to eq("Test Sound Belongs to User")
+    end
+  end
+
   describe "GET /sounds/:id" do
-    it "returns a sound" do
+    it "returns a (default) sound" do
       sound = Sound.create!(name: "Test Sound", audio_file: audio)
       get "/sounds/#{sound.id}"
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body)["data"]["id"]).to eq(sound.id.to_s)
+    end
+
+    it "returns forbidden for another user's private sound" do
+      other_user = User.create!(email: "other@example.com", password: "password123", username: "otheruser")
+      sound = Sound.create!(name: "Private Sound", audio_file: audio, user: other_user)
+      get "/sounds/#{sound.id}", headers: auth_headers
+      expect(response).to have_http_status(:forbidden)
+      expect(JSON.parse(response.body)["error"]).to eq("Not authorized")
     end
   end
 

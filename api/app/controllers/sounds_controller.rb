@@ -3,12 +3,22 @@ class SoundsController < ApplicationController
   before_action :authorize_user!, only: [ :update, :destroy ]
 
   def index
-    sounds = Sound.all
+    sounds = Sound.where(user_id: nil) # Fetch only public sounds
+    render json: SoundSerializer.new(sounds).serializable_hash.to_json
+  end
+
+  def my_sounds
+    authenticate_user!
+    sounds = current_user.sounds
     render json: SoundSerializer.new(sounds).serializable_hash.to_json
   end
 
   def show
-    render json: SoundSerializer.new(sound).serializable_hash.to_json
+    if sound.user_id.nil? || (sound.user == current_user)
+      render json: SoundSerializer.new(sound).serializable_hash.to_json
+    else
+      render json: { error: "Not authorized" }, status: :forbidden
+    end
   end
 
   def create
