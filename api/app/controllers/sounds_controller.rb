@@ -1,4 +1,7 @@
 class SoundsController < ApplicationController
+  before_action :authenticate_user!, except: [ :index, :show ]
+  before_action :authorize_user!, only: [ :update, :destroy ]
+
   def index
     sounds = Sound.all
     render json: SoundSerializer.new(sounds).serializable_hash.to_json
@@ -10,6 +13,7 @@ class SoundsController < ApplicationController
 
   def create
     sound = Sound.new(sound_params)
+    sound.user = current_user if user_signed_in?
     sound.audio_file.attach(sound_params[:audio_file])
     sound.tag_ids = sound_params[:tag_ids] if sound_params[:tag_ids]
     if sound.save
@@ -40,5 +44,11 @@ class SoundsController < ApplicationController
 
   def sound_params
     params.require(:sound).permit(:name, :audio_file, tag_ids: [])
+  end
+
+  def authorize_user!
+    if sound.user.present? && sound.user != current_user
+      render json: { error: "Not authorized" }, status: :forbidden
+    end
   end
 end
