@@ -29,8 +29,10 @@ function App() {
         volume: fxVolume,
       });
     }
-    playLocalAudio(file, fxVolume);
-    setCurrentlyPlaying(file);
+    const success = await playLocalAudio(file, fxVolume);
+    if (success) {
+      setCurrentlyPlaying(file);
+    }
   }
 
   async function stopSound() {

@@ -32,11 +32,14 @@ const SoundButton: React.FC<SoundButtonProps> = ({
         }}
         {...props}
       >
-        <div className="buttonEmoji">{emoji ?? ""}</div>
+        <div className="visually-hidden">Play sound: {label}</div>
+        <div aria-hidden className="buttonEmoji">
+          {emoji ?? ""}
+        </div>
       </button>
-      <label className="soundButtonLabel" htmlFor={label}>
+      <div aria-hidden className="soundButtonLabel">
         {label}
-      </label>
+      </div>
     </div>
   );
 };

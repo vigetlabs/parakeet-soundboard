@@ -33,7 +33,7 @@ declare global {
 
 export async function playLocalAudio(file: PublicPath, volume: number) {
   if (!(await URLIsValid())) {
-    return;
+    return false;
   }
 
   const fileURL = browser.runtime.getURL(file);
@@ -65,6 +65,7 @@ export async function playLocalAudio(file: PublicPath, volume: number) {
     },
     args: [fileURL, volume, CrossFunctions.AUDIO_ENDED],
   });
+  return true;
 }
 
 export async function stopLocalAudio() {
