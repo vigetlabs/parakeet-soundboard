@@ -1,0 +1,48 @@
+.soundButtonWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.soundButton {
+  font-size: 2.5rem;
+  width: 1.5em;
+  height: 1.5em;
+  padding: 0;
+  border: 4px solid transparent;
+  margin: auto;
+}
+
+.soundButton:hover {
+  border-color: deepskyblue;
+}
+
+.buttonEmoji {
+  line-height: 1;
+}
+
+.soundButtonLabel {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+  color: gray;
+  user-select: none;
+}
+
+.iconButton {
+  font-size: large;
+  height: 1.5em;
+  width: 1.5em;
+  padding: 0;
+}
+
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}

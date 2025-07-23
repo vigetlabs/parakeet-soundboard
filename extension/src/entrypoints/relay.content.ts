@@ -1,15 +1,10 @@
 import { CrossFunctions } from "@/utils/constants";
 
 export default defineContentScript({
-  matches: ["https://meet.google.com/*"],
+  matches: ["<all_urls>"],
   runAt: "document_start",
   main() {
-    const s = document.createElement("script");
-    s.src = browser.runtime.getURL("/inject.js");
-    (document.head || document.documentElement).appendChild(s);
-    s.onload = () => s.remove();
-
-    async function getMicMuted(event: MessageEvent<any>) {
+    window.addEventListener("message", async (event) => {
       if (event.source !== window) return;
       if (event.data.command === CrossFunctions.GET_MIC_MUTED) {
         const micMuted = await browser.runtime.sendMessage({
@@ -26,8 +21,11 @@ export default defineContentScript({
           "*"
         );
       }
-    }
-
-    window.addEventListener("message", getMicMuted);
+      if (event.data.command === CrossFunctions.AUDIO_ENDED) {
+        browser.runtime.sendMessage({
+          type: CrossFunctions.AUDIO_ENDED,
+        });
+      }
+    });
   },
 });

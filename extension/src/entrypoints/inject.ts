@@ -15,6 +15,15 @@ declare global {
   }
 }
 
+function sendMessage(command: CrossFunctions) {
+  window.postMessage(
+    {
+      command: command,
+    },
+    "*"
+  );
+}
+
 export default defineUnlistedScript(() => {
   console.log("Successfully Injected!");
 
@@ -100,12 +109,7 @@ export default defineUnlistedScript(() => {
             };
           }
         }
-        window.postMessage(
-          {
-            command: CrossFunctions.GET_MIC_MUTED,
-          },
-          "*"
-        );
+        sendMessage(CrossFunctions.GET_MIC_MUTED);
 
         console.log("Made it to return!");
         // 5) Return the mixed audio track

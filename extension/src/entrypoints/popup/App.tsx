@@ -1,11 +1,13 @@
 import { useState } from "react";
 import "./App.css";
 import { PublicPath } from "wxt/browser";
-import { postMessage, playAudio } from "@/utils";
+import { postMessage, playLocalAudio, stopLocalAudio } from "@/utils";
 import { storage } from "#imports";
 import { CrossFunctions } from "@/utils/constants";
 
 function App() {
+  const [currentlyPlaying, setCurrentlyPlaying] = useState("");
+
   const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
     fallback: 25,
   });
@@ -21,23 +23,35 @@ function App() {
   }
 
   async function playSound(file: PublicPath) {
-    postMessage(CrossFunctions.INJECT_AUDIO, {
-      url: browser.runtime.getURL(file),
-      volume: fxVolume,
-    });
+    if (isMeet) {
+      postMessage(CrossFunctions.INJECT_AUDIO, {
+        url: browser.runtime.getURL(file),
+        volume: fxVolume,
+      });
+    }
+    const success = await playLocalAudio(file, fxVolume);
+    if (success) {
+      setCurrentlyPlaying(file);
+    }
   }
 
   async function stopSound() {
-    postMessage(CrossFunctions.STOP_AUDIO);
+    if (isMeet) {
+      postMessage(CrossFunctions.STOP_AUDIO);
+    }
+    stopLocalAudio();
+    setCurrentlyPlaying("");
   }
 
   async function handleMicMute(muteMic: boolean) {
     micMutedStorage.setValue(muteMic);
     setMicMuted(muteMic);
-    if (muteMic) {
-      postMessage(CrossFunctions.MUTE_MICROPHONE);
-    } else {
-      postMessage(CrossFunctions.UNMUTE_MICROPHONE);
+    if (isMeet) {
+      if (muteMic) {
+        postMessage(CrossFunctions.MUTE_MICROPHONE);
+      } else {
+        postMessage(CrossFunctions.UNMUTE_MICROPHONE);
+      }
     }
   }
 
@@ -62,29 +76,112 @@ function App() {
     loadStates();
   }, []);
 
+  useEffect(() => {
+    // TODO: Make it check if the audio is still playing on reopen
+    const listener = (msg: any) => {
+      if (msg.type === CrossFunctions.AUDIO_ENDED) {
+        setCurrentlyPlaying("");
+      }
+    };
+
+    browser.runtime.onMessage.addListener(listener);
+
+    return () => {
+      browser.runtime.onMessage.removeListener(listener);
+    };
+  }, []);
+
+  const tempButtons: Array<{
+    label: string;
+    color: string;
+    emoji: string;
+    url: PublicPath;
+  }> = [
+    {
+      label: "Applause",
+      color: "cornsilk",
+      emoji: "👏",
+      url: "/sounds/applause.mp3",
+    },
+    {
+      label: "Airhorn",
+      color: "crimson",
+      emoji: "🔉",
+      url: "/sounds/airhorn.mp3",
+    },
+    {
+      label: "Anime Wow",
+      color: "deeppink",
+      emoji: "🎉",
+      url: "/sounds/anime-wow.mp3",
+    },
+    {
+      label: "Crickets",
+      color: "darkolivegreen",
+      emoji: "🦗",
+      url: "/sounds/crickets.mp3",
+    },
+    {
+      label: "Explosion",
+      color: "orange",
+      emoji: "💥",
+      url: "/sounds/explosion.mp3",
+    },
+    {
+      label: "Duck",
+      color: "darkgreen",
+      emoji: "🦆",
+      url: "/sounds/quack.mp3",
+    },
+    {
+      label: "Splat",
+      color: "midnightblue",
+      emoji: "♠️",
+      url: "/sounds/splat.mp3",
+    },
+    {
+      label: "Drumroll",
+      color: "moccasin",
+      emoji: "🥁",
+      url: "/sounds/drumroll.mp3",
+    },
+    {
+      label: "Yippee",
+      color: "aliceblue",
+      emoji: "🏳️‍🌈",
+      url: "/sounds/yippee.mp3",
+    },
+    {
+      label: "Music",
+      color: "cornflowerblue",
+      emoji: "🎵",
+      url: "/sounds/bg-music.mp3",
+    },
+  ];
+
   return (
     <>
-      <body>
-        {isMeet && (
-          <>
-            <button onClick={() => playSound("/sounds/bg-music.mp3")}>
-              Play Sound FX 1
-            </button>
-            <button
-              onClick={() => playSound("/sounds/deltarune-explosion.mp3")}
-            >
-              Play Sound FX 2
-            </button>
-            <button onClick={stopSound}>Stop Sound FX</button>
-          </>
-        )}
-        <button onClick={() => playAudio("/sounds/deltarune-explosion.mp3")}>
-          Play Sound
-        </button>
-        <button onClick={openTab}>Open Tab</button>
-
-        <label>
-          Sound Effect Volume
+      <div className="wrapper">
+        <div className="topBar">
+          <p className="name">LOGO</p>
+          <input type="text" placeholder="Search" className="searchBar"></input>
+          <IconButton icon="gear" onClick={openTab} />
+        </div>
+        <div className="soundButtonContainer">
+          {tempButtons.map((button) => (
+            <div key={button.label}>
+              <SoundButton
+                label={button.label}
+                color={button.color}
+                emoji={button.emoji}
+                onClick={() => playSound(button.url)}
+                isPlaying={currentlyPlaying === button.url}
+              />
+            </div>
+          ))}
+        </div>
+        <label className="rangeWrapper">
+          Sound Volume
           <input
             type="range"
             min="1"
@@ -95,17 +192,22 @@ function App() {
             name="fxVolume"
           />
         </label>
-        <label>
-          Mute Microphone
-          <input
-            type="checkbox"
-            name="micVolume"
-            checked={micMuted}
-            onChange={(e) => handleMicMute(e.target.checked)}
-          />
-        </label>
-        <script src="popup.js"></script>
-      </body>
+        <div className="flexRow">
+          <label className="verticalCheckboxWrapper">
+            Mute Microphone
+            <input
+              type="checkbox"
+              name="micVolume"
+              checked={micMuted}
+              onChange={(e) => handleMicMute(e.target.checked)}
+            />
+          </label>
+          <button onClick={stopSound}>Stop Sounds</button>
+        </div>
+        <p style={{ color: isMeet ? "green" : "red" }}>
+          {isMeet ? "C" : "Not c"}onnected to meet
+        </p>
+      </div>
     </>
   );
 }
