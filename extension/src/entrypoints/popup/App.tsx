@@ -4,6 +4,7 @@ import { PublicPath } from "wxt/browser";
 import { postMessage, playAudio } from "@/utils";
 import { storage } from "#imports";
 import { CrossFunctions } from "@/utils/constants";
+import { login, getMySounds } from '@/utils/api';
 
 function App() {
   const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
@@ -12,6 +13,18 @@ function App() {
   const micMutedStorage = storage.defineItem<boolean>("session:micMuted", {
     fallback: false,
   });
+
+  const handleTestLogin = async () => {
+    console.log("Testing login...");
+    try {
+      const jwt = await login('natalietest@example.com', 'password123');
+      console.log('JWT:', jwt);
+      const sounds = await getMySounds();
+      console.log('My Sounds:', sounds);
+    } catch (err) {
+      console.error('Login failed:', err);
+    }
+  };
 
   const [fxVolume, setFxVolume] = useState(25);
   const [micMuted, setMicMuted] = useState(false);
@@ -104,6 +117,7 @@ function App() {
             onChange={(e) => handleMicMute(e.target.checked)}
           />
         </label>
+        <button onClick={handleTestLogin}>Test Login</button>
         <script src="popup.js"></script>
       </body>
     </>
