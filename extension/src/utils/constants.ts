@@ -4,4 +4,5 @@ export enum CrossFunctions {
   MUTE_MICROPHONE = "muteMicrophone",
   UNMUTE_MICROPHONE = "unmuteMicrophone",
   GET_MIC_MUTED = "getMicMuted",
+  AUDIO_ENDED = "audioEnded",
 }
