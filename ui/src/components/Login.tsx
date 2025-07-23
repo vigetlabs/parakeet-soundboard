@@ -8,17 +8,17 @@ const Login = () => {
   }, []);
 
   return (
-    <div className="Login-component">
-      Login
+    <div>
+      Sign in
       <Form.Root
-        className="FormRoot"
+        className="formRoot"
         onSubmit={(e) => {
           e.preventDefault();
           const data = Object.fromEntries(new FormData(e.currentTarget));
           console.log(data);
         }}
       >
-        <Form.Field className="FormField" name="email">
+        <Form.Field className="formField" name="email">
           <div
             style={{
               display: "flex",
@@ -26,11 +26,11 @@ const Login = () => {
               justifyContent: "space-between",
             }}
           >
-            <Form.Label className="FormLabel">Email</Form.Label>
-            <Form.Message className="FormMessage" match="valueMissing">
+            <Form.Label className="formLabel">Email</Form.Label>
+            <Form.Message className="formMessage" match="valueMissing">
               Please enter your email
             </Form.Message>
-            <Form.Message className="FormMessage" match="typeMismatch">
+            <Form.Message className="formMessage" match="typeMismatch">
               Please provide a valid email
             </Form.Message>
           </div>
@@ -38,7 +38,7 @@ const Login = () => {
             <TextInput required email />
           </Form.Control>
         </Form.Field>
-        <Form.Field className="FormField" name="password">
+        <Form.Field className="formField" name="password">
           <div
             style={{
               display: "flex",
@@ -46,8 +46,8 @@ const Login = () => {
               justifyContent: "space-between",
             }}
           >
-            <Form.Label className="FormLabel">Password</Form.Label>
-            <Form.Message className="FormMessage" match="valueMissing">
+            <Form.Label className="formLabel">Password</Form.Label>
+            <Form.Message className="formMessage" match="valueMissing">
               Please enter a password
             </Form.Message>
           </div>
@@ -56,7 +56,7 @@ const Login = () => {
           </Form.Control>
         </Form.Field>
         <Form.Submit asChild>
-          <button className="Button" style={{ marginTop: 10 }}>
+          <button className="button" style={{ marginTop: 10 }}>
             Login
           </button>
         </Form.Submit>

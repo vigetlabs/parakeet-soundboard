@@ -4,3 +4,15 @@
   padding: 2rem;
   text-align: center;
 }
+
+.formField {
+  margin-bottom: 1em;
+}
+
+.formLabel {
+  margin-bottom: 4px;
+}
+
+.formMessage {
+  font-size: 0.6em;
+}

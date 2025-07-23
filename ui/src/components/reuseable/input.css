@@ -1,17 +1,20 @@
+.textInput,
 .passwordRoot {
+  all: unset;
   display: flex;
   flex-wrap: nowrap;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  color: #fff;
-  background-color: gray;
+  background-color: lightgray;
   padding: 0 0.75em;
   padding-right: 9px;
   height: 36px;
   gap: 8px;
   text-align: left;
+  width: 100%;
+  box-sizing: border-box;
 
   &:hover {
     box-shadow: 0 0 0 1px black;
