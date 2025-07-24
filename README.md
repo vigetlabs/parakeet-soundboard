@@ -22,7 +22,12 @@ cd extension && pnpm install
 
 ### Database
 
-TODO
+```bash
+cd api
+bundle exec rails db:create db:migrate
+```
+
+TODO: seed database with default sounds
 
 ### Run servers
 
