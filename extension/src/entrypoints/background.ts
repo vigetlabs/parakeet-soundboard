@@ -16,6 +16,10 @@ export default defineBackground(() => {
         });
       return true; // tells the caller that there will be a response
     }
+    if (msg.type === "SET_AUTH_TOKEN") {
+      console.log("Setting auth token in background script", msg.token);
+      return browser.storage.local.set({ jwt: msg.token });
+    }
   });
 
   // If we want to disable to chrome extension outside google meet:

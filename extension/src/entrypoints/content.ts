@@ -9,6 +9,11 @@ export default defineContentScript({
     (document.head || document.documentElement).appendChild(s);
     s.onload = () => s.remove();
 
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      browser.runtime.sendMessage({ type: "SET_AUTH_TOKEN", token });
+    }
+
     async function getMicMuted(event: MessageEvent<any>) {
       if (event.source !== window) return;
       if (event.data.command === CrossFunctions.GET_MIC_MUTED) {
