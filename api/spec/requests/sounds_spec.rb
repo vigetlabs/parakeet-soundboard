@@ -4,7 +4,7 @@ RSpec.describe "Sounds API", type: :request do
   let(:audio) { fixture_file_upload(Rails.root.join("spec/fixtures/files/seinfeld_test_audio.mp3"), "audio/mpeg") }
   let(:user) { User.create!(email: "user@example.com", password: "password123", username: "user1") }
   let(:auth_headers) do
-    post "/login", params: { user: { email: user.email, password: "password123" } }.to_json, headers: { "Content-Type" => "application/json" }
+    post "/users/login", params: { user: { email: user.email, password: "password123" } }.to_json, headers: { "Content-Type" => "application/json" }
     { "Authorization" => response.headers["Authorization"] }
   end
   let(:valid_attributes) do

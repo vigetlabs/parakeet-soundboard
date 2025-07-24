@@ -4,7 +4,7 @@ import { PublicPath } from "wxt/browser";
 import { postMessage, playAudio } from "@/utils";
 import { storage } from "#imports";
 import { CrossFunctions } from "@/utils/constants";
-import { login, getMySounds } from '@/utils/api';
+import { login, getMySounds, openGoogleAuth } from '@/utils/api';
 
 function App() {
   const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
@@ -23,6 +23,15 @@ function App() {
       console.log('My Sounds:', sounds);
     } catch (err) {
       console.error('Login failed:', err);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    try {
+      await openGoogleAuth();
+      console.log('Google Auth window opened!');
+    } catch (err) {
+      console.error('Failed to open Google Auth:', err);
     }
   };
 
@@ -118,6 +127,7 @@ function App() {
           />
         </label>
         <button onClick={handleTestLogin}>Test Login</button>
+        <button onClick={handleGoogleAuth}>Login with Google</button>
         <script src="popup.js"></script>
       </body>
     </>

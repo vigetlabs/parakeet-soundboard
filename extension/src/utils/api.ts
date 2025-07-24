@@ -22,3 +22,26 @@ export async function getMySounds() {
   if (!res.ok) throw new Error('Failed to fetch sounds');
   return res.json();
 }
+
+export async function openGoogleAuth() {
+  const popup = window.open('http://localhost:3001/users/auth/google_oauth2', 'oauthPopup', 'width=500,height=600');
+
+  window.addEventListener('message', (event) => {
+    if (event.origin !== window.location.origin) return;
+
+    const { token, user } = event.data;
+    console.log('Token received!', token);
+    localStorage.setItem('jwt', token);
+    // Continue with authenticated requests
+  });
+}
+
+// export async function signInWithGoogle() {
+//   const form = document.createElement('form');
+//   form.method = 'POST';
+//   form.action = 'http://localhost:3001/users/auth/google_oauth2';
+
+//   document.body.appendChild(form);
+//   form.submit();
+// }
+

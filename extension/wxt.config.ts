@@ -16,7 +16,7 @@ export default defineConfig({
     host_permissions: ["https://meet.google.com/*"],
     web_accessible_resources: [
       {
-        resources: ["inject.js", "sounds/*"],
+        resources: ["inject.js", "sounds/*", "auth_success.html"],
         matches: ["https://meet.google.com/*"],
       },
     ],

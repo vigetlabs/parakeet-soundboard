@@ -13,7 +13,7 @@ describe 'User API', type: :request do
   end
 
   it 'signs up a user and returns JWT token in headers' do
-    post '/signup', params: signup_params.to_json, headers: { 'Content-Type' => 'application/json' }
+    post '/users/signup', params: signup_params.to_json, headers: { 'Content-Type' => 'application/json' }
     expect(response).to have_http_status(:ok)
     expect(JSON.parse(response.body)['status']['code']).to eq(200)
     expect(response.headers['Authorization']).to be_present
@@ -22,7 +22,7 @@ describe 'User API', type: :request do
 
   it 'fails to sign up a user because email is already used' do
     User.create!(email: 'testuser@example.com', password: 'password123', username: 'testuser')
-    post '/signup', params: signup_params.to_json, headers: { 'Content-Type' => 'application/json' }
+    post '/users/signup', params: signup_params.to_json, headers: { 'Content-Type' => 'application/json' }
     expect(response).to have_http_status(:unprocessable_entity)
     expect(JSON.parse(response.body)['status']['code']).to eq(422)
     expect(response.headers['Authorization']).to be_blank
@@ -37,7 +37,7 @@ describe 'User API', type: :request do
         password: 'password123'
       }
     }
-    post '/login', params: login_params.to_json, headers: { 'Content-Type' => 'application/json' }
+    post '/users/login', params: login_params.to_json, headers: { 'Content-Type' => 'application/json' }
     expect(response).to have_http_status(:ok)
     expect(JSON.parse(response.body)['status']['code']).to eq(200)
     expect(response.headers['Authorization']).to be_present
@@ -53,11 +53,35 @@ describe 'User API', type: :request do
         password: 'password123'
       }
     }
-    post '/login', params: login_params.to_json, headers: { 'Content-Type' => 'application/json' }
+    post '/users/login', params: login_params.to_json, headers: { 'Content-Type' => 'application/json' }
     token = response.headers['Authorization']
     # Log out
-    delete '/logout', headers: { 'Authorization' => token }
+    delete '/users/logout', headers: { 'Authorization' => token }
     expect(response).to have_http_status(:ok)
     expect(JSON.parse(response.body)['message']).to eq('Logged out successfully.')
+  end
+end
+
+require 'rails_helper'
+
+RSpec.describe 'Omniauth Google Callback', type: :request do
+  before do
+    OmniAuth.config.test_mode = true
+    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new({
+      provider: 'google_oauth2',
+      uid: '1234567890',
+      info: {
+        email: 'test@example.com'
+      }
+    })
+  end
+
+  it 'creates a user and returns JWT' do
+    get '/users/auth/google_oauth2/callback'
+
+    expect(response).to have_http_status(:ok)
+    json = JSON.parse(response.body)
+    expect(json).to have_key('token')
+    expect(json['user']['email']).to eq('test@example.com')
   end
 end

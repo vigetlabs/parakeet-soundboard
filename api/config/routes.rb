@@ -1,13 +1,15 @@
 Rails.application.routes.draw do
-  devise_for :users, path: "", path_names: {
+  devise_for :users, path_names: {
     sign_in: "login",
     sign_out: "logout",
-    registration: "signup"
+    registration: "signup",
   },
   controllers: {
     sessions: "users/sessions",
-    registrations: "users/registrations"
+    registrations: "users/registrations",
+    omniauth_callbacks: "users/omniauth_callbacks"
   }
+
   resources :sounds
   get "my_sounds", to: "sounds#my_sounds"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
