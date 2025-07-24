@@ -1,5 +1,4 @@
 class SoundsController < ApplicationController
-  before_action :set_sound, only: [ :show, :update, :destroy ]
 
   def index
     sounds = Sound.all
@@ -7,7 +6,7 @@ class SoundsController < ApplicationController
   end
 
   def show
-    render json: SoundSerializer.new(@sound).serializable_hash.to_json
+    render json: SoundSerializer.new(sound).serializable_hash.to_json
   end
 
   def create
@@ -22,22 +21,22 @@ class SoundsController < ApplicationController
   end
 
   def update
-    if @sound.update(sound_params)
-      render json: SoundSerializer.new(@sound).serializable_hash.to_json
+    if sound.update(sound_params)
+      render json: SoundSerializer.new(sound).serializable_hash.to_json
     else
-      render json: { errors: @sound.errors }, status: :unprocessable_entity
+      render json: { errors: sound.errors }, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @sound.destroy
+    sound.destroy
     head :no_content
   end
 
   private
 
-  def set_sound
-    @sound = Sound.find(params[:id])
+  def sound
+    @sound ||= Sound.find(params[:id])
   end
 
   def sound_params
