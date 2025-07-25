@@ -24,15 +24,17 @@ const Sidebar = ({ children }: Props) => {
                 <IconButton
                   icon="home"
                   label="Home"
-                  style={{ marginBottom: "32px" }}
+                  style={{ marginBottom: "24px" }}
                   selected={location.pathname === "/"}
+                  tabIndex={-1}
                 />
               </Link>
               <Link to="/folders">
                 <IconButton
                   icon="archive"
                   label="Folders"
-                  selected={location.pathname === "/folders"}
+                  selected={location.pathname.startsWith("/folders")}
+                  tabIndex={-1}
                 />
               </Link>
             </div>

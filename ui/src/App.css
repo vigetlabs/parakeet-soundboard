@@ -13,25 +13,32 @@
 .childBackground {
   background-color: var(--inner-background);
   border-radius: 32px 0 0 32px;
-  padding: 48px;
-  height: calc(100% - 96px);
+  padding: 40px;
+  height: calc(100% - 80px);
   color: var(--primary-foreground);
 }
 
+.folderButtonContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 140px);
+  gap: 24px;
+  margin-top: 24px;
+}
+
 h1 {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
   margin-bottom: 8px;
 }
 
 h2 {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
 }
 
 p {
-  font-size: 20px;
+  font-size: 1.25rem;
   margin: 0;
 }

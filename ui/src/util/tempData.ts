@@ -1,159 +1,90 @@
-export const tempButtons: Array<{
+import { fetchSounds } from "./db";
+
+const db = (await fetchSounds()).data;
+
+export type SoundType = Array<{
   name: string;
   color: string;
   emoji: string;
   url: string;
   folders: Array<string>;
-}> = [
+}>;
+
+export const tempButtons: SoundType = [
   {
     name: "Applause",
-    color: "cornsilk",
+    color: "var(--color-preset-4)",
     emoji: "👏",
-    url: "/sounds/applause.mp3",
+    url: db[2].attributes.audio_file_url,
     folders: [],
   },
   {
     name: "Airhorn",
-    color: "crimson",
+    color: "var(--color-preset-1)",
     emoji: "🔉",
-    url: "/sounds/airhorn.mp3",
+    url: db[0].attributes.audio_file_url,
     folders: ["Jokes"],
   },
   {
     name: "Anime Wow",
-    color: "deeppink",
+    color: "var(--color-preset-12)",
     emoji: "🎉",
-    url: "/sounds/anime-wow.mp3",
+    url: db[1].attributes.audio_file_url,
     folders: ["Jokes"],
   },
   {
     name: "Crickets",
-    color: "darkolivegreen",
+    color: "var(--color-preset-3)",
     emoji: "🦗",
-    url: "/sounds/crickets.mp3",
+    url: db[4].attributes.audio_file_url,
     folders: ["Misc"],
   },
   {
     name: "Explosion",
-    color: "orange",
+    color: "var(--color-preset-8)",
     emoji: "💥",
-    url: "/sounds/explosion.mp3",
+    url: db[6].attributes.audio_file_url,
     folders: ["Favorites"],
   },
   {
     name: "Duck",
-    color: "darkgreen",
+    color: "var(--color-preset-7)",
     emoji: "🦆",
-    url: "/sounds/quack.mp3",
+    url: db[7].attributes.audio_file_url,
     folders: ["Favorites"],
   },
   {
     name: "Splat",
-    color: "midnightblue",
+    color: "var(--color-preset-11)",
     emoji: "♠️",
-    url: "/sounds/splat.mp3",
+    url: db[8].attributes.audio_file_url,
     folders: ["Favorites"],
   },
   {
     name: "Drumroll",
-    color: "moccasin",
+    color: "var(--color-preset-5)",
     emoji: "🥁",
-    url: "/sounds/drumroll.mp3",
+    url: db[5].attributes.audio_file_url,
     folders: ["Misc"],
   },
   {
     name: "Yippee",
-    color: "aliceblue",
+    color: "var(--color-preset-9)",
     emoji: "🏳️‍🌈",
-    url: "/sounds/yippee.mp3",
+    url: db[9].attributes.audio_file_url,
     folders: ["Favorites"],
   },
   {
-    name: "Music",
-    color: "cornflowerblue",
+    name: "Deltarune Music",
+    color: "var(--color-preset-10)",
     emoji: "🎵",
-    url: "/sounds/bg-music.mp3",
-    folders: ["Favorites"],
+    url: db[3].attributes.audio_file_url,
+    folders: ["Favorites", "Misc"],
   },
 ];
 
-export const tempButtonsNoFolders: Array<{
-  name: string;
-  color: string;
-  emoji: string;
-  url: string;
-  folders: Array<string>;
-}> = [
-  {
-    name: "Applause",
-    color: "cornsilk",
-    emoji: "👏",
-    url: "/sounds/applause.mp3",
-    folders: [],
-  },
-  {
-    name: "Airhorn",
-    color: "crimson",
-    emoji: "🔉",
-    url: "/sounds/airhorn.mp3",
-    folders: [],
-  },
-  {
-    name: "Anime Wow",
-    color: "deeppink",
-    emoji: "🎉",
-    url: "/sounds/anime-wow.mp3",
-    folders: [],
-  },
-  {
-    name: "Crickets",
-    color: "darkolivegreen",
-    emoji: "🦗",
-    url: "/sounds/crickets.mp3",
-    folders: [],
-  },
-  {
-    name: "Explosion",
-    color: "orange",
-    emoji: "💥",
-    url: "/sounds/explosion.mp3",
-    folders: [],
-  },
-  {
-    name: "Duck",
-    color: "darkgreen",
-    emoji: "🦆",
-    url: "/sounds/quack.mp3",
-    folders: [],
-  },
-  {
-    name: "Splat",
-    color: "midnightblue",
-    emoji: "♠️",
-    url: "/sounds/splat.mp3",
-    folders: [],
-  },
-  {
-    name: "Drumroll",
-    color: "moccasin",
-    emoji: "🥁",
-    url: "/sounds/drumroll.mp3",
-    folders: [],
-  },
-  {
-    name: "Yippee",
-    color: "aliceblue",
-    emoji: "🏳️‍🌈",
-    url: "/sounds/yippee.mp3",
-    folders: [],
-  },
-  {
-    name: "Music",
-    color: "cornflowerblue",
-    emoji: "🎵",
-    url: "/sounds/bg-music.mp3",
-    folders: [],
-  },
-];
+export const tempButtonsNoFolders = structuredClone(tempButtons).forEach(
+  (sound) => (sound.folders = [])
+);
 
-export const tempFolders = ["Favorites", "Jokes", "DnD", "Misc"];
+export const tempFolders = ["Favorites", "Jokes", "Dungeons & Dragons", "Misc"];

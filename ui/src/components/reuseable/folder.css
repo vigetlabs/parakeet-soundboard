@@ -1,0 +1,86 @@
+.folderButtonWrapper {
+  padding: 12px 16px;
+  background-color: var(--elevated-background);
+  width: fit-content;
+  border: 2px solid var(--primary-muted);
+  border-radius: 16px;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  width: 144px;
+  box-sizing: border-box;
+}
+
+.folderButtonWrapper:hover {
+  border-color: var(--primary-active);
+}
+
+.newFolderButtonWrapper {
+  background-color: var(--inner-background);
+  border-color: var(--primary-muted-dark);
+  color: var(--primary-muted-dark);
+}
+
+.folderButtonSoundWrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.soundButtonDisplay {
+  box-sizing: border-box;
+  height: 42px;
+  width: 42px;
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid var(--primary-muted);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.buttonDisplayEmoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.folderButtonLabel {
+  font-size: 1rem;
+  font-weight: 700;
+  gap: 4px;
+  display: block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.newFolderButtonLabel {
+  font-size: 1rem;
+  font-weight: 700;
+  gap: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buttonDisplayNum {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.buttonDisplayNumIcon {
+  color: var(--primary-active);
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.newFolderIcon {
+  width: 1rem;
+  height: 1rem;
+}

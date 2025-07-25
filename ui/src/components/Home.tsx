@@ -11,8 +11,9 @@ const Home = () => {
           <SoundGroup
             title="Favorites"
             icon="star"
-            folder="Favorites"
-            sounds={sounds}
+            sounds={sounds.filter((sound) => {
+              return sound.folders.includes("Favorites");
+            })}
           />
         )}
         <SoundGroup title="All Sounds" icon="disc" sounds={sounds} />

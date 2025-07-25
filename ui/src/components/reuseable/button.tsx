@@ -25,17 +25,17 @@ const Button: React.FC<ButtonProps> = ({
 
 export interface SoundButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  label: string;
+  color: string;
+  emoji: string;
   isPlaying?: boolean;
-  label?: string;
-  color?: string;
-  emoji?: string;
 }
 
 const SoundButton: React.FC<SoundButtonProps> = ({
-  isPlaying,
   label,
   color,
   emoji,
+  isPlaying,
   className = "",
   ...props
 }) => {
@@ -48,7 +48,7 @@ const SoundButton: React.FC<SoundButtonProps> = ({
         name={label}
         style={{
           backgroundColor: color,
-          borderColor: isPlaying ? "dodgerblue" : undefined,
+          borderColor: isPlaying ? "var(--primary-foreground)" : undefined,
         }}
         {...props}
       >
@@ -89,6 +89,7 @@ const InnerIconButton: React.FC<IconButtonProps> = ({
           className: "innerIcon",
         })}
       </div>
+      {/* TODO: Add tooltip if the name is too long */}
       {label && <div className="iconButtonLabel">{label}</div>}
     </button>
   );

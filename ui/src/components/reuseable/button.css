@@ -1,8 +1,8 @@
 .button {
-  background-color: var(--primary-active);
-  color: var(--elevated-background);
+  background-color: var(--primary-active-light);
+  color: var(--primary-foreground);
   padding: 8px 24px;
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -10,7 +10,19 @@
   gap: 8px;
   height: fit-content;
   font-weight: 700;
-  border: none;
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.button:hover {
+  background-color: var(--primary-active-lighter);
+  color: var(--primary-active);
+  border-color: var(--primary-active);
+}
+
+.button:focus {
+  background-color: var(--primary-active);
+  color: var(--elevated-background);
 }
 
 .soundButtonWrapper {
@@ -27,21 +39,24 @@
 }
 
 .soundButton:hover {
-  border-color: deepskyblue;
+  border-color: var(--primary-active);
 }
 
 .buttonEmoji {
-  font-size: 32px;
+  font-size: 2em;
   line-height: 1;
 }
 
 .soundButtonLabel {
   display: block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
   margin-top: 4px;
   font-size: 1rem;
   user-select: none;
   text-align: center;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .iconButtonWrapper {
@@ -51,22 +66,33 @@
   background-color: transparent;
   border: 0;
   padding: 0;
+  transition: all 0.2s ease-in-out;
+}
+
+.iconButtonWrapper:hover {
+  color: var(--primary-hover);
+}
+
+.iconButtonWrapper:hover .iconButton {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: var(--primary-hover);
 }
 
 .iconButton {
   width: 48px;
   height: 48px;
   background-color: var(--primary-foreground);
-  color: var(--elevated-background);
+  color: var(--inner-background);
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: color, background-color 0.2s ease-in-out;
   border-radius: 8px;
+  transition: all 0.2s ease-in-out;
 }
 
-.iconButtonSelected {
-  background-color: var(--elevated-background);
+.iconButtonSelected,
+.iconButtonWrapper:hover .iconButtonSelected {
+  background-color: var(--inner-background);
   color: var(--primary-foreground);
 }
 
@@ -78,5 +104,9 @@
 .iconButtonLabel {
   margin-top: 4px;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 0.75rem;
+}
+
+.iconButtonSelected + .iconButtonLabel {
+  color: var(--inner-background);
 }

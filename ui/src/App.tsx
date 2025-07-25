@@ -8,14 +8,33 @@ import {
 import Home from "./components/Home";
 import Folders from "./components/Folders";
 import Sidebar from "./components/Sidebar";
+import { tempFolders as folders } from "./util/tempData";
+import FolderView from "./components/FolderView";
+import { useEffect } from "react";
 
 function App() {
+  useEffect(() => {
+    if ("mediaSession" in navigator) {
+      // Disable playing and pausing with media keys
+      navigator.mediaSession.setActionHandler("play", () => {});
+      navigator.mediaSession.setActionHandler("pause", () => {});
+    }
+  }, []);
+
   return (
     <Router>
       <Sidebar>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/folders" element={<Folders />} />
+          {folders.map((folder) => (
+            <Route
+              key={folder}
+              path={"/folders/" + folder.toLowerCase()}
+              element={<FolderView folder={folder} />}
+            />
+          ))}
+          <Route path="/folders/*" element={<Navigate to="/folders" />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Sidebar>

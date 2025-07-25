@@ -2,7 +2,7 @@ import {
   tempFolders as folders,
   tempButtons as sounds,
 } from "../util/tempData";
-import SoundGroup from "./SoundGroup";
+import { FolderButton, NewFolderButton } from "./reuseable/folder";
 
 const Home = () => {
   return (
@@ -10,18 +10,25 @@ const Home = () => {
       <div className="childBackground">
         <h1>Your Folders</h1>
         <p>Organize your sounds!</p>
-        {folders.map((folder) => {
-          if (folder === "Favorites") return;
-          if (!sounds.some((button) => button.folders.includes(folder))) return;
-          return (
-            <SoundGroup
-              title={folder}
-              icon="archive"
-              folder={folder}
-              sounds={sounds}
+        <div className="folderButtonContainer">
+          {folders.map((folder) => (
+            <FolderButton
+              key={folder}
+              name={folder}
+              numSounds={
+                sounds.filter((sound) => {
+                  return sound.folders.includes(folder);
+                }).length
+              }
+              firstSounds={sounds
+                .filter((sound) => {
+                  return sound.folders.includes(folder);
+                })
+                .slice(0, 4)}
             />
-          );
-        })}
+          ))}
+          <NewFolderButton />
+        </div>
       </div>
     </>
   );

@@ -11,15 +11,14 @@
   display: flex;
   justify-content: space-between;
   flex-direction: row;
-  padding: 32px;
-  padding-bottom: 16px;
-  gap: 42px;
+  padding: 16px 24px 0 16px;
+  gap: 24px;
 }
 
 .logo {
   width: 60px;
   height: 60px;
-  background-color: white;
+  background-color: var(--inner-background);
   border-radius: 50%;
 }
 
@@ -38,7 +37,7 @@
 }
 
 .sidebarLeft {
-  padding: 32px;
+  padding: 24px 16px 32px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
