@@ -44,12 +44,14 @@ const SoundButtonDisplay: React.FC<SoundButtonDisplayProps> = ({
 export interface FolderButtonProps
   extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
+  slug: string;
   numSounds: number;
   firstSounds: SoundType; // only the first 4 (for display)
 }
 
 const FolderButton: React.FC<FolderButtonProps> = ({
   name,
+  slug,
   numSounds,
   firstSounds,
   className = "",
@@ -58,7 +60,7 @@ const FolderButton: React.FC<FolderButtonProps> = ({
   const classes = `folderButtonWrapper ${className}`.trim();
 
   return (
-    <Link to={`/folders/${name.toLowerCase()}`}>
+    <Link to={`/folders/${slug}`}>
       <div className={classes} {...props}>
         <div className="visually-hidden">Open folder: {name}</div>
         <div aria-hidden className="folderButtonSoundWrapper">

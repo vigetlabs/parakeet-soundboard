@@ -13,16 +13,17 @@ const Home = () => {
         <div className="folderButtonContainer">
           {folders.map((folder) => (
             <FolderButton
-              key={folder}
-              name={folder}
+              key={folder.name}
+              name={folder.name}
+              slug={folder.slug}
               numSounds={
                 sounds.filter((sound) => {
-                  return sound.folders.includes(folder);
+                  return sound.folders.includes(folder.name);
                 }).length
               }
               firstSounds={sounds
                 .filter((sound) => {
-                  return sound.folders.includes(folder);
+                  return sound.folders.includes(folder.name);
                 })
                 .slice(0, 4)}
             />

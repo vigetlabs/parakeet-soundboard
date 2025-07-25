@@ -21,19 +21,21 @@ export function chooseIcon(
   props?: IconProps,
   size: number = 24
 ) {
+  const propsWithStyle = { ...props, style: { width: size, height: size } };
+
   switch (icon) {
     case "home":
-      return <HomeIcon {...props} style={{ width: size, height: size }} />;
+      return <HomeIcon {...propsWithStyle} />;
     case "archive":
-      return <ArchiveIcon {...props} style={{ width: size, height: size }} />;
+      return <ArchiveIcon {...propsWithStyle} />;
     case "person":
-      return <PersonIcon {...props} style={{ width: size, height: size }} />;
+      return <PersonIcon {...propsWithStyle} />;
     case "plus":
-      return <PlusIcon {...props} style={{ width: size, height: size }} />;
+      return <PlusIcon {...propsWithStyle} />;
     case "star":
-      return <StarIcon {...props} style={{ width: size, height: size }} />;
+      return <StarIcon {...propsWithStyle} />;
     case "disc":
-      return <DiscIcon {...props} style={{ width: size, height: size }} />;
+      return <DiscIcon {...propsWithStyle} />;
     default:
       console.error("Invalid icon provided");
       return;

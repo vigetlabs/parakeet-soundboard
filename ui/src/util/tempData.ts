@@ -87,4 +87,9 @@ export const tempButtonsNoFolders = structuredClone(tempButtons).forEach(
   (sound) => (sound.folders = [])
 );
 
-export const tempFolders = ["Favorites", "Jokes", "Dungeons & Dragons", "Misc"];
+export const tempFolders = [
+  { name: "Favorites", slug: "favorites" },
+  { name: "Jokes", slug: "jokes" },
+  { name: "Dungeons & Dragons", slug: "dungeons-and-dragons" },
+  { name: "Misc", slug: "misc" },
+];

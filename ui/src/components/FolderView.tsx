@@ -1,25 +1,37 @@
-import { tempButtons as sounds } from "../util/tempData";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  tempButtons as sounds,
+  tempFolders as folders,
+} from "../util/tempData";
 import SoundGroup from "./SoundGroup";
+import { useEffect, useState } from "react";
 
-interface FolderViewProps {
-  folder: string;
-}
+const FolderView = () => {
+  const navigate = useNavigate();
+  const { folder } = useParams();
+  const [folderName, setFolderName] = useState("");
 
-const FolderView = ({ folder }: FolderViewProps) => {
+  useEffect(() => {
+    const foundFolder = folders.find((f) => f.slug === folder);
+
+    if (!folder || !foundFolder) {
+      navigate("/folders");
+    }
+    setFolderName(foundFolder?.name ?? "");
+  }, [folder, navigate, setFolderName]);
+
   return (
-    <>
-      <div className="childBackground">
-        <SoundGroup
-          title={folder}
-          icon="archive"
-          sounds={sounds.filter((sound) => {
-            return sound.folders.includes(folder);
-          })}
-          backLink="/folders"
-          style={{ paddingTop: 0 }}
-        />
-      </div>
-    </>
+    <div className="childBackground">
+      <SoundGroup
+        title={folderName ?? ""}
+        icon="archive"
+        sounds={sounds.filter((sound) =>
+          sound.folders.includes(folderName ?? "")
+        )}
+        backLink="/folders"
+        style={{ paddingTop: 0 }}
+      />
+    </div>
   );
 };
 
