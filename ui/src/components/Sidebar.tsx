@@ -1,6 +1,7 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { Button, IconButton, TextInput } from "./reuseable";
 import "./Sidebar.css";
+import { useEffect, useState } from "react";
 
 interface Props {
   children: React.ReactNode;
@@ -8,13 +9,37 @@ interface Props {
 
 const Sidebar = ({ children }: Props) => {
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    setSearch("");
+  }, [location.pathname]);
+
+  useEffect(() => {
+    setSearch(searchParams.get("search") ?? "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setSearch]);
 
   return (
     <>
       <div className="sidebarWrapper">
         <div className="sidebarTop">
           <div className="logo"></div>
-          <TextInput placeholder="Search" className="sidebarSearch" icon />
+          <TextInput
+            placeholder="Search"
+            className="sidebarSearch"
+            icon
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              if (e.target.value.trim() === "") {
+                setSearchParams({});
+              } else {
+                setSearchParams({ search: e.target.value.trim() });
+              }
+            }}
+          />
           <Button icon="plus">Upload</Button>
         </div>
         <div className="sidebarRest">
