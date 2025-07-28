@@ -1,0 +1,32 @@
+.soundGroupTitle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding-top: 24px;
+  margin-bottom: 16px;
+}
+
+.soundGroupIcon {
+  color: var(--primary-active);
+}
+
+.soundGroupButtonContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 72px);
+  gap: 32px;
+}
+
+.soundGroupBack {
+  display: flex;
+  align-items: center;
+  background-color: var(--primary-muted);
+  border-radius: 50%;
+  margin-right: 20px;
+}
+
+.soundGroupBackIcon {
+  width: 16px;
+  height: 16px;
+  padding: 4px;
+}

@@ -1,0 +1,58 @@
+.textInputWrapper,
+.passwordRoot {
+  all: unset;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100px;
+  background-color: rgba(255, 255, 255, 0.3);
+  padding: 8px 12px;
+  gap: 16px;
+  text-align: left;
+  box-sizing: border-box;
+  height: fit-content;
+
+  &:hover {
+    box-shadow: 0 0 0 1px black;
+  }
+
+  &:focus-within {
+    box-shadow: 0 0 0 2px black;
+  }
+}
+
+.textInput,
+.passwordInput,
+.passwordEyeToggle {
+  all: unset;
+  box-sizing: border-box;
+  font-size: calc(15 / 16) rem;
+  color: inherit;
+  line-height: 1;
+  width: 100%;
+}
+
+.passwordInput {
+  &::selection {
+    background-color: var(--black-a6);
+    color: white;
+  }
+}
+
+.passwordEyeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: 0.5px;
+  &:focus-visible {
+    outline: 2px solid var(--accent-9);
+    outline-offset: 2px;
+  }
+}
+
+.textInputIcon {
+  height: 24px;
+  width: 24px;
+}
