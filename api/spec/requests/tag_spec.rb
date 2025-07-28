@@ -4,12 +4,6 @@ RSpec.describe "Tags API", type: :request do
   let!(:tags) { create_list(:tag, 3) }
   let(:tag_id) { tags.first.id }
 
-    let(:valid_attributes) do
-    {
-      name: "Test Tag"
-    }
-  end
-
   describe "GET /tags" do
     it "returns all tags" do
       get "/tags"
@@ -29,7 +23,7 @@ RSpec.describe "Tags API", type: :request do
   end
 
   describe "POST /tags" do
-    let(:valid_attributes) { { tag: { name: "Funny" } } }
+    let(:valid_attributes) { { tag: { name: "Funny", color: "blue" } } }
 
     it "creates a tag" do
       expect {
