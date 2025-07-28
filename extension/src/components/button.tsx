@@ -11,14 +11,14 @@ export interface SoundButtonProps
   emoji?: string;
 }
 
-const SoundButton: React.FC<SoundButtonProps> = ({
+const SoundButton = ({
   isPlaying,
   label,
   color,
   emoji,
   className = "",
   ...props
-}) => {
+}: SoundButtonProps) => {
   const classes = `soundButton ${className}`.trim();
 
   return (
@@ -49,11 +49,11 @@ export interface IconButtonProps
   icon: "gear";
 }
 
-const InnerIconButton: React.FC<IconButtonProps> = ({
+const InnerIconButton = ({
   className = "",
   icon,
   ...props
-}) => {
+}: IconButtonProps) => {
   const classes = `iconButton ${className}`.trim();
 
   return (
@@ -65,11 +65,7 @@ const InnerIconButton: React.FC<IconButtonProps> = ({
   );
 };
 
-const IconButton: React.FC<IconButtonProps> = ({
-  className,
-  icon,
-  ...props
-}) => {
+const IconButton = ({ className, icon, ...props }: IconButtonProps) => {
   // It's seperated in case I want to add tooltips later
   return <InnerIconButton icon={icon} className={className} {...props} />;
 };

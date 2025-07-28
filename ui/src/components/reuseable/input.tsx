@@ -13,12 +13,12 @@ export interface TextInputProps
   icon?: boolean;
 }
 
-const TextInput: React.FC<TextInputProps> = ({
+const TextInput = ({
   className = "",
   email = false,
   icon = false,
   ...props
-}) => {
+}: TextInputProps) => {
   const classes = `textInputWrapper ${className}`.trim();
 
   return (
@@ -29,9 +29,10 @@ const TextInput: React.FC<TextInputProps> = ({
   );
 };
 
-const PasswordInput: React.FC<
-  React.ComponentPropsWithoutRef<typeof PasswordToggleField.Input>
-> = ({ className = "", ...props }) => {
+const PasswordInput = ({
+  className = "",
+  ...props
+}: React.ComponentPropsWithoutRef<typeof PasswordToggleField.Input>) => {
   const classes = `passwordRoot ${className}`.trim();
 
   return (
