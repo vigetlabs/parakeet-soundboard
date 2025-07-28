@@ -7,12 +7,7 @@ export interface ButtonProps
   icon?: AvaliableIcons;
 }
 
-const Button: React.FC<ButtonProps> = ({
-  className = "",
-  icon,
-  children,
-  ...props
-}) => {
+const Button = ({ className = "", icon, children, ...props }: ButtonProps) => {
   const classes = `button ${className}`.trim();
 
   return (
@@ -31,14 +26,14 @@ export interface SoundButtonProps
   isPlaying?: boolean;
 }
 
-const SoundButton: React.FC<SoundButtonProps> = ({
+const SoundButton = ({
   label,
   color,
   emoji,
   isPlaying,
   className = "",
   ...props
-}) => {
+}: SoundButtonProps) => {
   const classes = `soundButtonWrapper ${className}`.trim();
 
   return (
@@ -71,13 +66,13 @@ export interface IconButtonProps
   selected?: boolean;
 }
 
-const InnerIconButton: React.FC<IconButtonProps> = ({
+const InnerIconButton = ({
   className = "",
   icon,
   label,
   selected = false,
   ...props
-}) => {
+}: IconButtonProps) => {
   const classes = `iconButton ${className} ${
     selected ? "iconButtonSelected" : ""
   }`.trim();
@@ -95,11 +90,7 @@ const InnerIconButton: React.FC<IconButtonProps> = ({
   );
 };
 
-const IconButton: React.FC<IconButtonProps> = ({
-  className,
-  icon,
-  ...props
-}) => {
+const IconButton = ({ className, icon, ...props }: IconButtonProps) => {
   // It's seperated in case I want to add tooltips later
   return <InnerIconButton icon={icon} className={className} {...props} />;
 };

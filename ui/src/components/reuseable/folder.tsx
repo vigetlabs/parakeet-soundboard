@@ -11,14 +11,14 @@ export interface SoundButtonDisplayProps
   numSounds?: number;
 }
 
-const SoundButtonDisplay: React.FC<SoundButtonDisplayProps> = ({
+const SoundButtonDisplay = ({
   // non-functional button that looks the same
   color,
   emoji,
   numSounds,
   className = "",
   ...props
-}) => {
+}: SoundButtonDisplayProps) => {
   const classes = `soundButtonDisplay ${className}`.trim();
 
   return (
@@ -49,14 +49,14 @@ export interface FolderButtonProps
   firstSounds: SoundType; // only the first 4 (for display)
 }
 
-const FolderButton: React.FC<FolderButtonProps> = ({
+const FolderButton = ({
   name,
   slug,
   numSounds,
   firstSounds,
   className = "",
   ...props
-}) => {
+}: FolderButtonProps) => {
   const classes = `folderButtonWrapper ${className}`.trim();
 
   return (
@@ -99,9 +99,10 @@ const FolderButton: React.FC<FolderButtonProps> = ({
   );
 };
 
-const NewFolderButton: React.FC<
-  React.ButtonHTMLAttributes<HTMLButtonElement>
-> = ({ className = "", ...props }) => {
+const NewFolderButton = ({
+  className = "",
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
   const classes =
     `folderButtonWrapper newFolderButtonWrapper ${className}`.trim();
 
