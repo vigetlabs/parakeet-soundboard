@@ -5,7 +5,6 @@ class TagsController < ApplicationController
   end
 
   def show
-    tag = Tag.find(params[:id])
     render json: TagSerializer.new(tag).serializable_hash.to_json
   end
 
