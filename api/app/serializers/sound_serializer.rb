@@ -1,13 +1,12 @@
 class SoundSerializer
   include JSONAPI::Serializer
-  attributes :name, :user_id, :color, :emoji, :tag_ids
+  attributes :name, :user_id, :color, :emoji
 
-   attribute :audio_file_url do |object|
+  has_many :tags, serializer: TagSerializer
+
+  attribute :audio_file_url do |object|
     if object.audio_file.attached?
       Rails.application.routes.url_helpers.rails_blob_url(object.audio_file, only_path: true)
     end
-  end
-  def tag_ids
-    object.tags.pluck(:id)
   end
 end
