@@ -31,6 +31,28 @@ const SoundGroup = ({
     setCurrentlyPlaying(name);
   }
 
+  function sortAndFilter() {
+    let outputSounds;
+    const filters = searchParams.getAll("filter");
+    if (filters.length > 0) {
+      outputSounds = sounds.filter((sound) => {
+        return filters.every((tag) => sound.tags.includes(tag));
+      });
+    } else {
+      outputSounds = sounds;
+    }
+
+    const searchInput = searchParams.get("search");
+    if (searchInput) {
+      outputSounds = fuzzysort
+        .go(searchParams.get("search") ?? "", outputSounds, { key: "name" })
+        .map((result) => result.obj);
+    }
+    console.log(outputSounds);
+
+    return outputSounds;
+  }
+
   return (
     <div className="soundGroup" {...props}>
       <div className="soundGroupTitle" style={style}>
@@ -43,12 +65,7 @@ const SoundGroup = ({
         <h2>{title}</h2>
       </div>
       <div className="soundGroupButtonContainer">
-        {(searchParams.get("search")
-          ? fuzzysort
-              .go(searchParams.get("search") ?? "", sounds, { key: "name" })
-              .map((result) => result.obj)
-          : sounds
-        ).map((sound) => (
+        {sortAndFilter().map((sound) => (
           <SoundButton
             key={sound.name}
             label={sound.name}
