@@ -8,7 +8,6 @@ class SoundsController < ApplicationController
   end
 
   def my_sounds
-    authenticate_user!
     sounds = current_user.sounds
     render json: SoundSerializer.new(sounds).serializable_hash.to_json
   end

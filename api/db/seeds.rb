@@ -28,7 +28,7 @@ default_tags = [
 
 tag_records = default_tags.map { |t| [ t[:name], Tag.find_or_create_by!(name: t[:name]) ] }.to_h
 
-default_sounds.each do |sound|
+sound_records = default_sounds.map do |sound|
   s = Sound.find_or_create_by!(name: sound[:name]) do |snd|
     snd.audio_file.attach(io: File.open(Rails.root.join("db", "seeds", "audio", sound[:file_path])), filename: sound[:file_path])
   end
@@ -37,4 +37,14 @@ default_sounds.each do |sound|
   sound[:tags].each do |tag_name|
     s.tags << tag_records[tag_name] unless s.tags.include?(tag_records[tag_name])
   end
+
+  [ sound[:name], s ]
+end.to_h
+
+demo_folder = Folder.find_or_create_by!(name: "For Demo")
+
+demo_sounds = [ 'Anime Wow', 'Yippee', 'Airhorn', 'Background Music', 'Crickets' ]
+demo_sounds.each do |sound_name|
+  sound = sound_records[sound_name]
+  demo_folder.sounds << sound unless demo_folder.sounds.include?(sound)
 end

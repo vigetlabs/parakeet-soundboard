@@ -8,6 +8,6 @@ class SoundSerializer
     end
   end
   attribute :tags do |object|
-    object.tags.map { |tag| { id: tag.id, name: tag.name } }
+    object.tags.map { |tag| { id: tag.id, name: tag.name, color: tag.color } }
   end
 end
