@@ -9,20 +9,32 @@
 #   end
 
 default_sounds = [
-  { name: 'Airhorn', file_path: 'airhorn.mp3' },
-  { name: 'Anime Wow', file_path: 'anime-wow.mp3' },
-  { name: 'Applause', file_path: 'applause.mp3' },
-  { name: 'Background Music', file_path: 'bg-music.mp3' },
-  { name: 'Crickets', file_path: 'crickets.mp3' },
-  { name: 'Drumroll', file_path: 'drumroll.mp3' },
-  { name: 'Explosion', file_path: 'explosion.mp3' },
-  { name: 'Quack', file_path: 'quack.mp3' },
-  { name: 'Splat', file_path: 'splat.mp3' },
-  { name: 'Yippee', file_path: 'yippee.mp3' }
+  { name: 'Airhorn', file_path: 'airhorn.mp3', tags: [ 'Funny' ] },
+  { name: 'Anime Wow', file_path: 'anime-wow.mp3', tags: [ 'Funny', 'Positive' ] },
+  { name: 'Applause', file_path: 'applause.mp3', tags: [ 'Positive' ] },
+  { name: 'Background Music', file_path: 'bg-music.mp3', tags: [ 'Positive' ] },
+  { name: 'Crickets', file_path: 'crickets.mp3', tags: [ 'Funny' ] },
+  { name: 'Drumroll', file_path: 'drumroll.mp3', tags: [ 'Funny' ] },
+  { name: 'Explosion', file_path: 'explosion.mp3', tags: [ 'Funny' ] },
+  { name: 'Quack', file_path: 'quack.mp3', tags: [ 'Funny' ] },
+  { name: 'Splat', file_path: 'splat.mp3', tags: [ 'Funny' ] },
+  { name: 'Yippee', file_path: 'yippee.mp3', tags: [ 'Funny', 'Positive' ] }
 ]
 
+default_tags = [
+  { name: 'Funny' },
+  { name: 'Positive' }
+]
+
+tag_records = default_tags.map { |t| [ t[:name], Tag.find_or_create_by!(name: t[:name]) ] }.to_h
+
 default_sounds.each do |sound|
-  Sound.find_or_create_by!(name: sound[:name]) do |s|
-    s.audio_file.attach(io: File.open(Rails.root.join("db", "seeds", "audio", sound[:file_path])), filename: sound[:file_path])
+  s = Sound.find_or_create_by!(name: sound[:name]) do |snd|
+    snd.audio_file.attach(io: File.open(Rails.root.join("db", "seeds", "audio", sound[:file_path])), filename: sound[:file_path])
+  end
+
+  # Associate tags
+  sound[:tags].each do |tag_name|
+    s.tags << tag_records[tag_name] unless s.tags.include?(tag_records[tag_name])
   end
 end
