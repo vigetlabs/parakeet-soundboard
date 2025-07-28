@@ -53,7 +53,7 @@ class SoundsController < ApplicationController
   end
 
   def sound_params
-    params.require(:sound).permit(:name, :audio_file, tag_ids: [])
+    params.require(:sound).permit(:name, :audio_file, :color, :emoji, tag_ids: [])
   end
 
   def authorize_user!
