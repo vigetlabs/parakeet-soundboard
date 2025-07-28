@@ -48,7 +48,6 @@ const SoundGroup = ({
         .go(searchParams.get("search") ?? "", outputSounds, { key: "name" })
         .map((result) => result.obj);
     }
-    console.log(outputSounds);
 
     return outputSounds;
   }
