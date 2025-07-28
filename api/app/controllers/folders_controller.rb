@@ -55,7 +55,7 @@ class FoldersController < ApplicationController
   end
 
   def folder_params
-    params.require(:folder).permit(:name, sound_ids: [])
+    params.require(:folder).permit(:name, :slug, sound_ids: [])
   end
 
   def authorize_user!

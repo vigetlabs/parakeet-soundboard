@@ -1,6 +1,6 @@
 class FolderSerializer
   include JSONAPI::Serializer
-  attributes :name
+  attributes :name, :slug
 
   attribute :sounds do |object|
     object.sounds.map do |sound|
