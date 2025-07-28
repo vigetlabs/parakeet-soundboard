@@ -9,16 +9,16 @@
 #   end
 
 default_sounds = [
-  { name: 'Airhorn', file_path: 'airhorn.mp3', tags: ['Funny'] },
-  { name: 'Anime Wow', file_path: 'anime-wow.mp3', tags: [ 'Funny', 'Positive'] },
-  { name: 'Applause', file_path: 'applause.mp3', tags: ['Positive'] },
-  { name: 'Background Music', file_path: 'bg-music.mp3', tags: ['Positive'] },
-  { name: 'Crickets', file_path: 'crickets.mp3', tags: ['Funny'] },
-  { name: 'Drumroll', file_path: 'drumroll.mp3', tags: ['Funny'] },
-  { name: 'Explosion', file_path: 'explosion.mp3', tags: ['Funny'] },
-  { name: 'Quack', file_path: 'quack.mp3', tags: ['Funny'] },
-  { name: 'Splat', file_path: 'splat.mp3', tags: ['Funny'] },
-  { name: 'Yippee', file_path: 'yippee.mp3', tags: ['Funny', 'Positive'] }
+  { name: 'Airhorn', file_path: 'airhorn.mp3', tags: [ 'Funny' ] },
+  { name: 'Anime Wow', file_path: 'anime-wow.mp3', tags: [ 'Funny', 'Positive' ] },
+  { name: 'Applause', file_path: 'applause.mp3', tags: [ 'Positive' ] },
+  { name: 'Background Music', file_path: 'bg-music.mp3', tags: [ 'Positive' ] },
+  { name: 'Crickets', file_path: 'crickets.mp3', tags: [ 'Funny' ] },
+  { name: 'Drumroll', file_path: 'drumroll.mp3', tags: [ 'Funny' ] },
+  { name: 'Explosion', file_path: 'explosion.mp3', tags: [ 'Funny' ] },
+  { name: 'Quack', file_path: 'quack.mp3', tags: [ 'Funny' ] },
+  { name: 'Splat', file_path: 'splat.mp3', tags: [ 'Funny' ] },
+  { name: 'Yippee', file_path: 'yippee.mp3', tags: [ 'Funny', 'Positive' ] }
 ]
 
 default_tags = [
@@ -26,7 +26,7 @@ default_tags = [
   { name: 'Positive' }
 ]
 
-tag_records = default_tags.map { |t| [t[:name], Tag.find_or_create_by!(name: t[:name])] }.to_h
+tag_records = default_tags.map { |t| [ t[:name], Tag.find_or_create_by!(name: t[:name]) ] }.to_h
 
 default_sounds.each do |sound|
   s = Sound.find_or_create_by!(name: sound[:name]) do |snd|
@@ -38,5 +38,3 @@ default_sounds.each do |sound|
     s.tags << tag_records[tag_name] unless s.tags.include?(tag_records[tag_name])
   end
 end
-
-
