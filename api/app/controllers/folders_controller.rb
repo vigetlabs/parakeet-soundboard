@@ -1,5 +1,6 @@
 class FoldersController < ApplicationController
   # before_action :authenticate_user!, except: [:index, :show]
+  before_action :authenticate_user!, only: [ :my_folders ] # temporary until users
   before_action :authorize_user!, only: [ :update, :destroy ]
 
 
@@ -11,7 +12,6 @@ class FoldersController < ApplicationController
 
   # GET /my_folders
   def my_folders
-    authenticate_user!
     folders = current_user.folders
     render json: FolderSerializer.new(folders).serializable_hash.to_json
   end
