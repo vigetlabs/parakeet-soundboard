@@ -2,6 +2,7 @@ import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { Button, IconButton, TextInput } from "./reuseable";
 import "./Sidebar.css";
 import { useEffect, useState } from "react";
+import { EditDialog } from "./reuseable/editDialog";
 
 interface Props {
   children: React.ReactNode;
@@ -50,7 +51,9 @@ const Sidebar = ({ children }: Props) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <Button icon="plus">Upload</Button>
+          <EditDialog uploadFirst>
+            <Button icon="plus">Upload</Button>
+          </EditDialog>
         </div>
         <div className="sidebarRest">
           <div className="sidebarLeft">

@@ -1,0 +1,76 @@
+.editDialogOverlay {
+  background-color: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  inset: 0;
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.editDialog {
+  background-color: var(--elevated-background);
+  border-radius: 24px;
+  padding: 32px;
+  border: 2px solid var(--primary-muted);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 500px;
+  max-height: 85vh;
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  width: 500px;
+}
+
+.editDialogTitle {
+  margin-bottom: 24px;
+}
+
+@keyframes overlayShow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.fileDrop {
+  color: var(--primary-muted-dark);
+  border: 4px dashed var(--primary-muted-dark);
+  border-radius: 16px;
+  padding: 48px;
+  box-sizing: border-box;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.fileDropContent {
+  margin: auto;
+}
+
+.fileDropIcon {
+  height: 128px;
+  width: 128px;
+}
+
+.fileDropText {
+  font-weight: 700;
+  margin-top: 24px;
+}
+
+.fileDrop:hover,
+.fileDropActive {
+  border-color: var(--primary-active);
+  color: var(--primary-foreground);
+}
