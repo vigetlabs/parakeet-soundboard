@@ -3,7 +3,7 @@ import { CrossFunctions } from "@/utils/constants";
 declare global {
   interface Window {
     soundboard: {
-      triggerAudio?: (url: string, volume: number) => void;
+      triggerAudio?: (base64: string, volume: number) => void;
       muteMicrophone?: () => void;
       unmuteMicrophone?: () => void;
       stopAudio?: () => void;
@@ -24,6 +24,20 @@ function sendMessage(command: CrossFunctions) {
   );
 }
 
+function base64ToArrayBuffer(base64: string) {
+  const real_base64 = base64.split(',')[1];
+  const binaryString = atob(real_base64);
+
+    const length = binaryString.length;
+    const bytes = new Uint8Array(length);
+
+    for (let i = 0; i < length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    return bytes.buffer;
+}
+
 export default defineUnlistedScript(() => {
   console.log("Successfully Injected!");
 
@@ -32,9 +46,8 @@ export default defineUnlistedScript(() => {
       navigator.mediaDevices
     );
 
-    async function loadEffectBuffer(ctx: AudioContext, url: string) {
-      const data = await fetch(url).then((r) => r.arrayBuffer());
-      return await ctx.decodeAudioData(data);
+    async function loadEffectBuffer(ctx: AudioContext, buffer: ArrayBuffer) {
+      return await ctx.decodeAudioData(buffer);
     }
 
     navigator.mediaDevices.getUserMedia = async function (constraints) {
@@ -49,9 +62,11 @@ export default defineUnlistedScript(() => {
         micGain.gain.value = window.soundboard?.micMuted ?? false ? 0 : 1;
         srcNode.connect(micGain).connect(destNode);
 
-        async function playSoundEffect(url: string, volume: number) {
+        async function playSoundEffect(base64: string, volume: number) {
           // Prepare sound‐effect node (but don’t play yet)
-          const fxBuffer = await loadEffectBuffer(audioCtx, url);
+          console.log("(inject.ts)Received sound effect base64:", base64);
+          const buffer = base64ToArrayBuffer(base64);
+          const fxBuffer = await loadEffectBuffer(audioCtx, buffer);
           let fxNode = null;
           const fxGain = audioCtx.createGain();
           fxGain.gain.value = volume / 100;
@@ -77,11 +92,11 @@ export default defineUnlistedScript(() => {
         // Meet calls navigator.mediaDevices.getUserMedia() twice on page load but only once when changing microphone,
         // so this adds a delay to the initial load but allows for changing past that
         const sb = {
-          triggerAudio: (url: string, volume: number) => {
+          triggerAudio: (base64: string, volume: number) => {
             if (window.soundboard.stopAudio) {
               window.soundboard.stopAudio();
             }
-            playSoundEffect(url, volume);
+            playSoundEffect(base64, volume);
           },
           muteMicrophone: () => {
             micGain.gain.value = 0;
@@ -125,10 +140,11 @@ export default defineUnlistedScript(() => {
     if (event.source !== window) return;
     switch (event.data.command) {
       case CrossFunctions.INJECT_AUDIO:
-        console.log("recieved play " + event.data.url);
+        console.log("Event received for playing audio:", event.data);
+        console.log("recieved play " + event.data.base64);
         if (window.soundboard.triggerAudio) {
           window.soundboard.triggerAudio(
-            event.data.url,
+            event.data.base64,
             parseInt(event.data.volume)
           );
         }

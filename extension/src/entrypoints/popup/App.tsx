@@ -5,6 +5,7 @@ import { postMessage, playLocalAudio, stopLocalAudio } from "@/utils";
 import { storage } from "#imports";
 import { CrossFunctions } from "@/utils/constants";
 import { login, getMySounds, getDefaultSounds } from '@/utils/api';
+import { storeSound, retrieveSound } from '@/utils/db.ts'
 
 function App() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState("");
@@ -35,20 +36,43 @@ function App() {
     try {
       const response = await getDefaultSounds();
       console.log('Default Sounds:', response);
-      const sounds = response.data.map((sound: any) => {
+      const sounds = await Promise.all(
+      response.data.map(async (sound: any) => {
+        const id = sound.id;
         const { name, color, emoji, audio_file_url } = sound.attributes;
+        const fullUrl = `http://localhost:3001${audio_file_url}`;
+
+        // Fetch the sound file as a Blob
+        const audioResponse = await fetch(fullUrl);
+        const blob = await audioResponse.blob();
+        console.log('blob:', blob);
+
+        // Store it in IndexedDB
+        console.log("Storing sound in IndexedDB:", id);
+        await storeSound(id, blob); // assumes `name` is unique key
+
         return {
+          id: id,
           label: name,
           color: color || 'gray',
           emoji: emoji || '🎵',
-          url: `http://localhost:3001${audio_file_url}`, // Fully qualified URL
         };
-      });
+      })
+    );
     setSoundButtons(sounds);
   } catch (err) {
       console.error('Failed to fetch sounds:', err);
     }
   };
+
+  function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob); // encodes to base64
+  });
+}
 
   const [fxVolume, setFxVolume] = useState(25);
   const [micMuted, setMicMuted] = useState(false);
@@ -57,17 +81,21 @@ function App() {
     fxVolumeStorage.setValue(volume);
   }
 
-  async function playSound(file: string) {
+  async function playSound(id: number) {
+    console.log("Playing sound with id:", id);
+    const blob = await retrieveSound(id);
+    console.log("(app.tsx)Retrieved sound blob:", blob);
+    const base64 = await blobToBase64(blob);
     if (isMeet) {
       postMessage(CrossFunctions.INJECT_AUDIO, {
-        url: file,
+        base64: base64,
         volume: fxVolume,
       });
     }
-    const success = await playLocalAudio(file, fxVolume);
-    if (success) {
-      setCurrentlyPlaying(file);
-    }
+    // const success = await playLocalAudio(id, fxVolume);
+    // if (success) {
+    //   setCurrentlyPlaying(name);
+    // }
   }
 
   async function stopSound() {
@@ -212,8 +240,8 @@ function App() {
                 label={button.label}
                 color={button.color}
                 emoji={button.emoji}
-                onClick={() => playSound(button.url)}
-                isPlaying={currentlyPlaying === button.url}
+                onClick={() => playSound(button.id)}
+                isPlaying={currentlyPlaying === button.name}
               />
             </div>
           ))}

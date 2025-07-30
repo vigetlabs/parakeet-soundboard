@@ -31,12 +31,11 @@ declare global {
   }
 }
 
-export async function playLocalAudio(file: PublicPath, volume: number) {
+export async function playLocalAudio(fileURL: string, volume: number) {
   if (!(await URLIsValid())) {
     return false;
   }
 
-  const fileURL = browser.runtime.getURL(file);
   browser.scripting.executeScript({
     target: { tabId: await getActiveTabID() },
     func: function (
