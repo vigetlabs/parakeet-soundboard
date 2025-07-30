@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { chooseIcon, type AvaliableIcons } from "../../util";
 import { SoundButton } from "../reuseable";
 import "./SoundGroup.css";
@@ -6,6 +6,7 @@ import { ChevronLeftIcon } from "@radix-ui/react-icons";
 import type { SoundType } from "../../util/tempData";
 import { AudioPlayer } from "../../util/audio";
 import { useState } from "react";
+import fuzzysort from "fuzzysort";
 
 interface SoundGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
@@ -23,10 +24,32 @@ const SoundGroup = ({
   ...props
 }: SoundGroupProps) => {
   const [currentlyPlaying, setCurrentlyPlaying] = useState("");
+  const [searchParams] = useSearchParams();
 
   function handleButtonClick(name: string, url: string) {
     AudioPlayer.play(url, () => setCurrentlyPlaying(""));
     setCurrentlyPlaying(name);
+  }
+
+  function sortAndFilter() {
+    let outputSounds;
+    const filters = searchParams.getAll("filter");
+    if (filters.length > 0) {
+      outputSounds = sounds.filter((sound) => {
+        return filters.every((tag) => sound.tags.includes(tag));
+      });
+    } else {
+      outputSounds = sounds;
+    }
+
+    const searchInput = searchParams.get("search");
+    if (searchInput) {
+      outputSounds = fuzzysort
+        .go(searchParams.get("search") ?? "", outputSounds, { key: "name" })
+        .map((result) => result.obj);
+    }
+
+    return outputSounds;
   }
 
   return (
@@ -41,7 +64,7 @@ const SoundGroup = ({
         <h2>{title}</h2>
       </div>
       <div className="soundGroupButtonContainer">
-        {sounds.map((sound) => (
+        {sortAndFilter().map((sound) => (
           <SoundButton
             key={sound.name}
             label={sound.name}

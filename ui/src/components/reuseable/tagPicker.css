@@ -1,0 +1,90 @@
+.tagPicker {
+  background-color: var(--elevated-background);
+  border-radius: 24px;
+  padding: 32px;
+  border: 2px solid var(--primary-muted);
+}
+
+.tagContainer {
+  max-width: 400px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.tagToggle {
+  padding: 4px 16px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  transition: all 0.2s ease-in-out;
+  background-color: var(--primary-hover);
+  border: 1px solid var(--primary-muted);
+}
+
+.tagToggle[data-state="on"] {
+  background-color: var(--primary-active);
+  color: var(--elevated-background);
+}
+
+.tagPickerClose {
+  background-color: var(--primary-foreground);
+  color: var(--elevated-background);
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 0;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.tagPickerClose:hover {
+  background-color: var(--primary-active);
+}
+
+.tagPickerCloseIcon {
+  height: 16px;
+  width: 16px;
+  padding: 8px;
+}
+
+.tagPickerArrow {
+  fill: var(--elevated-background);
+}
+
+.tagPickerButton,
+.tagPickerClearButton {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tagPickerButton:disabled {
+  cursor: not-allowed;
+}
+
+.tagPickerClearContainer {
+  display: flex;
+  justify-content: end;
+}
+
+.tagPickerClearButton {
+  color: var(--primary-active);
+  font-weight: 700;
+  font-size: 1rem;
+  transition: color 0.2s ease-in-out;
+}
+
+.tagPickerClearButton:hover {
+  color: var(--primary-foreground);
+}

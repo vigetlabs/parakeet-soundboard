@@ -4,7 +4,7 @@ import { PublicPath } from "wxt/browser";
 import { postMessage, playLocalAudio, stopLocalAudio } from "@/utils";
 import { storage } from "#imports";
 import { CrossFunctions } from "@/utils/constants";
-import { login, getMySounds } from '@/utils/api';
+import { login, getMySounds } from "@/utils/api";
 
 function App() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState("");
@@ -19,12 +19,12 @@ function App() {
   const handleTestLogin = async () => {
     console.log("Testing login...");
     try {
-      const jwt = await login('natalietest@example.com', 'password123');
-      console.log('JWT:', jwt);
+      const jwt = await login("natalietest@example.com", "password123");
+      console.log("JWT:", jwt);
       const sounds = await getMySounds();
-      console.log('My Sounds:', sounds);
+      console.log("My Sounds:", sounds);
     } catch (err) {
-      console.error('Login failed:', err);
+      console.error("Login failed:", err);
     }
   };
 
