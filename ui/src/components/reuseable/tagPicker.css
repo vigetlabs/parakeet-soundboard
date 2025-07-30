@@ -52,7 +52,7 @@
 }
 
 .tagPickerArrow {
-  fill: var(--elevated-background);
+  fill: var(--primary-muted);
 }
 
 .tagPickerButton,

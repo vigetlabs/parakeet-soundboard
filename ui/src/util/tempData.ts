@@ -14,7 +14,7 @@ export type SoundType = Array<{
 export const tempButtons: SoundType = [
   {
     name: "Applause",
-    color: "var(--color-preset-4)",
+    color: "#BB27FF",
     emoji: "👏",
     url: db[2].attributes.audio_file_url,
     folders: [],
@@ -22,7 +22,7 @@ export const tempButtons: SoundType = [
   },
   {
     name: "Airhorn",
-    color: "var(--color-preset-1)",
+    color: "#E90C13",
     emoji: "🔉",
     url: db[0].attributes.audio_file_url,
     folders: ["Jokes"],
@@ -30,7 +30,7 @@ export const tempButtons: SoundType = [
   },
   {
     name: "Anime Wow",
-    color: "var(--color-preset-12)",
+    color: "#FF4BD8",
     emoji: "🎉",
     url: db[1].attributes.audio_file_url,
     folders: ["Jokes"],
@@ -38,7 +38,7 @@ export const tempButtons: SoundType = [
   },
   {
     name: "Crickets",
-    color: "var(--color-preset-3)",
+    color: "#FF6E42",
     emoji: "🦗",
     url: db[4].attributes.audio_file_url,
     folders: ["Misc"],
@@ -46,7 +46,7 @@ export const tempButtons: SoundType = [
   },
   {
     name: "Explosion",
-    color: "var(--color-preset-8)",
+    color: "#008573",
     emoji: "💥",
     url: db[6].attributes.audio_file_url,
     folders: ["Favorites"],
@@ -54,7 +54,7 @@ export const tempButtons: SoundType = [
   },
   {
     name: "Duck",
-    color: "var(--color-preset-7)",
+    color: "#00D5B8",
     emoji: "🦆",
     url: db[7].attributes.audio_file_url,
     folders: ["Favorites"],
@@ -62,7 +62,7 @@ export const tempButtons: SoundType = [
   },
   {
     name: "Splat",
-    color: "var(--color-preset-11)",
+    color: "#6200AD",
     emoji: "♠️",
     url: db[8].attributes.audio_file_url,
     folders: ["Favorites"],
@@ -70,7 +70,7 @@ export const tempButtons: SoundType = [
   },
   {
     name: "Drumroll",
-    color: "var(--color-preset-5)",
+    color: "#FFC53D",
     emoji: "🥁",
     url: db[5].attributes.audio_file_url,
     folders: ["Misc"],
@@ -78,7 +78,7 @@ export const tempButtons: SoundType = [
   },
   {
     name: "Yippee",
-    color: "var(--color-preset-9)",
+    color: "#00C8FF",
     emoji: "🏳️‍🌈",
     url: db[9].attributes.audio_file_url,
     folders: ["Favorites"],
@@ -86,7 +86,7 @@ export const tempButtons: SoundType = [
   },
   {
     name: "Background Music",
-    color: "var(--color-preset-10)",
+    color: "#5373F2",
     emoji: "🎵",
     url: db[3].attributes.audio_file_url,
     folders: ["Favorites", "Misc"],
@@ -127,4 +127,17 @@ export const tempTags = [
   { name: "Meme", color: "orange" },
   { name: "Celebration", color: "orange" },
   { name: "Holiday", color: "orange" },
+];
+
+export const defaultColors = [
+  "#BB27FF",
+  "#008573",
+  "#5373F2",
+  "#FF4BD8",
+  "#FFC53D",
+  "#E90C13",
+  "#6200AD",
+  "#FF6E42",
+  "#00D5B8",
+  "#00C8FF",
 ];

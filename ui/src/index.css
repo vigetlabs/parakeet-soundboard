@@ -21,20 +21,9 @@
   --inner-background: #faf9f2; /* gold 2 */
   --primary-muted: #e7e7e7; /* gray 6 */
   --primary-muted-dark: #bbbbbb; /* gray 8 */
-  --primary-disabled: #606060;
-
-  --color-preset-1: #e5484d;
-  --color-preset-2: #f5a898;
-  --color-preset-3: #f76b15;
-  --color-preset-4: #ffdfb5;
-  --color-preset-5: #ffc53d;
-  --color-preset-6: #b0e64c;
-  --color-preset-7: #9ce0d0;
-  --color-preset-8: #008573;
-  --color-preset-9: #74daf8;
-  --color-preset-10: #0090ff;
-  --color-preset-11: #d1afec;
-  --color-preset-12: #8e4ec6;
+  --primary-disabled: #646464; /* gray 11 */
+  --warning: #ce2c31; /* red 11 */
+  --warning-light: #ff9592;
 
   --primary-font: "Instrument Sans", sans-serif;
   font-family: var(--primary-font);
@@ -57,7 +46,6 @@ h1 {
 button {
   border-radius: 8px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
   font-size: 1rem;
   font-weight: 500;
   font-family: inherit;

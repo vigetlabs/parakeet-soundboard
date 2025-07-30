@@ -37,11 +37,13 @@ const Sidebar = ({ children }: Props) => {
     <>
       <div className="sidebarWrapper">
         <div className="sidebarTop">
-          <div className="logo"></div>
+          <Link to="/">
+            <img src="/parakeetLogo.png" className="logo" />
+          </Link>
           <TextInput
             placeholder="Search"
             className="sidebarSearch"
-            icon
+            leftIcon="magnifyingGlass"
             filter
             filterOptions={filterTags}
             setFilterOptions={setFilterTags}

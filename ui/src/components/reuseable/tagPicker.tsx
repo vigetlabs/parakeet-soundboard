@@ -16,6 +16,7 @@ const TagPicker = ({
   setSelectedTags,
   disabled = false,
   className = "",
+  style,
   children,
   ...props
 }: TagPickerProps) => {
@@ -35,7 +36,12 @@ const TagPicker = ({
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
-        <button className="tagPickerButton" disabled={disabled}>
+        <button
+          type="button"
+          className="tagPickerButton"
+          disabled={disabled}
+          style={style}
+        >
           {children}
         </button>
       </Popover.Trigger>
@@ -43,8 +49,6 @@ const TagPicker = ({
         <Popover.Content
           sideOffset={4}
           collisionPadding={16}
-          align="end"
-          alignOffset={-30}
           className={classes}
           {...props}
         >

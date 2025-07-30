@@ -18,12 +18,19 @@
 .logo {
   width: 60px;
   height: 60px;
-  background-color: var(--inner-background);
-  border-radius: 50%;
+  display: block;
 }
 
 .sidebarSearch {
   flex-grow: 1;
+
+  &:hover {
+    box-shadow: 0 0 0 1px black;
+  }
+
+  &:focus-within {
+    box-shadow: 0 0 0 2px black;
+  }
 }
 
 .sidebarRest {
