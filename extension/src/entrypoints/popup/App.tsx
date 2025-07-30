@@ -5,7 +5,7 @@ import { postMessage, playLocalAudio, stopLocalAudio } from "@/utils";
 import { storage } from "#imports";
 import { CrossFunctions } from "@/utils/constants";
 import { login, getMySounds, getDefaultSounds } from '@/utils/api';
-import { storeSound, retrieveSound } from '@/utils/db.ts'
+import { storeSound, retrieveSound, isSoundCached } from '@/utils/db.ts'
 
 function App() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState("");
@@ -42,12 +42,15 @@ function App() {
         const { name, color, emoji, audio_file_url } = sound.attributes;
         const fullUrl = `http://localhost:3001${audio_file_url}`;
 
-        const audioResponse = await fetch(fullUrl);
-        const blob = await audioResponse.blob();
-        console.log('blob:', blob);
-
-        console.log("Storing sound in IndexedDB:", id);
-        await storeSound(id, blob);
+        const isCached = await isSoundCached(id);
+        if (!isCached) {
+          const audioResponse = await fetch(fullUrl);
+          const blob = await audioResponse.blob();
+          console.log('Caching new sound:', id);
+          await storeSound(id, blob);
+        } else {
+          console.log('Sound already cached:', id);
+        }
 
         return {
           id: id,

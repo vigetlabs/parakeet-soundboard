@@ -64,7 +64,7 @@ export default defineUnlistedScript(() => {
 
         async function playSoundEffect(base64: string, volume: number) {
           // Prepare sound‐effect node (but don’t play yet)
-          console.log("(inject.ts)Received sound effect base64:", base64);
+          console.log("(inject.ts)Received sound effect base64");
           const buffer = base64ToArrayBuffer(base64);
           const fxBuffer = await loadEffectBuffer(audioCtx, buffer);
           let fxNode = null;
@@ -141,7 +141,6 @@ export default defineUnlistedScript(() => {
     switch (event.data.command) {
       case CrossFunctions.INJECT_AUDIO:
         console.log("Event received for playing audio:", event.data);
-        console.log("recieved play " + event.data.base64);
         if (window.soundboard.triggerAudio) {
           window.soundboard.triggerAudio(
             event.data.base64,
