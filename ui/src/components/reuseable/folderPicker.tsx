@@ -97,6 +97,7 @@ const FolderPicker = ({
             {tempFolders.map((folder) => (
               <FolderListing
                 folder={folder.name}
+                key={folder.name}
                 checked={selectedFolders.includes(folder.name)}
                 setChecked={handleFolderClick}
                 id={folder.name}

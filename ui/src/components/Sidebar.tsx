@@ -41,8 +41,7 @@ const Sidebar = ({ children }: Props) => {
   useEffect(() => {
     setSearch(searchParams.get("search") ?? "");
     setFilterTags(searchParams.getAll("filter") ?? []);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setSearch]);
+  }, [searchParams]);
 
   useEffect(() => {
     const localVolume = parseInt(localStorage.getItem("volume") ?? "50");

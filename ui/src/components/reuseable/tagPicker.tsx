@@ -26,10 +26,7 @@ const TagPicker = ({
     if (pressed) {
       setSelectedTags((prev) => [...prev, tag]);
     } else {
-      setSelectedTags((prev) => [
-        ...prev.slice(0, prev.indexOf(tag)),
-        ...prev.slice(prev.indexOf(tag) + 1),
-      ]);
+      setSelectedTags((prev) => prev.filter((t) => t !== tag));
     }
   }
 
