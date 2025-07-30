@@ -25,10 +25,7 @@ const TagPicker = ({
     if (pressed) {
       setSelectedTags((prev) => [...prev, tag]);
     } else {
-      setSelectedTags((prev) => [
-        ...prev.slice(0, prev.indexOf(tag)),
-        ...prev.slice(prev.indexOf(tag) + 1),
-      ]);
+      setSelectedTags((prev) => prev.filter((t) => t !== tag));
     }
   }
 
@@ -48,7 +45,7 @@ const TagPicker = ({
           className={classes}
           {...props}
         >
-          <h1>Tags</h1>
+          <h3 className="popoverTitle">Tags</h3>
           <div className="tagContainer">
             {tempTags.map((tag) => (
               <Toggle.Root
