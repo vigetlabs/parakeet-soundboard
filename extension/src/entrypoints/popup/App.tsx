@@ -42,14 +42,12 @@ function App() {
         const { name, color, emoji, audio_file_url } = sound.attributes;
         const fullUrl = `http://localhost:3001${audio_file_url}`;
 
-        // Fetch the sound file as a Blob
         const audioResponse = await fetch(fullUrl);
         const blob = await audioResponse.blob();
         console.log('blob:', blob);
 
-        // Store it in IndexedDB
         console.log("Storing sound in IndexedDB:", id);
-        await storeSound(id, blob); // assumes `name` is unique key
+        await storeSound(id, blob);
 
         return {
           id: id,
@@ -92,10 +90,10 @@ function App() {
         volume: fxVolume,
       });
     }
-    // const success = await playLocalAudio(id, fxVolume);
-    // if (success) {
-    //   setCurrentlyPlaying(name);
-    // }
+    const success = await playLocalAudio(base64, fxVolume);
+    if (success) {
+      setCurrentlyPlaying(id.toString());
+    }
   }
 
   async function stopSound() {
