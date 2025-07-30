@@ -3,7 +3,11 @@ class SoundsController < ApplicationController
   before_action :authorize_user!, only: [ :update, :destroy ]
 
   def index
-    sounds = Sound.where(user_id: nil) # Fetch only public sounds
+    if current_user
+      sounds = Sound.where(user_id: nil).or(Sound.where(user: current_user))
+    else
+      sounds = Sound.where(user_id: nil)
+    end
     render json: SoundSerializer.new(sounds).serializable_hash.to_json
   end
 

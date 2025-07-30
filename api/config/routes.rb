@@ -12,7 +12,12 @@ Rails.application.routes.draw do
   get "my_sounds", to: "sounds#my_sounds"
 
   resources :tags
-  resources :folders
+  resources :folders, param: :slug do
+    member do
+      post 'add_sound'
+      delete 'remove_sound'
+    end
+  end
   get "my_folders", to: "folders#my_folders"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

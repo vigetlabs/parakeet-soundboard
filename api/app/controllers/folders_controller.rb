@@ -1,12 +1,15 @@
 class FoldersController < ApplicationController
   # before_action :authenticate_user!, except: [:index, :show]
   before_action :authenticate_user!, only: [ :my_folders ] # temporary until users
-  before_action :authorize_user!, only: [ :update, :destroy ]
+  # before_action :authorize_user!, only: [ :update, :destroy, :add_sound, :remove_sound ]
 
-
-  # GET /folders
+  # GET /folders (default + a user's folder if signed in)
   def index
-    folders = Folder.all
+    if current_user
+      folders = Folder.where(user_id: nil).or(Folder.where(user: current_user))
+    else
+      folders = Folder.where(user_id: nil)
+    end
     render json: FolderSerializer.new(folders).serializable_hash.to_json
   end
 
@@ -16,7 +19,7 @@ class FoldersController < ApplicationController
     render json: FolderSerializer.new(folders).serializable_hash.to_json
   end
 
-  # GET /folders/:id
+  # GET /folders/:slug
   def show
     render json: FolderSerializer.new(folder).serializable_hash.to_json
   end
@@ -33,7 +36,7 @@ class FoldersController < ApplicationController
     end
   end
 
-  # PATCH /folders/:id
+  # PATCH /folders/:slug
   def update
     if folder.update(folder_params)
       render json: FolderSerializer.new(folder).serializable_hash.to_json
@@ -42,16 +45,35 @@ class FoldersController < ApplicationController
     end
   end
 
-  # DELETE /folders/:id
+  # DELETE /folders/:slug
   def destroy
     folder.destroy
     head :no_content
   end
 
+  # POST /folders/:slug/add_sound
+  def add_sound
+    sound = Sound.find_by(id: params[:sound_id])
+    return render json: { error: "Sound not found" }, status: :not_found unless sound
+
+    folder.sounds << sound unless folder.sounds.include?(sound)
+    render json: FolderSerializer.new(folder).serializable_hash.to_json
+  end
+
+  # DELETE /folders/:slug/remove_sound
+  def remove_sound
+    sound = Sound.find_by(id: params[:sound_id])
+    return render json: { error: "Sound not found" }, status: :not_found unless sound
+
+    folder.sounds.delete(sound)
+    render json: FolderSerializer.new(folder).serializable_hash.to_json
+  end
+
+
   private
 
   def folder
-    @folder ||= Folder.find(params[:id])
+    @folder ||= Folder.find_by!(slug: params[:slug])
   end
 
   def folder_params
