@@ -149,6 +149,17 @@
   color: var(--primary-hover);
 }
 
+.iconButtonWrapper:disabled {
+  cursor: not-allowed;
+}
+
+.iconButtonWrapper:disabled .iconButton {
+  background-color: var(--primary-muted);
+  color: var(--primary-disabled);
+  border-color: var(--primary-muted);
+  cursor: not-allowed;
+}
+
 .iconButton {
   width: 48px;
   height: 48px;

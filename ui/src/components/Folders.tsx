@@ -29,7 +29,7 @@ const Home = () => {
   }
 
   return (
-    <div className="childBackground">
+    <>
       <h1>Your Folders</h1>
       <p>Organize your sounds!</p>
       <div className="folderButtonContainer">
@@ -72,7 +72,7 @@ const Home = () => {
           isFolder={true}
         />
       </div>
-    </div>
+    </>
   );
 };
 

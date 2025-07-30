@@ -81,5 +81,9 @@
 }
 
 .textInputButton:hover {
+  color: var(--warning-hover);
+}
+
+.textInputButton:active {
   color: var(--warning);
 }

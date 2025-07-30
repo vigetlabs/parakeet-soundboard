@@ -23,10 +23,16 @@
   --primary-muted-dark: #bbbbbb; /* gray 8 */
   --primary-disabled: #646464; /* gray 11 */
   --warning: #ce2c31; /* red 11 */
-  --warning-light: #ff9592;
+  --warning-hover: #e5484d; /* red 9 */
+  --warning-light: #eb8e90; /* red 6 */
 
   --primary-font: "Instrument Sans", sans-serif;
   font-family: var(--primary-font);
+  overflow: hidden;
+}
+
+::selection {
+  background: var(--primary-hover);
 }
 
 a {

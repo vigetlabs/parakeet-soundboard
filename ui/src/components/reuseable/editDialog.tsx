@@ -321,7 +321,10 @@ const EditDialogContent = ({
           </Form.Field>
         </div>
 
-        <Form.Field className="editDialogFieldContainer" name="tags">
+        <Form.Field
+          className="editDialogFieldContainer editDialogFieldContainerSelector"
+          name="tags"
+        >
           <TagPicker
             selectedTags={tags}
             setSelectedTags={setTags}
@@ -345,7 +348,10 @@ const EditDialogContent = ({
           </TagPicker>
         </Form.Field>
 
-        <Form.Field className="editDialogFieldContainer" name="folders">
+        <Form.Field
+          className="editDialogFieldContainer editDialogFieldContainerSelector"
+          name="folders"
+        >
           <FolderPicker
             selectedFolders={folders}
             setSelectedFolders={setFolders}

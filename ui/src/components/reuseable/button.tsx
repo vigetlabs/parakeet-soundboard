@@ -168,6 +168,7 @@ export interface IconButtonProps
   icon: AvaliableIcons;
   label?: string;
   selected?: boolean;
+  size?: number;
 }
 
 const InnerIconButton = ({
@@ -175,6 +176,7 @@ const InnerIconButton = ({
   icon,
   label,
   selected = false,
+  size = 24,
   ...props
 }: IconButtonProps) => {
   const classes = `iconButton ${className} ${
@@ -184,9 +186,13 @@ const InnerIconButton = ({
   return (
     <button className="iconButtonWrapper" {...props}>
       <div className={classes}>
-        {chooseIcon(icon, {
-          className: "innerIcon",
-        })}
+        {chooseIcon(
+          icon,
+          {
+            className: "innerIcon",
+          },
+          size
+        )}
       </div>
       {/* TODO: Add tooltip if the name is too long */}
       {label && <div className="iconButtonLabel">{label}</div>}

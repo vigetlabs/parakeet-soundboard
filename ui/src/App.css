@@ -10,14 +10,6 @@
   font-size: 0.6em;
 }
 
-.childBackground {
-  background-color: var(--inner-background);
-  border-radius: 32px 0 0 32px;
-  padding: 40px;
-  height: calc(100% - 80px);
-  color: var(--primary-foreground);
-}
-
 .folderButtonContainer {
   display: grid;
   grid-template-columns: repeat(auto-fill, 140px);

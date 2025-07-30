@@ -21,7 +21,7 @@ const FolderView = () => {
   }, [folder, navigate, setFolderName]);
 
   return (
-    <div className="childBackground">
+    <>
       <SoundGroup
         title={folderName ?? ""}
         icon="archive"
@@ -31,7 +31,7 @@ const FolderView = () => {
         backLink="/folders"
         style={{ paddingTop: 0 }}
       />
-    </div>
+    </>
   );
 };
 

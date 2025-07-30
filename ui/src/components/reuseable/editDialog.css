@@ -83,16 +83,25 @@
   border-color: var(--primary-active);
 }
 
+.editDialogFieldContainer:focus-within:not(.editDialogFieldContainerSelector) {
+  border-color: var(--primary-foreground);
+}
+
 .editDialogFieldContainerDisabled:hover {
   border-color: var(--primary-muted-dark);
+}
+
+.editDialogInputDisabled {
+  cursor: pointer;
 }
 
 .editDialogInput {
   width: 100%;
 }
 
-.editDialogInputFilename::placeholder {
-  font-style: italic;
+.editDialogInputFilename .textInput {
+  color: var(--primary-muted-dark);
+  cursor: default;
 }
 
 .editDialogDesignContainer {
@@ -113,6 +122,11 @@
 .editDialogEmojiPickerContainer {
   margin-left: -52px;
   margin-top: 8px;
+  transition: color 0.2s ease-in-out;
+}
+
+.editDialogEmojiPickerContainer:hover {
+  color: var(--primary-active);
 }
 
 .buttonDisplayPickerIcon {
