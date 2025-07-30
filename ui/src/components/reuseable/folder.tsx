@@ -255,7 +255,9 @@ const EditFolderDialog = ({
             <Form.Field name="name">
               <Dialog.Title>
                 <Form.Label>
-                  <h1>{previousName ? "Edit" : "Create"} Folder</h1>
+                  <h3 className="popoverTitle">
+                    {previousName ? "Edit" : "Create"} Folder
+                  </h3>
                 </Form.Label>
               </Dialog.Title>
               <Form.Message match="valueMissing">

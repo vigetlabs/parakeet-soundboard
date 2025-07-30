@@ -219,7 +219,7 @@ const EditDialogContent = ({
         }}
       >
         <Form.Field
-          className="editDialogFieldContainer editDialogFieldContainerDisabled"
+          className="editDialogFieldContainer editDialogFieldContainerDisabled editDialogFieldContainerSelector"
           name="filename"
         >
           <Form.Label className="visually-hidden">Filename</Form.Label>

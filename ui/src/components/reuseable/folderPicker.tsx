@@ -92,7 +92,7 @@ const FolderPicker = ({
           {...props}
           onWheelCapture={(e) => e.stopPropagation() /* Allows scrolling */}
         >
-          <h1>Folders</h1>
+          <h3 className="popoverTitle">Folders</h3>
           <div className="folderContainer">
             {tempFolders.map((folder) => (
               <FolderListing

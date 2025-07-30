@@ -37,7 +37,7 @@ const DeleteDialog = ({
         <Dialog.Overlay className="dialogOverlay" />
         <Dialog.Content className={classes} {...props}>
           <Dialog.Title asChild>
-            <h1>Are you sure?</h1>
+            <h3 className="popoverTitle">Are you sure?</h3>
           </Dialog.Title>
           <Dialog.Description asChild>
             <p>
