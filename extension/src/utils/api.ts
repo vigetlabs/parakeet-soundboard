@@ -22,3 +22,9 @@ export async function getMySounds() {
   if (!res.ok) throw new Error('Failed to fetch sounds');
   return res.json();
 }
+
+export async function getDefaultSounds() {
+  const res = await fetch('http://localhost:3001/sounds')
+  if (!res.ok) throw new Error('Failed to fetch default sounds');
+  return res.json();
+}

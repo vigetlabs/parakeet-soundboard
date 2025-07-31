@@ -4,10 +4,14 @@ import { PublicPath } from "wxt/browser";
 import { postMessage, playLocalAudio, stopLocalAudio } from "@/utils";
 import { storage } from "#imports";
 import { CrossFunctions } from "@/utils/constants";
-import { login, getMySounds } from "@/utils/api";
+import { login, getMySounds, getDefaultSounds } from "@/utils/api";
+import { storeSound, retrieveSound, isSoundCached } from "@/utils/db.ts";
+
 
 function App() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState("");
+  const [soundButtons, setSoundButtons] = useState<any[]>([]);
+
 
   const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
     fallback: 25,
@@ -28,6 +32,50 @@ function App() {
     }
   };
 
+  async function fetchSounds() {
+    console.log("Fetching sounds...");
+    try {
+      const response = await getDefaultSounds();
+      console.log('Default Sounds:', response);
+      const sounds = await Promise.all(
+      response.data.map(async (sound: any) => {
+        const id = sound.id;
+        const { name, color, emoji, audio_file_url } = sound.attributes;
+        const fullUrl = `http://localhost:3001${audio_file_url}`;
+
+        const isCached = await isSoundCached(id);
+        if (!isCached) {
+          const audioResponse = await fetch(fullUrl);
+          const blob = await audioResponse.blob();
+          console.log('Caching new sound:', id);
+          await storeSound(id, blob);
+        } else {
+          console.log('Sound already cached:', id);
+        }
+
+        return {
+          id: id,
+          label: name,
+          color: color || 'gray',
+          emoji: emoji || '🎵',
+        };
+      })
+    );
+    setSoundButtons(sounds);
+  } catch (err) {
+      console.error('Failed to fetch sounds:', err);
+    }
+  };
+
+  function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob); // encodes to base64
+  });
+}
+
   const [fxVolume, setFxVolume] = useState(25);
   const [micMuted, setMicMuted] = useState(false);
   function updateFxVolume(volume: number) {
@@ -35,16 +83,20 @@ function App() {
     fxVolumeStorage.setValue(volume);
   }
 
-  async function playSound(file: PublicPath) {
+  async function playSound(id: number) {
+    console.log("Playing sound with id:", id);
+    const blob = await retrieveSound(id);
+    console.log("(app.tsx)Retrieved sound blob:", blob);
+    const base64 = await blobToBase64(blob);
     if (isMeet) {
       postMessage(CrossFunctions.INJECT_AUDIO, {
-        url: browser.runtime.getURL(file),
+        base64: base64,
         volume: fxVolume,
       });
     }
-    const success = await playLocalAudio(file, fxVolume);
+    const success = await playLocalAudio(base64, fxVolume);
     if (success) {
-      setCurrentlyPlaying(file);
+      setCurrentlyPlaying(id.toString());
     }
   }
 
@@ -102,6 +154,9 @@ function App() {
     return () => {
       browser.runtime.onMessage.removeListener(listener);
     };
+  }, []);
+  useEffect(() => {
+    fetchSounds();
   }, []);
 
   const tempButtons: Array<{
@@ -181,14 +236,14 @@ function App() {
           <IconButton icon="gear" onClick={openTab} />
         </div>
         <div className="soundButtonContainer">
-          {tempButtons.map((button) => (
+          {soundButtons.map((button) => (
             <div key={button.label}>
               <SoundButton
                 label={button.label}
                 color={button.color}
                 emoji={button.emoji}
-                onClick={() => playSound(button.url)}
-                isPlaying={currentlyPlaying === button.url}
+                onClick={() => playSound(button.id)}
+                isPlaying={currentlyPlaying === button.name}
               />
             </div>
           ))}
