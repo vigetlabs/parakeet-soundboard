@@ -1,26 +1,38 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  max-height: 700px;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: #213547;
+  background-color: var(--inner-background);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+
+  --primary-foreground: #0d3d38; /* teal 12 */
+  --primary-active: #008573; /* teal 11 */
+  --primary-hover: #b8eae0; /* teal 5 */
+  --primary-active-light: #e0f8f3; /* teal 3 */
+  --primary-active-lighter: #f3fbf9; /* teal 2 */
+  --elevated-background: #fafefd; /* teal 1 */
+  --inner-background: #faf9f2; /* gold 2 */
+  --primary-muted: #e7e7e7; /* gray 6 */
+  --primary-muted-dark: #bbbbbb; /* gray 8 */
+  --primary-disabled: #646464; /* gray 11 */
+  --warning-dark: #641723; /* red 12 */
+  --warning: #ce2c31; /* red 11 */
+  --warning-hover: #e5484d; /* red 9 */
+  --warning-light: #eb8e90; /* red 6 */
+
+  --primary-font: "Instrument Sans", sans-serif;
 }
 
 a {
-  font-weight: 500;
-  color: #646cff;
+  color: inherit;
   text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
 }
 
 body {
@@ -28,11 +40,25 @@ body {
   display: flex;
   place-items: center;
   min-width: 320px;
+  font-family: var(--primary-font);
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+h2 {
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin: 0;
+  color: var(--primary-disabled);
+}
+
+p {
+  font-size: 0.75rem;
+  margin: 0;
 }
 
 button {
@@ -47,18 +73,19 @@ button {
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: var(--primary-active);
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }

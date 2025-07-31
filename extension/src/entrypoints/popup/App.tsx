@@ -1,17 +1,41 @@
 import { useState } from "react";
 import "./App.css";
 import { PublicPath } from "wxt/browser";
-import { postMessage, playLocalAudio, stopLocalAudio } from "@/utils";
+import {
+  postMessage,
+  playLocalAudio,
+  stopLocalAudio,
+  setLocalVolume,
+} from "@/utils";
 import { storage } from "#imports";
 import { CrossFunctions } from "@/utils/constants";
 import { login, getMySounds, getDefaultSounds } from "@/utils/api";
 import { storeSound, retrieveSound, isSoundCached } from "@/utils/db.ts";
 
+import {
+  BoxIcon,
+  DesktopIcon,
+  DotsHorizontalIcon,
+  ExternalLinkIcon,
+  InfoCircledIcon,
+  MagnifyingGlassIcon,
+  SpeakerLoudIcon,
+} from "@radix-ui/react-icons";
+import { DropdownMenu, Popover, Separator, Slider } from "radix-ui";
+import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon } from "../../icons";
+import fuzzysort from "fuzzysort";
 
 function App() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [isMeet, setIsMeet] = useState<boolean>(false);
   const [soundButtons, setSoundButtons] = useState<any[]>([]);
 
+  const [folderSelectWidth, setFolderSelectWidth] = useState(0);
+
+  const [fxVolume, setFxVolume] = useState(25);
+  const [micMuted, setMicMuted] = useState(false);
+  const [selectedFolder, setSelectedFolder] = useState("favorites");
 
   const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
     fallback: 25,
@@ -19,6 +43,12 @@ function App() {
   const micMutedStorage = storage.defineItem<boolean>("session:micMuted", {
     fallback: false,
   });
+  const selectedFolderStorage = storage.defineItem<string>(
+    "session:selectedFolder",
+    {
+      fallback: "favorites",
+    }
+  );
 
   const handleTestLogin = async () => {
     console.log("Testing login...");
@@ -36,51 +66,55 @@ function App() {
     console.log("Fetching sounds...");
     try {
       const response = await getDefaultSounds();
-      console.log('Default Sounds:', response);
+      console.log("Default Sounds:", response);
       const sounds = await Promise.all(
-      response.data.map(async (sound: any) => {
-        const id = sound.id;
-        const { name, color, emoji, audio_file_url } = sound.attributes;
-        const fullUrl = `http://localhost:3001${audio_file_url}`;
+        response.data.map(async (sound: any) => {
+          const id = sound.id;
+          const { name, color, emoji, audio_file_url } = sound.attributes;
+          const fullUrl = `http://localhost:3001${audio_file_url}`;
 
-        const isCached = await isSoundCached(id);
-        if (!isCached) {
-          const audioResponse = await fetch(fullUrl);
-          const blob = await audioResponse.blob();
-          console.log('Caching new sound:', id);
-          await storeSound(id, blob);
-        } else {
-          console.log('Sound already cached:', id);
-        }
+          const isCached = await isSoundCached(id);
+          if (!isCached) {
+            const audioResponse = await fetch(fullUrl);
+            const blob = await audioResponse.blob();
+            console.log("Caching new sound:", id);
+            await storeSound(id, blob);
+          } else {
+            console.log("Sound already cached:", id);
+          }
 
-        return {
-          id: id,
-          label: name,
-          color: color || 'gray',
-          emoji: emoji || '🎵',
-        };
-      })
-    );
-    setSoundButtons(sounds);
-  } catch (err) {
-      console.error('Failed to fetch sounds:', err);
+          return {
+            id: id,
+            label: name,
+            color: color || "gray",
+            emoji: emoji || "🎵",
+          };
+        })
+      );
+      setSoundButtons(sounds);
+    } catch (err) {
+      console.error("Failed to fetch sounds:", err);
     }
-  };
+  }
 
   function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob); // encodes to base64
-  });
-}
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob); // encodes to base64
+    });
+  }
 
-  const [fxVolume, setFxVolume] = useState(25);
-  const [micMuted, setMicMuted] = useState(false);
   function updateFxVolume(volume: number) {
     setFxVolume(volume);
     fxVolumeStorage.setValue(volume);
+    setLocalVolume(volume);
+    if (isMeet) {
+      postMessage(CrossFunctions.SET_VOLUME, {
+        volume: fxVolume,
+      });
+    }
   }
 
   async function playSound(id: number) {
@@ -124,8 +158,6 @@ function App() {
     browser.tabs.create({ url: browser.runtime.getURL("/fullpage.html") });
   }
 
-  const [isMeet, setIsMeet] = useState<boolean>(false);
-
   useEffect(() => {
     browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const url = tabs[0]?.url ?? "";
@@ -137,6 +169,7 @@ function App() {
     async function loadStates() {
       setFxVolume(await fxVolumeStorage.getValue());
       setMicMuted(await micMutedStorage.getValue());
+      setSelectedFolder(await selectedFolderStorage.getValue());
     }
     loadStates();
   }, []);
@@ -167,115 +200,343 @@ function App() {
   }> = [
     {
       label: "Applause",
-      color: "cornsilk",
+      color: "#BB27FF",
       emoji: "👏",
       url: "/sounds/applause.mp3",
     },
     {
       label: "Airhorn",
-      color: "crimson",
+      color: "#E90C13",
       emoji: "🔉",
       url: "/sounds/airhorn.mp3",
     },
     {
       label: "Anime Wow",
-      color: "deeppink",
+      color: "#FF4BD8",
       emoji: "🎉",
       url: "/sounds/anime-wow.mp3",
     },
     {
       label: "Crickets",
-      color: "darkolivegreen",
+      color: "#FF6E42",
       emoji: "🦗",
       url: "/sounds/crickets.mp3",
     },
     {
       label: "Explosion",
-      color: "orange",
+      color: "#008573",
       emoji: "💥",
       url: "/sounds/explosion.mp3",
     },
     {
       label: "Duck",
-      color: "darkgreen",
+      color: "#00D5B8",
       emoji: "🦆",
       url: "/sounds/quack.mp3",
     },
     {
       label: "Splat",
-      color: "midnightblue",
+      color: "#6200AD",
       emoji: "♠️",
       url: "/sounds/splat.mp3",
     },
     {
       label: "Drumroll",
-      color: "moccasin",
+      color: "#FFC53D",
       emoji: "🥁",
       url: "/sounds/drumroll.mp3",
     },
     {
       label: "Yippee",
-      color: "aliceblue",
+      color: "#00C8FF",
       emoji: "🏳️‍🌈",
       url: "/sounds/yippee.mp3",
     },
     {
-      label: "Music",
-      color: "cornflowerblue",
+      label: "Undertale Music",
+      color: "#5373F2",
       emoji: "🎵",
       url: "/sounds/bg-music.mp3",
     },
   ];
 
+  function handleSync() {
+    console.log("This would sync!");
+  }
+
+  useEffect(() => {
+    // Resize the folder selector on value change
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    if (context) {
+      context.font = `12px 'Instrument Sans', sans-serif`;
+      const textWidth = context.measureText(selectedFolder).width;
+      setFolderSelectWidth(textWidth + 48);
+    }
+  }, [selectedFolder]);
+
+  const [soundButtonOverflow, setSoundButtonOverflow] = useState("");
+
+  useEffect(() => {
+    // Since the height isn't calculated correctly when it loads, this forces it to recalculate
+    const forceReflow = () => {
+      const body = document.body;
+      const originalOverflow = body.style.overflow;
+      body.style.overflow = "hidden";
+      body.offsetHeight;
+      body.style.overflow = originalOverflow;
+    };
+
+    setTimeout(() => {
+      setSoundButtonOverflow("auto");
+    }, 10);
+    setTimeout(() => {
+      forceReflow();
+    }, 20);
+  }, []);
+
+  useEffect(() => {
+    if ("mediaSession" in navigator) {
+      // Disable playing and pausing with media keys
+      navigator.mediaSession.setActionHandler("play", () => {});
+      navigator.mediaSession.setActionHandler("pause", () => {});
+    }
+  }, []);
+
   return (
     <>
       <div className="wrapper">
-        <div className="topBar">
-          <p className="name">LOGO</p>
-          <input type="text" placeholder="Search" className="searchBar"></input>
-          <IconButton icon="gear" onClick={openTab} />
-        </div>
-        <div className="soundButtonContainer">
-          {soundButtons.map((button) => (
-            <div key={button.label}>
-              <SoundButton
-                label={button.label}
-                color={button.color}
-                emoji={button.emoji}
-                onClick={() => playSound(button.id)}
-                isPlaying={currentlyPlaying === button.name}
+        <div
+          className="topBar"
+          style={{
+            backgroundImage: `url(${browser.runtime.getURL(
+              "/images/bannerBackground.png"
+            )})`,
+          }}
+        >
+          <div className="logoContainer">
+            <button
+              className="logoButton"
+              tabIndex={-1}
+              onClick={() =>
+                browser.tabs.create({ url: "http://localhost:3000" })
+              }
+            >
+              <img
+                src={browser.runtime.getURL("/images/parakeetLogo.png")}
+                className="logo"
               />
-            </div>
-          ))}
+            </button>
+            <h1>Parakeet</h1>
+          </div>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button className="topBarMenuButton">
+                <DotsHorizontalIcon className="topBarMenuButtonIcon" />
+              </button>
+            </DropdownMenu.Trigger>
+
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                side="bottom"
+                sideOffset={2}
+                collisionPadding={8}
+                className="topBarMenuContent"
+              >
+                <DropdownMenu.Item
+                  className="topBarMenuItem"
+                  onSelect={handleSync}
+                >
+                  <DesktopIcon className="topBarMenuItemIcon" />
+                  Sync
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  className="topBarMenuItem"
+                  onSelect={() => {
+                    browser.tabs.create({ url: "http://localhost:3000" });
+                  }}
+                >
+                  <ExternalLinkIcon className="topBarMenuItemIcon" />
+                  Settings
+                </DropdownMenu.Item>
+
+                <DropdownMenu.Arrow className="topBarMenuArrow" />
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
         </div>
-        <label className="rangeWrapper">
-          Sound Volume
+        <div className="controlPanel">
+          <div className="controlPanelContainer">
+            <h2>Sound Effects</h2>
+            <div className="soundControls">
+              <div className="volumeSliderWrapper">
+                <SpeakerLoudIcon className="volumeSliderIcon" />
+                <Slider.Root
+                  defaultValue={[50]}
+                  max={100}
+                  step={1}
+                  className="volumeSlider"
+                  value={[fxVolume]}
+                  onValueChange={(value) => {
+                    updateFxVolume(value[0]);
+                  }}
+                >
+                  <Slider.Track className="volumeSliderTrack">
+                    <Slider.Range className="volumeSliderRange" />
+                  </Slider.Track>
+                  <Slider.Thumb
+                    className="volumeSliderThumb"
+                    aria-label="Volume"
+                  />
+                </Slider.Root>
+              </div>
+              <button
+                className="iconButton stopButton"
+                onClick={stopSound}
+                disabled={currentlyPlaying === ""}
+              >
+                <BoxIcon className="buttonIcon stopButtonIcon" />
+              </button>
+            </div>
+          </div>
+          <Separator.Root
+            className="verticalSeperator"
+            decorative
+            orientation="vertical"
+          />
+          <div className="controlPanelContainer">
+            <h2 className="voiceLabel">
+              Voice{" "}
+              <Popover.Root>
+                <Popover.Trigger asChild>
+                  <button className="iconButton infoButton">
+                    <InfoCircledIcon className="infoButtonIcon" />
+                  </button>
+                </Popover.Trigger>
+                <Popover.Portal>
+                  <Popover.Content
+                    className="infoButtonPopover"
+                    side="top"
+                    sideOffset={2}
+                    collisionPadding={8}
+                  >
+                    <p>
+                      This extension can only inject audio when your Google Meet
+                      microphone is unmuted. To play sound effects but mute your
+                      microphone, use this button!
+                    </p>
+                    <Popover.Arrow className="infoButtonArrow" />
+                  </Popover.Content>
+                </Popover.Portal>
+              </Popover.Root>
+            </h2>
+            <button
+              className={
+                "iconButton" + (micMuted ? " unmuteButton" : " muteButton")
+              }
+              onClick={(e) => handleMicMute(!micMuted)}
+            >
+              {micMuted ? (
+                <MicOffIcon
+                  className="buttonIcon unmuteButtonIcon"
+                  viewBox="0 0 27 27"
+                  fill="none"
+                  stroke="currentColor"
+                />
+              ) : (
+                <MicIcon
+                  className="buttonIcon muteButtonIcon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                />
+              )}
+            </button>
+          </div>
+        </div>
+        <label className="textInputWrapper">
+          <MagnifyingGlassIcon className="textInputIcon" />
           <input
-            type="range"
-            min="1"
-            max="100"
-            value={fxVolume}
-            onChange={(e) => updateFxVolume(parseInt(e.target.value))}
-            className="slider"
-            name="fxVolume"
+            type="text"
+            className="textInput"
+            placeholder="Search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </label>
-        <div className="flexRow">
-          <label className="verticalCheckboxWrapper">
-            Mute Microphone
-            <input
-              type="checkbox"
-              name="micVolume"
-              checked={micMuted}
-              onChange={(e) => handleMicMute(e.target.checked)}
-            />
-          </label>
-          <button onClick={handleTestLogin}>Test Login</button>
-          <button onClick={stopSound}>Stop Sounds</button>
+
+        <div className="folderSelectWrapper">
+          <select
+            className="folderSelect"
+            name="folderSelect"
+            value={selectedFolder}
+            onChange={(e) => {
+              setSelectedFolder(e.target.value);
+              // This is not in the useEffect because otherwise it is always overridden to the default
+              selectedFolderStorage.setValue(e.target.value);
+            }}
+            style={{
+              width: `${folderSelectWidth}px`,
+            }}
+          >
+            <option value="favorites">Favorites</option>
+            <option value="jokes">Jokes</option>
+            <option value="dungeons-and-dragons">Dungeons & Dragons</option>
+            <option value="misc">Misc</option>
+          </select>
         </div>
-        <p style={{ color: isMeet ? "green" : "red" }}>
-          {isMeet ? "C" : "Not c"}onnected to meet
-        </p>
+
+        <div
+          className="soundButtonContainer"
+          style={{
+            overflow: soundButtonOverflow,
+            minHeight: soundButtonOverflow ? undefined : "500px",
+          }}
+        >
+          {(searchInput !== ""
+            ? fuzzysort
+                .go(searchInput, soundButtons, { key: "label" })
+                .map((result) => result.obj)
+            : soundButtons
+          ).map((button) => (
+            <SoundButton
+              label={button.label}
+              key={button.label}
+              color={button.color}
+              emoji={button.emoji}
+              onClick={() => playSound(button.id)}
+              isPlaying={currentlyPlaying === button.name}
+            />
+          ))}
+        </div>
+        <div className="connectedStatusWrapper">
+          <h2>Google Meet Status:</h2>
+          <p
+            className="connectedStatus"
+            style={{ color: isMeet ? "green" : "red" }}
+          >
+            {isMeet ? (
+              <>
+                <VideoIcon
+                  className="connectedStatusIcon"
+                  fill="none"
+                  stroke="currentColor"
+                />
+                Connected
+              </>
+            ) : (
+              <>
+                <VideoOffIcon
+                  className="connectedStatusIcon"
+                  fill="none"
+                  stroke="currentColor"
+                />
+                Disconnected
+              </>
+            )}
+          </p>
+        </div>
       </div>
     </>
   );

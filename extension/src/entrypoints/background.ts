@@ -3,7 +3,7 @@ import { CrossFunctions } from "@/utils/constants";
 export default defineBackground(() => {
   console.log("Background loaded!", { id: browser.runtime.id });
 
-  browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  browser.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
     if (msg.type === CrossFunctions.GET_MIC_MUTED) {
       storage
         .getItem("session:micMuted", { defaultValue: false })
@@ -15,6 +15,13 @@ export default defineBackground(() => {
           sendResponse(false);
         });
       return true; // tells the caller that there will be a response
+    }
+    if (msg.type === CrossFunctions.OPEN_POPUP) {
+      try {
+        await browser.action.openPopup();
+      } catch (e) {
+        console.error("openPopup failed:", e);
+      }
     }
   });
 

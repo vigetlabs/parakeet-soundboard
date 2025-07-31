@@ -2,32 +2,36 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-bottom: 1rem;
 }
 
 .soundButton {
-  font-size: 2.5rem;
-  width: 1.5em;
-  height: 1.5em;
   padding: 0;
   border: 4px solid transparent;
   margin: auto;
+  outline: 0;
 }
-
 .soundButton:hover {
-  border-color: deepskyblue;
+  border-color: var(--primary-active);
+}
+.soundButton:focus {
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--primary-hover);
 }
 
 .buttonEmoji {
+  font-size: 1.75rem;
+  padding: 10px;
   line-height: 1;
 }
 
 .soundButtonLabel {
   display: block;
   margin-top: 4px;
-  font-size: 1rem;
-  color: gray;
+  font-size: 0.75rem;
   user-select: none;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .iconButton {
