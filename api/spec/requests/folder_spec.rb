@@ -23,16 +23,19 @@ RSpec.describe "Folders API", type: :request do
     it "returns user's folders" do
       folder = Folder.create!(name: "Test Folder Belongs to User", user: user)
       get "/my_folders", headers: auth_headers
-      expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)["data"].first["id"]).to eq(folder.id.to_s)
-      expect(JSON.parse(response.body)["data"].first["attributes"]["name"]).to eq("Test Folder Belongs to User")
+      folders = JSON.parse(response.body)["data"]
+
+      matching_folder = folders.find { |f| f["id"] == folder.id.to_s }
+
+      expect(matching_folder).not_to be_nil
+      expect(matching_folder["attributes"]["name"]).to eq("Test Folder Belongs to User")
     end
   end
 
-  describe "GET /folders/:id" do
+  describe "GET /folders/:slug" do
     it "returns a (default) folder" do
       folder = Folder.create!(name: "Test Folder")
-      get "/folders/#{folder.id}"
+      get "/folders/#{folder.slug}"
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body)["data"]["id"]).to eq(folder.id.to_s)
     end
@@ -52,23 +55,23 @@ RSpec.describe "Folders API", type: :request do
     end
   end
 
-  describe "PATCH /folders/:id" do
+  describe "PATCH /folders/:slug" do
     let(:valid_attributes) { { folder: { name: "Updated Folder" } } }
 
     it "updates the folder" do
       folder = Folder.create!(name: "To Update")
-      patch "/folders/#{folder.id}", params: valid_attributes
+      patch "/folders/#{folder.slug}", params: valid_attributes
       expect(response).to have_http_status(:ok)
       expect(Folder.find(folder.id).name).to eq("Updated Folder")
     end
   end
 
-  describe "DELETE /folders/:id" do
+  describe "DELETE /folders/:slug" do
     it "deletes the folder" do
       folder = Folder.create!(name: "To Delete")
 
       expect {
-        delete "/folders/#{folder.id}"
+        delete "/folders/#{folder.slug}"
       }.to change(Folder, :count).by(-1)
 
       expect(response).to have_http_status(:no_content)

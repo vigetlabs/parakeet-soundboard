@@ -31,43 +31,67 @@ declare global {
   }
 }
 
-export async function playLocalAudio(file: PublicPath, volume: number) {
+export async function playLocalAudio(base64Audio: string, volume: number) {
   if (!(await URLIsValid())) {
     return false;
   }
   let returnValue = true;
 
-  const fileURL = browser.runtime.getURL(file);
   await browser.scripting
     .executeScript({
       target: { tabId: await getActiveTabID() },
       func: function (
-        fileURL: string,
+        base64Audio: string,
         volume: number,
         endCommand: CrossFunctions
       ) {
-        let audio;
-        if (window.localAudio) {
-          audio = window.localAudio;
-          audio.pause();
-          audio.currentTime = 0;
-          audio.src = fileURL;
-        } else {
-          audio = new Audio(fileURL);
-          window.localAudio = audio;
+        function base64ToBlob(base64: string, mimeType = "audio/mpeg") {
+          const real_base64 = base64.split(",")[1];
+          const byteCharacters = atob(real_base64);
+          const byteArrays = [];
+
+          for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+            const slice = byteCharacters.slice(offset, offset + 512);
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+              byteNumbers[i] = slice.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+          }
+
+          return new Blob(byteArrays, { type: mimeType });
         }
-        audio.volume = volume / 100;
-        audio.onended = () => {
-          window.postMessage(
-            {
-              command: endCommand,
-            },
-            "*"
-          );
-        };
-        audio.play().catch((err) => console.error("Playback failed:", err));
+
+        try {
+          const blob = base64ToBlob(base64Audio);
+          const objectUrl = URL.createObjectURL(blob);
+
+          let audio;
+          if (window.localAudio) {
+            audio = window.localAudio;
+            audio.pause();
+            audio.currentTime = 0;
+            audio.src = objectUrl;
+          } else {
+            audio = new Audio(objectUrl);
+            window.localAudio = audio;
+          }
+          audio.volume = volume / 100;
+          audio.onended = () => {
+            window.postMessage(
+              {
+                command: endCommand,
+              },
+              "*"
+            );
+          };
+          audio.play().catch((err) => console.error("Playback failed:", err));
+        } catch (e) {
+          console.error("Failed to decode and play base64 audio:", e);
+        }
       },
-      args: [fileURL, volume, CrossFunctions.AUDIO_ENDED],
+      args: [base64Audio, volume, CrossFunctions.AUDIO_ENDED],
     })
     .catch((err) => {
       alert(

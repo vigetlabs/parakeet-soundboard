@@ -7,4 +7,9 @@ class User < ApplicationRecord
   validates :username, presence: true, uniqueness: true
   has_many :sounds
   has_many :folders
+  has_one :favorite_folder, -> { where(is_favorite: true) }, class_name: "Folder"
+  after_create :create_favorites_folder
+  def create_favorites_folder
+    folders.create!(name: "Favorites", is_favorite: true)
+  end
 end

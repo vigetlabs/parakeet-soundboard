@@ -10,4 +10,10 @@ class SoundSerializer
   attribute :tags do |object|
     object.tags.map { |tag| { id: tag.id, name: tag.name, color: tag.color } }
   end
+
+  attribute :is_favorited do |object, params|
+    user = params[:scope]
+    next false unless user.present?
+    user.favorite_folder.sounds.exists?(object.id)
+  end
 end
