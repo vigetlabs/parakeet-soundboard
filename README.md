@@ -20,6 +20,11 @@ cd ui && pnpm install
 cd extension && pnpm install
 ```
 
+### Environment Variables
+
+- There should be environment variables at the top of each repository (`api/.env`, `ui/.env`, and `extension/.env`)
+- You can create the ui and extension's based on the `.env.example` located in their repositories
+
 ### Database
 
 ```bash
