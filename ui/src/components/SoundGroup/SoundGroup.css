@@ -23,10 +23,33 @@
   background-color: var(--primary-muted);
   border-radius: 50%;
   margin-right: 20px;
+  border: 1px solid transparent;
+  transition: border-color 0.2s ease-in-out;
 }
 
 .soundGroupBackIcon {
   width: 16px;
   height: 16px;
   padding: 4px;
+}
+
+.folderViewMenu {
+  height: 26px;
+  width: 26px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--elevated-background);
+  color: var(--primary-foreground);
+  border: 1px solid var(--primary-muted-dark);
+  border-radius: 50%;
+  padding: 0;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+  margin-left: 20px;
+}
+
+.folderViewMenu:hover,
+.soundGroupBack:hover {
+  border-color: var(--primary-active);
 }

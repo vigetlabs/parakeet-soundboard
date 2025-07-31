@@ -10,7 +10,7 @@
   gap: 8px;
   height: fit-content;
   font-weight: 700;
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   transition: all 0.2s ease-in-out;
 }
 
@@ -30,6 +30,11 @@
   flex-direction: column;
   justify-content: start;
   margin-bottom: 1rem;
+}
+
+.soundButtonInner {
+  display: flex;
+  flex-direction: row;
 }
 
 .soundButton {
@@ -59,6 +64,72 @@
   font-size: 0.75rem;
 }
 
+.soundButtonMenu {
+  position: absolute;
+  transform: translate(38px, 4px);
+  height: 30px;
+  width: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--elevated-background);
+  border: 2px solid var(--primary-muted-dark);
+  border-radius: 50%;
+  padding: 0;
+  flex-shrink: 0;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.soundButtonMenuIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.soundButtonMenuContent {
+  background-color: var(--elevated-background);
+  padding: 8px;
+  border: 2px solid var(--primary-muted);
+  border-radius: 8px;
+}
+
+.soundButtonMenuArrow {
+  fill: var(--primary-muted);
+}
+
+.soundButtonMenuItem {
+  color: var(--primary-disabled);
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 4px;
+  margin: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.soundButtonMenuItem[data-highlighted] {
+  border-color: var(--primary-active);
+}
+
+.soundButtonMenuItemDanger {
+  color: var(--warning);
+}
+
+.soundButtonMenuItemDanger[data-highlighted] {
+  border-color: var(--warning);
+}
+
+.soundButtonMenuItemIcon {
+  height: 1rem;
+  width: 1rem;
+  margin-right: 8px;
+}
+
 .iconButtonWrapper {
   display: flex;
   flex-direction: column;
@@ -76,6 +147,17 @@
 .iconButtonWrapper:hover .iconButton {
   background-color: rgba(255, 255, 255, 0.3);
   color: var(--primary-hover);
+}
+
+.iconButtonWrapper:disabled {
+  cursor: not-allowed;
+}
+
+.iconButtonWrapper:disabled .iconButton {
+  background-color: var(--primary-muted);
+  color: var(--primary-disabled);
+  border-color: var(--primary-muted);
+  cursor: not-allowed;
 }
 
 .iconButton {

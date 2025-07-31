@@ -1,18 +1,21 @@
 import * as React from "react";
 import { unstable_PasswordToggleField as PasswordToggleField } from "radix-ui";
 import {
-  MagnifyingGlassIcon,
   MixerVerticalIcon,
   EyeClosedIcon,
   EyeOpenIcon,
 } from "@radix-ui/react-icons";
 import "./input.css";
 import { TagPicker } from "./tagPicker";
+import { chooseIcon, type AvaliableIcons } from "../../util";
 
 export interface TextInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   email?: boolean;
-  icon?: boolean;
+  leftIcon?: AvaliableIcons;
+  rightIcon?: AvaliableIcons;
+  rightIconAction?: () => void;
+  iconSize?: number;
   filter?: boolean;
   filterOptions?: string[];
   filterDisabled?: boolean;
@@ -22,7 +25,10 @@ export interface TextInputProps
 const TextInput = ({
   className = "",
   email = false,
-  icon = false,
+  leftIcon,
+  rightIcon,
+  rightIconAction,
+  iconSize = 16,
   filter = false,
   filterOptions,
   filterDisabled,
@@ -32,19 +38,51 @@ const TextInput = ({
   const classes = `textInputWrapper ${className}`.trim();
 
   return (
-    <div className={classes}>
-      {icon && <MagnifyingGlassIcon className="textInputIcon" />}
+    <label className={classes}>
+      {leftIcon &&
+        chooseIcon(
+          leftIcon,
+          {
+            className: "textInputIcon",
+            "aria-hidden": true,
+          },
+          iconSize
+        )}
       <input type={email ? "email" : "text"} className="textInput" {...props} />
       {filter && (
         <TagPicker
           selectedTags={filterOptions ?? []}
           setSelectedTags={setFilterOptions ?? (() => {})}
           disabled={filterDisabled}
+          align="end"
+          alignOffset={-30}
         >
           <MixerVerticalIcon className="filterInputIcon" />
         </TagPicker>
       )}
-    </div>
+      {rightIcon &&
+        (rightIconAction ? (
+          <button onClick={rightIconAction} className="textInputButton">
+            {chooseIcon(
+              rightIcon,
+              {
+                className: "textInputIcon",
+                "aria-hidden": true,
+              },
+              iconSize
+            )}
+          </button>
+        ) : (
+          chooseIcon(
+            rightIcon,
+            {
+              className: "textInputIcon",
+              "aria-hidden": true,
+            },
+            iconSize
+          )
+        ))}
+    </label>
   );
 };
 

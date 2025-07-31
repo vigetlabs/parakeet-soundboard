@@ -10,14 +10,6 @@
   font-size: 0.6em;
 }
 
-.childBackground {
-  background-color: var(--inner-background);
-  border-radius: 32px 0 0 32px;
-  padding: 40px;
-  height: calc(100% - 80px);
-  color: var(--primary-foreground);
-}
-
 .folderButtonContainer {
   display: grid;
   grid-template-columns: repeat(auto-fill, 140px);
@@ -48,4 +40,15 @@ p {
   font-weight: 700;
   margin: 0;
   margin-bottom: 8px;
+}
+
+.dialogOverlay {
+  background-color: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  inset: 0;
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rightAlign {
+  margin-left: auto;
 }

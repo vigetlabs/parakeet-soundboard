@@ -3,14 +3,33 @@ import {
   tempFolders as folders,
   tempButtons as sounds,
 } from "../util/tempData";
-import { FolderButton, NewFolderButton } from "./reuseable/folder";
+import {
+  EditFolderDialog,
+  FolderButton,
+  NewFolderButton,
+} from "./reuseable/folder";
 import fuzzysort from "fuzzysort";
+import { useState } from "react";
+import { DeleteDialog } from "./reuseable/confirmDelete";
 
 const Home = () => {
   const [searchParams] = useSearchParams();
+  const [currentlyEditing, setCurrentlyEditing] = useState(false);
+  const [currentlyDeleting, setCurrentlyDeleting] = useState(false);
+  const [editingName, setEditingName] = useState("");
+
+  function handleEditClicked(name: string) {
+    setEditingName(name);
+    setCurrentlyEditing(true);
+  }
+
+  function handleDeleteClicked(name: string) {
+    setEditingName(name);
+    setCurrentlyDeleting(true);
+  }
 
   return (
-    <div className="childBackground">
+    <>
       <h1>Your Folders</h1>
       <p>Organize your sounds!</p>
       <div className="folderButtonContainer">
@@ -24,6 +43,8 @@ const Home = () => {
             key={folder.name}
             name={folder.name}
             slug={folder.slug}
+            editFunction={handleEditClicked}
+            deleteFunction={handleDeleteClicked}
             numSounds={
               sounds.filter((sound) => {
                 return sound.folders.includes(folder.name);
@@ -36,9 +57,22 @@ const Home = () => {
               .slice(0, 4)}
           />
         ))}
-        <NewFolderButton />
+        <EditFolderDialog
+          open={currentlyEditing}
+          onOpenChange={setCurrentlyEditing}
+          previousName={editingName}
+        >
+          <NewFolderButton onClick={() => setEditingName("")} />
+        </EditFolderDialog>
+
+        <DeleteDialog
+          open={currentlyDeleting}
+          setClose={() => setCurrentlyDeleting(false)}
+          name={editingName}
+          isFolder={true}
+        />
       </div>
-    </div>
+    </>
   );
 };
 

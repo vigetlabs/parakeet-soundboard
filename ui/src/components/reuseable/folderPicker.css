@@ -1,0 +1,135 @@
+.folderPicker {
+  background-color: var(--elevated-background);
+  border-radius: 24px;
+  padding: 32px;
+  border: 2px solid var(--primary-muted);
+  width: 350px;
+  color: var(--primary-foreground);
+}
+
+.folderContainer {
+  margin: 24px 0;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.folderPickerClose {
+  background-color: var(--primary-foreground);
+  color: var(--elevated-background);
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 0;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.folderPickerClose:hover {
+  background-color: var(--primary-active);
+}
+
+.folderPickerCloseIcon {
+  height: 16px;
+  width: 16px;
+  padding: 8px;
+}
+
+.folderPickerArrow {
+  fill: var(--primary-muted);
+}
+
+.folderPickerButton,
+.folderPickerClearButton {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folderPickerButton:disabled {
+  cursor: not-allowed;
+}
+
+.folderPickerClearContainer {
+  display: flex;
+  justify-content: end;
+}
+
+.folderPickerClearButton {
+  color: var(--primary-active);
+  font-weight: 700;
+  font-size: 1rem;
+  transition: color 0.2s ease-in-out;
+}
+
+.folderPickerClearButton:hover {
+  color: var(--primary-foreground);
+}
+
+.folderListing {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  padding: 8px;
+  margin-top: 8px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.folderListing:first-of-type {
+  margin-top: 0;
+}
+
+.folderPickerNewButton {
+  margin-top: 8px !important;
+}
+
+.folderListingChecked {
+  background-color: var(--primary-hover);
+}
+
+.folderListing:hover {
+  border: 2px solid var(--primary-active);
+}
+
+.folderListingIcon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 16px;
+}
+
+.folderListingCheckbox,
+.folderListingCheckbox:hover {
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--elevated-background);
+  border: 1px solid var(--primary-foreground);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.folderListingChecked .folderListingCheckbox {
+  background-color: var(--primary-hover);
+}
+
+.folderListingCheckboxIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

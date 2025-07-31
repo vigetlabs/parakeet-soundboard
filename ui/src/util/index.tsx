@@ -5,6 +5,12 @@ import {
   PlusIcon,
   StarIcon,
   DiscIcon,
+  MagnifyingGlassIcon,
+  FileIcon,
+  TrashIcon,
+  Cross2Icon,
+  IdCardIcon,
+  ChevronRightIcon,
 } from "@radix-ui/react-icons";
 import type { IconProps } from "@radix-ui/react-icons/dist/types";
 
@@ -14,14 +20,23 @@ export type AvaliableIcons =
   | "person"
   | "plus"
   | "star"
-  | "disc";
+  | "disc"
+  | "magnifyingGlass"
+  | "file"
+  | "trash"
+  | "cross"
+  | "idCard"
+  | "chevronRight";
 
 export function chooseIcon(
   icon: AvaliableIcons,
   props?: IconProps,
   size: number = 24
 ) {
-  const propsWithStyle = { ...props, style: { width: size, height: size } };
+  const propsWithStyle = {
+    ...props,
+    style: { width: size, height: size, flexShrink: 0 },
+  };
 
   switch (icon) {
     case "home":
@@ -36,6 +51,18 @@ export function chooseIcon(
       return <StarIcon {...propsWithStyle} />;
     case "disc":
       return <DiscIcon {...propsWithStyle} />;
+    case "magnifyingGlass":
+      return <MagnifyingGlassIcon {...propsWithStyle} />;
+    case "file":
+      return <FileIcon {...propsWithStyle} />;
+    case "trash":
+      return <TrashIcon {...propsWithStyle} />;
+    case "cross":
+      return <Cross2Icon {...propsWithStyle} />;
+    case "idCard":
+      return <IdCardIcon {...propsWithStyle} />;
+    case "chevronRight":
+      return <ChevronRightIcon {...propsWithStyle} />;
     default:
       console.error("Invalid icon provided");
       return;

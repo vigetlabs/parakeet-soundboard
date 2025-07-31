@@ -18,22 +18,36 @@
 .logo {
   width: 60px;
   height: 60px;
-  background-color: var(--inner-background);
-  border-radius: 50%;
+  display: block;
 }
 
 .sidebarSearch {
   flex-grow: 1;
+
+  &:hover {
+    box-shadow: 0 0 0 1px black;
+  }
+
+  &:focus-within {
+    box-shadow: 0 0 0 2px black;
+  }
 }
 
 .sidebarRest {
   display: flex;
   flex-direction: row;
   flex-grow: 1;
+  min-height: 0;
 }
 
 .contentArea {
   flex-grow: 1;
+  background-color: var(--inner-background);
+  border-radius: 32px 0 0 32px;
+  padding: 40px;
+  color: var(--primary-foreground);
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .sidebarLeft {
@@ -41,4 +55,117 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.controlBar {
+  background-color: var(--primary-foreground);
+  color: var(--elevated-background);
+  border-radius: 60px;
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-height: 85vh;
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+}
+
+.volumeSliderWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px 0 24px;
+}
+
+.volumeSlider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  touch-action: none;
+  width: 340px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.volumeSliderTrack {
+  background-color: var(--inner-background);
+  position: relative;
+  flex-grow: 1;
+  border-radius: 9999px;
+  height: 3px;
+}
+
+.volumeSliderRange {
+  position: absolute;
+  background-color: var(--primary-active);
+  border-radius: 9999px;
+  height: 100%;
+}
+
+.volumeSliderThumb {
+  display: block;
+  width: 20px;
+  height: 20px;
+  background-color: var(--elevated-background);
+  border: 2px solid var(--primary-muted-dark);
+  border-radius: 50%;
+  transition: all 0.2s ease-in-out;
+}
+
+.volumeSlider:hover .volumeSliderThumb {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-active);
+}
+
+.volumeSliderThumb:focus {
+  outline: none;
+}
+
+.volumeSliderIcon {
+  height: 16px;
+  width: 16px;
+}
+
+.controlBarStop {
+  background-color: var(--warning);
+  border: 3px solid transparent;
+  border-radius: 50%;
+  height: 72px;
+  width: 72px;
+  box-sizing: border-box;
+  transition: all 0.2s ease-in-out;
+  margin-right: -2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.controlBarStopIcon {
+  height: 40px;
+  width: 40px;
+}
+
+.controlBarStop:hover {
+  color: var(--elevated-background);
+  background-color: var(--warning-hover);
+  border-color: var(--elevated-background);
+}
+
+.controlBarStop:active {
+  color: var(--warning);
+  background-color: var(--warning-light);
+  border-color: var(--warning);
+}
+
+.controlBarStop:disabled {
+  background-color: var(--primary-muted);
+  color: var(--primary-disabled);
+  border-color: var(--primary-muted);
+  cursor: not-allowed;
 }
