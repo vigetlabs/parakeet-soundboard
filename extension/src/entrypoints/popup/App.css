@@ -1,53 +1,448 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 1rem;
   text-align: center;
 }
 
 .wrapper {
-  max-width: 700px;
+  width: 372px;
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.controlPanel,
+.textInputWrapper,
+.folderSelectWrapper,
+.connectedStatusWrapper {
+  flex-shrink: 0;
+}
+
+.soundButtonContainer {
+  flex-grow: 1;
 }
 
 .topBar {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 1rem;
+  padding: 34px 16px;
+  background-repeat: no-repeat;
+  background-position: right;
+  border-radius: 16px;
 }
 
-.searchBar {
-  margin: 0 0.5rem;
-  padding: 0.5em;
-  border-color: gray;
-  border-radius: 1rem;
-  flex-grow: 1;
-}
-
-.soundButtonContainer {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.verticalCheckboxWrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-.flexRow {
+.logoContainer {
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  align-items: center;
+  gap: 8px;
 }
 
-.rangeWrapper {
+.logoButton {
+  padding: 0;
+  margin: 0;
+  background-color: inherit;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+.logoButton:focus {
+  outline: 0;
+}
+
+.logo {
+  display: block;
+  height: 32px;
+  width: 32px;
+}
+
+.topBarMenuButton {
+  color: var(--primary-foreground);
+  background-color: var(--elevated-background);
+  padding: 0;
+  padding: 6px;
+  border: 2px solid var(--primary-muted);
+  outline: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.topBarMenuButton:focus {
+  outline: 0;
+  box-shadow: 0 0 0 2px var(--primary-hover);
+}
+
+.topBarMenuButtonIcon {
+  height: 16px;
+  width: 16px;
+}
+
+.topBarMenu {
+  position: absolute;
+  transform: translate(38px, 4px);
+  height: 30px;
+  width: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--elevated-background);
+  border: 2px solid var(--primary-muted-dark);
+  border-radius: 50%;
+  padding: 0;
+  flex-shrink: 0;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.topBarMenuIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.topBarMenuContent,
+.infoButtonPopover {
+  background-color: var(--elevated-background);
+  padding: 8px;
+  border: 2px solid var(--primary-muted);
+  border-radius: 8px;
+}
+
+.infoButtonPopover {
+  max-width: 300px;
+  text-align: center;
+}
+
+.topBarMenuArrow,
+.infoButtonArrow {
+  fill: var(--primary-muted);
+}
+
+.topBarMenuItem {
+  color: var(--primary-disabled);
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 4px;
+  margin: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.topBarMenuItem[data-highlighted] {
+  border-color: var(--primary-active);
+}
+
+.topBarMenuItemDanger {
+  color: var(--warning);
+}
+
+.topBarMenuItemDanger[data-highlighted] {
+  border-color: var(--warning);
+}
+
+.topBarMenuItemIcon {
+  height: 1rem;
+  width: 1rem;
+  margin-right: 8px;
+}
+
+.controlPanel {
+  text-align: left;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  gap: 8px;
+}
+
+.controlPanelContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.verticalSeperator {
+  align-self: stretch;
+  width: 1px;
+  background-color: var(--primary-muted-dark);
+  margin-top: 16px;
+}
+
+.soundControls {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.volumeSliderWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.volumeSlider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  touch-action: none;
+  width: 160px;
+  height: 8px;
+  cursor: pointer;
+}
+
+.volumeSliderTrack {
+  background-color: var(--primary-muted);
+  position: relative;
+  flex-grow: 1;
+  border-radius: 9999px;
+  height: 6px;
+}
+
+.volumeSliderRange {
+  position: absolute;
+  background-color: var(--primary-active);
+  border-radius: 9999px;
+  height: 100%;
+}
+
+.volumeSliderThumb {
+  display: block;
+  width: 8px;
+  height: 8px;
+  background-color: var(--elevated-background);
+  border: 2px solid var(--primary-muted-dark);
+  border-radius: 50%;
+  transition: all 0.2s ease-in-out;
+}
+
+.volumeSlider:hover .volumeSliderThumb {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-active);
+}
+
+.volumeSliderThumb:focus {
+  outline: none;
+}
+
+.volumeSliderIcon {
+  height: 16px;
+  width: 16px;
+}
+
+.iconButton {
+  background-color: var(--elevated-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+  flex-shrink: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.buttonIcon {
+  height: 24px;
+  width: 24px;
+  padding: 12px;
+}
+
+.stopButton {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+.stopButton:hover {
+  background-color: var(--warning-light);
+  border-color: var(--warning);
+}
+.stopButton:active {
+  background-color: var(--warning);
+  color: var(--elevated-background);
+  border-color: var(--warning);
+}
+.stopButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--warning-light);
+}
+.stopButton:disabled {
+  background-color: var(--primary-muted);
+  color: var(--primary-disabled);
+  border-color: var(--primary-muted);
+  cursor: not-allowed;
+}
+
+.muteButton {
+  color: var(--primary-active);
+  border-color: var(--primary-active);
+}
+.muteButton:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-active);
+}
+.muteButton:active {
+  background-color: var(--primary-active);
+  color: var(--elevated-background);
+  border-color: var(--primary-active);
+}
+.muteButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-hover);
+}
+
+.unmuteButton {
+  color: var(--warning-dark);
+  border-color: var(--warning-dark);
+}
+.unmuteButton:hover {
+  background-color: var(--primary-muted-dark);
+  border-color: var(--warning-dark);
+}
+.unmuteButton:active {
+  background-color: var(--warning-dark);
+  color: var(--elevated-background);
+  border-color: var(--warning-dark);
+}
+.unmuteButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--warning-light);
+}
+
+.infoButton {
+  color: var(--primary-disabled);
+  border-color: transparent;
+}
+.infoButton:hover {
+  background-color: var(--primary-muted-dark);
+  border-color: transparent;
+}
+.infoButton:active {
+  background-color: var(--warning-dark);
+  color: var(--elevated-background);
+  border-color: transparent;
+}
+.infoButton:focus {
+  outline: none;
+  border-color: var(--primary-disabled);
+}
+
+.voiceLabel {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  margin-bottom: 1rem;
+  align-items: center;
 }
 
-.slider {
-  flex-grow: 1;
-  margin-left: 8px;
+.textInputWrapper {
+  all: unset;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100px;
+  background-color: var(--primary-muted);
+  color: var(--primary-foreground);
+  padding: 4px;
+  margin: 16px 0 0;
+  gap: 4px;
+  text-align: left;
+  box-sizing: border-box;
+  height: fit-content;
+  cursor: text;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 0 0 1px var(--primary-active);
+  }
+
+  &:focus-within {
+    background-color: var(--primary-hover);
+    box-shadow: 0 0 0 2px var(--primary-active);
+  }
+}
+
+.textInput {
+  all: unset;
+  box-sizing: border-box;
+  font-size: 0.75rem;
+  color: inherit;
+  line-height: 1;
+  width: 100%;
+}
+
+.textInputIcon {
+  height: 16px;
+  width: 16px;
+  flex-shrink: 0;
+}
+
+.folderSelectWrapper {
+  width: 100%;
+  text-align: left;
+  margin: 16px 0 8px;
+}
+
+.folderSelect {
+  border: 2px solid transparent;
+  background-color: var(--inner-background);
+  font-family: var(--primary-font);
+  color: var(--primary-disabled);
+  font-weight: 700;
+  padding: 4px 0 4px 8px;
+  border: 0;
+  outline: 0;
+  border-right: 8px solid transparent;
+  border-radius: 12px;
+  transition: all 0.2s ease-in-out;
+}
+.folderSelect:hover {
+  box-shadow: 0 0 0 2px var(--primary-active);
+}
+.folderSelect:focus {
+  box-shadow: 0 0 0 2px var(--primary-foreground);
+}
+
+.soundButtonContainer {
+  padding-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: min-content;
+  row-gap: 16px;
+}
+
+.connectedStatusWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.connectedStatus {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.connectedStatusIcon {
+  height: 12px;
+  width: 12px;
 }

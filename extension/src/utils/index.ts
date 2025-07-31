@@ -44,13 +44,16 @@ export async function playLocalAudio(file: PublicPath, volume: number) {
       volume: number,
       endCommand: CrossFunctions
     ) {
+      let audio;
       if (window.localAudio) {
-        const audio = window.localAudio;
+        audio = window.localAudio;
         audio.pause();
-        audio.remove();
+        audio.currentTime = 0;
+        audio.src = fileURL;
+      } else {
+        audio = new Audio(fileURL);
+        window.localAudio = audio;
       }
-      const audio = new Audio(fileURL);
-      audio.currentTime = 0;
       audio.volume = volume / 100;
       audio.onended = () => {
         window.postMessage(
@@ -96,6 +99,8 @@ export async function URLIsValid() {
   if (allowedSchemes.some((scheme) => url.startsWith(scheme))) {
     return true;
   }
-  console.log("Can't control audio in this tab"); // TODO: Change this to a toast
+  alert(
+    "Can't control audio in this tab! You're probably in an empty or settings tab. Try going to an actual website."
+  ); // TODO: Change this to a toast
   return false;
 }

@@ -28,7 +28,7 @@ const SoundButton = ({
         name={label}
         style={{
           backgroundColor: color,
-          borderColor: isPlaying ? "dodgerblue" : undefined,
+          borderColor: isPlaying ? "var(--primary-foreground)" : undefined,
         }}
         {...props}
       >
