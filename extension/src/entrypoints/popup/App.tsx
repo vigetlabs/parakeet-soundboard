@@ -1,7 +1,12 @@
 import { useState } from "react";
 import "./App.css";
 import { PublicPath } from "wxt/browser";
-import { postMessage, playLocalAudio, stopLocalAudio } from "@/utils";
+import {
+  postMessage,
+  playLocalAudio,
+  stopLocalAudio,
+  setLocalVolume,
+} from "@/utils";
 import { storage } from "#imports";
 import { CrossFunctions } from "@/utils/constants";
 import { login, getMySounds } from "@/utils/api";
@@ -22,6 +27,13 @@ import fuzzysort from "fuzzysort";
 function App() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [isMeet, setIsMeet] = useState<boolean>(false);
+
+  const [folderSelectWidth, setFolderSelectWidth] = useState(0);
+
+  const [fxVolume, setFxVolume] = useState(25);
+  const [micMuted, setMicMuted] = useState(false);
+  const [selectedFolder, setSelectedFolder] = useState("favorites");
 
   const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
     fallback: 25,
@@ -29,6 +41,12 @@ function App() {
   const micMutedStorage = storage.defineItem<boolean>("session:micMuted", {
     fallback: false,
   });
+  const selectedFolderStorage = storage.defineItem<string>(
+    "session:selectedFolder",
+    {
+      fallback: "favorites",
+    }
+  );
 
   const handleTestLogin = async () => {
     console.log("Testing login...");
@@ -41,12 +59,15 @@ function App() {
       console.error("Login failed:", err);
     }
   };
-
-  const [fxVolume, setFxVolume] = useState(25);
-  const [micMuted, setMicMuted] = useState(false);
   function updateFxVolume(volume: number) {
     setFxVolume(volume);
     fxVolumeStorage.setValue(volume);
+    setLocalVolume(volume);
+    if (isMeet) {
+      postMessage(CrossFunctions.SET_VOLUME, {
+        volume: fxVolume,
+      });
+    }
   }
 
   async function playSound(file: PublicPath) {
@@ -86,8 +107,6 @@ function App() {
     browser.tabs.create({ url: browser.runtime.getURL("/fullpage.html") });
   }
 
-  const [isMeet, setIsMeet] = useState<boolean>(false);
-
   useEffect(() => {
     browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const url = tabs[0]?.url ?? "";
@@ -99,6 +118,7 @@ function App() {
     async function loadStates() {
       setFxVolume(await fxVolumeStorage.getValue());
       setMicMuted(await micMutedStorage.getValue());
+      setSelectedFolder(await selectedFolderStorage.getValue());
     }
     loadStates();
   }, []);
@@ -126,61 +146,61 @@ function App() {
   }> = [
     {
       label: "Applause",
-      color: "cornsilk",
+      color: "#BB27FF",
       emoji: "👏",
       url: "/sounds/applause.mp3",
     },
     {
       label: "Airhorn",
-      color: "crimson",
+      color: "#E90C13",
       emoji: "🔉",
       url: "/sounds/airhorn.mp3",
     },
     {
       label: "Anime Wow",
-      color: "deeppink",
+      color: "#FF4BD8",
       emoji: "🎉",
       url: "/sounds/anime-wow.mp3",
     },
     {
       label: "Crickets",
-      color: "darkolivegreen",
+      color: "#FF6E42",
       emoji: "🦗",
       url: "/sounds/crickets.mp3",
     },
     {
       label: "Explosion",
-      color: "orange",
+      color: "#008573",
       emoji: "💥",
       url: "/sounds/explosion.mp3",
     },
     {
       label: "Duck",
-      color: "darkgreen",
+      color: "#00D5B8",
       emoji: "🦆",
       url: "/sounds/quack.mp3",
     },
     {
       label: "Splat",
-      color: "midnightblue",
+      color: "#6200AD",
       emoji: "♠️",
       url: "/sounds/splat.mp3",
     },
     {
       label: "Drumroll",
-      color: "moccasin",
+      color: "#FFC53D",
       emoji: "🥁",
       url: "/sounds/drumroll.mp3",
     },
     {
       label: "Yippee",
-      color: "aliceblue",
+      color: "#00C8FF",
       emoji: "🏳️‍🌈",
       url: "/sounds/yippee.mp3",
     },
     {
       label: "Undertale Music",
-      color: "cornflowerblue",
+      color: "#5373F2",
       emoji: "🎵",
       url: "/sounds/bg-music.mp3",
     },
@@ -189,9 +209,6 @@ function App() {
   function handleSync() {
     console.log("This would sync!");
   }
-
-  const [selectedFolder, setSelectedFolder] = useState("favorites");
-  const [folderSelectWidth, setFolderSelectWidth] = useState(0);
 
   useEffect(() => {
     // Resize the folder selector on value change
@@ -223,6 +240,14 @@ function App() {
     setTimeout(() => {
       forceReflow();
     }, 20);
+  }, []);
+
+  useEffect(() => {
+    if ("mediaSession" in navigator) {
+      // Disable playing and pausing with media keys
+      navigator.mediaSession.setActionHandler("play", () => {});
+      navigator.mediaSession.setActionHandler("pause", () => {});
+    }
   }, []);
 
   return (
@@ -343,9 +368,9 @@ function App() {
                     collisionPadding={8}
                   >
                     <p>
-                      This extension only works when your Google Meet microphone
-                      is unmuted. If you'd still like to play sound effects but
-                      mute your microphone, use this button!
+                      This extension can only inject audio when your Google Meet
+                      microphone is unmuted. To play sound effects but mute your
+                      microphone, use this button!
                     </p>
                     <Popover.Arrow className="infoButtonArrow" />
                   </Popover.Content>
@@ -392,7 +417,11 @@ function App() {
             className="folderSelect"
             name="folderSelect"
             value={selectedFolder}
-            onChange={(e) => setSelectedFolder(e.target.value)}
+            onChange={(e) => {
+              setSelectedFolder(e.target.value);
+              // This is not in the useEffect because otherwise it is always overridden to the default
+              selectedFolderStorage.setValue(e.target.value);
+            }}
             style={{
               width: `${folderSelectWidth}px`,
             }}
@@ -406,7 +435,10 @@ function App() {
 
         <div
           className="soundButtonContainer"
-          style={{ overflow: soundButtonOverflow }}
+          style={{
+            overflow: soundButtonOverflow,
+            minHeight: soundButtonOverflow ? undefined : "500px",
+          }}
         >
           {(searchInput !== ""
             ? fuzzysort

@@ -7,9 +7,11 @@ declare global {
       muteMicrophone?: () => void;
       unmuteMicrophone?: () => void;
       stopAudio?: () => void;
+      setVolume?: (volume: number) => void;
       fxNode?: AudioBufferSourceNode;
       fxGain?: GainNode;
-      initialized?: boolean;
+      fakeDiscarded?: boolean;
+      // lastRecieved?: number;
       micMuted?: boolean;
     };
   }
@@ -69,6 +71,9 @@ export default defineUnlistedScript(() => {
             fxGain.gain.value = 0;
             fxNode.stop();
           };
+          window.soundboard.setVolume = (volume: number) => {
+            fxGain.gain.value = volume / 100;
+          };
           window.soundboard.fxNode = fxNode;
           window.soundboard.fxGain = fxGain;
         }
@@ -91,21 +96,31 @@ export default defineUnlistedScript(() => {
           },
         };
 
-        if (!window.soundboard) {
+        // Commented out sections are a bandage fix if Google Meet starts sending double the requests again
+        if (
+          !window.soundboard
+          // || Date.now() - (window.soundboard.lastRecieved ?? 0) > 2000
+        ) {
           console.log("Updated soundboard initial");
           window.soundboard = {
             ...sb,
-            initialized: false,
+            fakeDiscarded: false,
+            // lastRecieved: Date.now(),
           };
         } else {
-          if (!window.soundboard.initialized) {
-            window.soundboard.initialized = true;
+          if (
+            !window.soundboard.fakeDiscarded
+            // && Date.now() - (window.soundboard.lastRecieved ?? 0) < 2000
+          ) {
+            window.soundboard.fakeDiscarded = true;
             console.log("Got the fake!");
           } else {
             console.log("Updated soundboard update");
             window.soundboard = {
               ...sb,
-              initialized: true,
+              fakeDiscarded: true,
+              // fakeDiscarded: false,
+              // lastRecieved: Date.now(),
             };
           }
         }
@@ -148,6 +163,11 @@ export default defineUnlistedScript(() => {
         window.soundboard.micMuted = false;
         if (window.soundboard.unmuteMicrophone) {
           window.soundboard.unmuteMicrophone();
+        }
+        break;
+      case CrossFunctions.SET_VOLUME:
+        if (window.soundboard.setVolume) {
+          window.soundboard.setVolume(event.data.volume);
         }
         break;
     }
