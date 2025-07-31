@@ -105,7 +105,6 @@ const Sidebar = ({ children }: Props) => {
         <div className="volumeSliderWrapper">
           <SpeakerLoudIcon className="volumeSliderIcon" />
           <Slider.Root
-            defaultValue={[50]}
             max={100}
             step={1}
             className="volumeSlider"

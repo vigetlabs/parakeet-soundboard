@@ -4,6 +4,17 @@ import "./emojiPicker.css";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import Picker, { Categories } from "emoji-picker-react";
 
+const EmojiPickerCategories = [
+  { category: Categories.SMILEYS_PEOPLE, name: "Smileys & People" },
+  { category: Categories.ANIMALS_NATURE, name: "Animals & Nature" },
+  { category: Categories.FOOD_DRINK, name: "Food & Drink" },
+  { category: Categories.TRAVEL_PLACES, name: "Travel & Places" },
+  { category: Categories.ACTIVITIES, name: "Activities" },
+  { category: Categories.OBJECTS, name: "Objects" },
+  { category: Categories.SYMBOLS, name: "Symbols" },
+  { category: Categories.FLAGS, name: "Flags" },
+];
+
 export interface EmojiPickerProps
   extends React.ComponentPropsWithoutRef<typeof Popover.Content> {
   setSelectedEmoji: React.Dispatch<React.SetStateAction<string>>;
@@ -34,16 +45,7 @@ const EmojiPicker = ({
         >
           <Picker
             className={classes}
-            categories={[
-              { category: Categories.SMILEYS_PEOPLE, name: "Smileys & People" },
-              { category: Categories.ANIMALS_NATURE, name: "Animals & Nature" },
-              { category: Categories.FOOD_DRINK, name: "Food & Drink" },
-              { category: Categories.TRAVEL_PLACES, name: "Travel & Places" },
-              { category: Categories.ACTIVITIES, name: "Activities" },
-              { category: Categories.OBJECTS, name: "Objects" },
-              { category: Categories.SYMBOLS, name: "Symbols" },
-              { category: Categories.FLAGS, name: "Flags" },
-            ]}
+            categories={EmojiPickerCategories}
             previewConfig={{
               showPreview: false,
             }}
