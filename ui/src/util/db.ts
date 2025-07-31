@@ -1,6 +1,8 @@
 export async function fetchSounds() {
   try {
-    const res = await fetch("http://localhost:3001/sounds");
+    const res = await fetch(
+      `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/sounds`
+    );
     if (!res.ok) {
       throw new Error("Failed to fetch sounds");
     }

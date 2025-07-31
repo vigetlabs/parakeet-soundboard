@@ -13,7 +13,9 @@ export class AudioPlayer {
     this.audio.pause();
     this.audio.currentTime = 0;
     this.audio.volume = this.volume;
-    this.audio.src = "http://localhost:3001" + fileURL;
+    this.audio.src =
+      `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}` +
+      fileURL;
     this.audio.play().catch((err) => console.error("Playback failed:", err));
     this.setActive(true);
     if (onEnd) {
