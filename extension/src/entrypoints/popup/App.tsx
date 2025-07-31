@@ -26,7 +26,7 @@ import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon } from "../../icons";
 import fuzzysort from "fuzzysort";
 
 function App() {
-  const [currentlyPlaying, setCurrentlyPlaying] = useState("");
+  const [currentlyPlaying, setCurrentlyPlaying] = useState(-1);
   const [searchInput, setSearchInput] = useState("");
   const [isMeet, setIsMeet] = useState<boolean>(false);
   const [soundButtons, setSoundButtons] = useState<any[]>([]);
@@ -130,7 +130,7 @@ function App() {
     }
     const success = await playLocalAudio(base64, fxVolume);
     if (success) {
-      setCurrentlyPlaying(id.toString());
+      setCurrentlyPlaying(id);
     }
   }
 
@@ -139,7 +139,7 @@ function App() {
       postMessage(CrossFunctions.STOP_AUDIO);
     }
     stopLocalAudio();
-    setCurrentlyPlaying("");
+    setCurrentlyPlaying(-1);
   }
 
   async function handleMicMute(muteMic: boolean) {
@@ -178,7 +178,7 @@ function App() {
     // TODO: Make it check if the audio is still playing on reopen
     const listener = (msg: any) => {
       if (msg.type === CrossFunctions.AUDIO_ENDED) {
-        setCurrentlyPlaying("");
+        setCurrentlyPlaying(-1);
       }
     };
 
@@ -394,7 +394,7 @@ function App() {
               <button
                 className="iconButton stopButton"
                 onClick={stopSound}
-                disabled={currentlyPlaying === ""}
+                disabled={currentlyPlaying === -1}
               >
                 <BoxIcon className="buttonIcon stopButtonIcon" />
               </button>
@@ -506,7 +506,7 @@ function App() {
               color={button.color}
               emoji={button.emoji}
               onClick={() => playSound(button.id)}
-              isPlaying={currentlyPlaying === button.name}
+              isPlaying={currentlyPlaying === button.id}
             />
           ))}
         </div>
