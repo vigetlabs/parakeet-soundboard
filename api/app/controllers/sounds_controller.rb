@@ -1,7 +1,7 @@
 class SoundsController < ApplicationController
   before_action :authenticate_user!, except: [ :index, :show ]
   before_action :authorize_user!, only: [ :update, :destroy ]
-  before_action :set_current_user, only: [:index, :show]
+  before_action :set_current_user, only: [ :index, :show ]
 
   def index
     if current_user
@@ -67,6 +67,6 @@ class SoundsController < ApplicationController
   end
 
   def set_current_user
-    request.env['warden'].authenticate(scope: :user)
+    request.env["warden"].authenticate(scope: :user)
   end
 end

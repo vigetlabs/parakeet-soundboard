@@ -14,8 +14,8 @@ Rails.application.routes.draw do
   resources :tags
   resources :folders, param: :slug do
     member do
-      post 'add_sound'
-      delete 'remove_sound'
+      post "add_sound"
+      delete "remove_sound"
     end
   end
   get "my_folders", to: "folders#my_folders"
