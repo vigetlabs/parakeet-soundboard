@@ -2,21 +2,31 @@ import * as React from "react";
 import { unstable_PasswordToggleField as PasswordToggleField } from "radix-ui";
 import {
   MagnifyingGlassIcon,
+  MixerVerticalIcon,
   EyeClosedIcon,
   EyeOpenIcon,
 } from "@radix-ui/react-icons";
 import "./input.css";
+import { TagPicker } from "./tagPicker";
 
 export interface TextInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   email?: boolean;
   icon?: boolean;
+  filter?: boolean;
+  filterOptions?: string[];
+  filterDisabled?: boolean;
+  setFilterOptions?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const TextInput = ({
   className = "",
   email = false,
   icon = false,
+  filter = false,
+  filterOptions,
+  filterDisabled,
+  setFilterOptions,
   ...props
 }: TextInputProps) => {
   const classes = `textInputWrapper ${className}`.trim();
@@ -25,6 +35,15 @@ const TextInput = ({
     <div className={classes}>
       {icon && <MagnifyingGlassIcon className="textInputIcon" />}
       <input type={email ? "email" : "text"} className="textInput" {...props} />
+      {filter && (
+        <TagPicker
+          selectedTags={filterOptions ?? []}
+          setSelectedTags={setFilterOptions ?? (() => {})}
+          disabled={filterDisabled}
+        >
+          <MixerVerticalIcon className="filterInputIcon" />
+        </TagPicker>
+      )}
     </div>
   );
 };

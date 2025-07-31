@@ -21,6 +21,7 @@
   --inner-background: #faf9f2; /* gold 2 */
   --primary-muted: #e7e7e7; /* gray 6 */
   --primary-muted-dark: #bbbbbb; /* gray 8 */
+  --primary-disabled: #606060;
 
   --color-preset-1: #e5484d;
   --color-preset-2: #f5a898;

@@ -1,6 +1,7 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { Button, IconButton, TextInput } from "./reuseable";
 import "./Sidebar.css";
+import { useEffect, useState } from "react";
 
 interface Props {
   children: React.ReactNode;
@@ -8,13 +9,46 @@ interface Props {
 
 const Sidebar = ({ children }: Props) => {
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState("");
+  const [filterTags, setFilterTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (search.trim() === "") {
+      setSearchParams({ filter: filterTags });
+    } else {
+      setSearchParams({ search: search.trim(), filter: filterTags });
+    }
+  }, [search, filterTags, setSearchParams]);
+
+  useEffect(() => {
+    setSearch("");
+    setFilterTags([]);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    setSearch(searchParams.get("search") ?? "");
+    setFilterTags(searchParams.getAll("filter") ?? []);
+  }, [searchParams]);
 
   return (
     <>
       <div className="sidebarWrapper">
         <div className="sidebarTop">
           <div className="logo"></div>
-          <TextInput placeholder="Search" className="sidebarSearch" icon />
+          <TextInput
+            placeholder="Search"
+            className="sidebarSearch"
+            icon
+            filter
+            filterOptions={filterTags}
+            setFilterOptions={setFilterTags}
+            filterDisabled={["/folders", "/folders/"].includes(
+              location.pathname.toLowerCase()
+            )}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
           <Button icon="plus">Upload</Button>
         </div>
         <div className="sidebarRest">
@@ -33,7 +67,9 @@ const Sidebar = ({ children }: Props) => {
                 <IconButton
                   icon="archive"
                   label="Folders"
-                  selected={location.pathname.startsWith("/folders")}
+                  selected={location.pathname
+                    .toLowerCase()
+                    .startsWith("/folders")}
                   tabIndex={-1}
                 />
               </Link>

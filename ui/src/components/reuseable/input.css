@@ -52,7 +52,20 @@
   }
 }
 
-.textInputIcon {
+.textInputIcon,
+.filterInputIcon {
   height: 24px;
   width: 24px;
+}
+
+.filterInputIcon {
+  transition: color 0.2s ease-in-out;
+}
+
+.filterInputIcon:hover {
+  color: var(--primary-foreground);
+}
+
+.tagPickerButton:disabled > .filterInputIcon {
+  color: var(--primary-disabled);
 }
