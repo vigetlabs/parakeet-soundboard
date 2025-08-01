@@ -23,6 +23,7 @@ Rails.application.routes.draw do
     member do
       post "add_sound"
       delete "remove_sound"
+      get "get_name"
     end
     collection do
       get "my_folders"

@@ -31,6 +31,11 @@
   &:focus-within {
     box-shadow: 0 0 0 2px black;
   }
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebarSearch:has(input:not(:placeholder-shown)) {
+  filter: drop-shadow(0 0 10px var(--primary-hover));
 }
 
 .sidebarRest {
@@ -48,6 +53,7 @@
   color: var(--primary-foreground);
   overflow-y: auto;
   box-sizing: border-box;
+  padding-bottom: 112px;
 }
 
 .sidebarLeft {

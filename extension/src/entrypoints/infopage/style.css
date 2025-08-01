@@ -1,9 +1,9 @@
 :root {
   line-height: 1.5;
   font-weight: 400;
-  max-height: 700px;
 
-  color: #213547;
+  color-scheme: light dark;
+  color: var(--primary-foreground);
   background-color: var(--inner-background);
 
   font-synthesis: none;
@@ -35,8 +35,11 @@
 }
 
 a {
-  color: inherit;
-  text-decoration: inherit;
+  color: var(--primary-active);
+  transition: color 0.2s ease-in-out;
+}
+a:hover {
+  color: var(--primary-foreground);
 }
 
 body {
@@ -44,52 +47,28 @@ body {
   display: flex;
   place-items: center;
   min-width: 320px;
+  min-height: 100vh;
   font-family: var(--primary-font);
 }
 
 h1 {
-  font-size: 1.25rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  margin: 0;
+  margin: 32px;
 }
 
 h2 {
-  font-size: 0.75rem;
-  font-weight: 400;
-  margin: 0;
-  color: var(--primary-disabled);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--elevated-background);
+  background-color: var(--primary-active);
+  padding: 8px 24px;
+  border-radius: 12px;
+  width: fit-content;
+  margin: auto;
 }
 
 p {
-  font-size: 0.75rem;
-  margin: 0;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: var(--primary-active);
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-.visually-hidden {
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  height: 1px;
-  overflow: hidden;
-  position: absolute;
-  white-space: nowrap;
-  width: 1px;
+  font-size: 1.5rem;
+  margin: 24px;
 }

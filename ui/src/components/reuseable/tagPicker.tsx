@@ -4,8 +4,8 @@ import { Popover, Toggle } from "radix-ui";
 import "./tagPicker.css";
 import { Cross2Icon, UpdateIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-
-export type Tag = { name: string; id?: number; color?: string };
+import type { Tag } from "../../util/types";
+import { API_URL } from "../../util/db";
 
 export interface TagPickerProps
   extends React.ComponentPropsWithoutRef<typeof Popover.Content> {
@@ -28,9 +28,7 @@ const TagPicker = ({
   const { data: tags, isLoading } = useQuery({
     queryKey: ["tags", "allTags"],
     queryFn: () =>
-      fetch(
-        `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/tags`
-      ).then(async (res) => {
+      fetch(`${API_URL}/tags`).then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch tags");
 
         const rawTags = (await res.json()).data;

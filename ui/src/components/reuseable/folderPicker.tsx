@@ -10,10 +10,10 @@ import {
   UpdateIcon,
 } from "@radix-ui/react-icons";
 import { EditFolderDialog } from "./folder";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-
-export type Folder = { name: string; slug: string };
+import type { Folder } from "../../util/types";
+import { API_URL } from "../../util/db";
 
 export interface FolderListingProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -64,15 +64,12 @@ const FolderPicker = ({
 }: FolderPickerProps) => {
   const classes = `folderPicker ${className}`.trim();
   const [newFolderOpen, setNewFolderOpen] = useState(false);
+  const [createdFolder, setCreatedFolder] = useState<Folder>();
 
   const { data: folders = [], isLoading } = useQuery({
     queryKey: ["folders", "minimalFolders"],
     queryFn: () =>
-      fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/folders/folder_slug_list`
-      ).then(async (res) => {
+      fetch(`${API_URL}/folders/folder_slug_list`).then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch folder slugs");
         const rawFolders = await res.json();
         return rawFolders.sort(
@@ -88,6 +85,12 @@ const FolderPicker = ({
       setSelectedFolders((prev) => prev.filter((f) => f.slug !== folder.slug));
     }
   }
+
+  useEffect(() => {
+    if (createdFolder) {
+      setSelectedFolders((prev) => [...prev, createdFolder]);
+    }
+  }, [createdFolder, setSelectedFolders]);
 
   return (
     <Popover.Root>
@@ -128,6 +131,7 @@ const FolderPicker = ({
                 <EditFolderDialog
                   open={newFolderOpen}
                   onOpenChange={setNewFolderOpen}
+                  setCreatedFolder={setCreatedFolder}
                 >
                   <div className="folderListing folderPickerNewButton">
                     <div>

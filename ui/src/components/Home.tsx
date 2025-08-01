@@ -1,16 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import SoundGroup from "./SoundGroup";
 import { UpdateIcon } from "@radix-ui/react-icons";
+import { API_URL } from "../util/db";
 
 const Home = () => {
   const { data: favoriteFolder, isLoading } = useQuery({
     queryKey: ["sounds", "favorites"],
     queryFn: () => {
-      return fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/folders/favorites`
-      ).then(async (res) => {
+      return fetch(`${API_URL}/folders/favorites`).then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch favorite sounds");
 
         const data = (await res.json()).data.attributes;

@@ -6,8 +6,9 @@ import {
   EyeOpenIcon,
 } from "@radix-ui/react-icons";
 import "./input.css";
-import { TagPicker, type Tag } from "./tagPicker";
+import { TagPicker } from "./tagPicker";
 import { chooseIcon, type AvaliableIcons } from "../../util";
+import type { Tag } from "../../util/types";
 
 export interface TextInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -57,7 +58,12 @@ const TextInput = ({
           align="end"
           alignOffset={-30}
         >
-          <MixerVerticalIcon className="filterInputIcon" />
+          <MixerVerticalIcon
+            className={
+              "filterInputIcon" +
+              (filterOptions?.length ?? 0 > 0 ? " filterInputIconActive" : "")
+            }
+          />
         </TagPicker>
       )}
       {rightIcon &&

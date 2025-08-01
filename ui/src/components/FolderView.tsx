@@ -4,6 +4,7 @@ import SoundGroup from "./SoundGroup";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { UpdateIcon } from "@radix-ui/react-icons";
+import { API_URL } from "../util/db";
 
 const FolderView = () => {
   const navigate = useNavigate();
@@ -12,11 +13,7 @@ const FolderView = () => {
   const { data: folders = [], isLoading } = useQuery({
     queryKey: ["folders", "minimalFolders"],
     queryFn: () =>
-      fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/folders/folder_slug_list`
-      ).then((res) => {
+      fetch(`${API_URL}/folders/folder_slug_list`).then((res) => {
         if (!res.ok) throw new Error("Failed to fetch folder slugs");
         return res.json();
       }),

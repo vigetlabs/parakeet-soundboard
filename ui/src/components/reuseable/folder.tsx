@@ -17,7 +17,8 @@ import { TextInput } from "./input";
 import { Button } from "./button";
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { queryClient } from "../../util/db";
+import { queryClient, API_URL } from "../../util/db";
+import type { Folder } from "../../util/types";
 
 export interface SoundButtonDisplayProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -214,6 +215,7 @@ export interface EditFolderProps
   className?: string;
   open: boolean;
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+  setCreatedFolder?: React.Dispatch<React.SetStateAction<Folder | undefined>>;
 }
 
 const EditFolderDialog = ({
@@ -222,6 +224,7 @@ const EditFolderDialog = ({
   className = "",
   open,
   onOpenChange,
+  setCreatedFolder,
   children,
   ...props
 }: EditFolderProps) => {
@@ -234,15 +237,10 @@ const EditFolderDialog = ({
       const formData = new FormData();
       formData.append("folder[name]", name);
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/folders/${slug}`,
-        {
-          method: "PATCH",
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_URL}/folders/${slug}`, {
+        method: "PATCH",
+        body: formData,
+      });
 
       if (!res.ok) {
         throw new Error("Failed to edit folder");
@@ -252,6 +250,7 @@ const EditFolderDialog = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["folders"] });
+      setIsSaving(false);
       onOpenChange(false);
     },
   });
@@ -261,15 +260,10 @@ const EditFolderDialog = ({
       const formData = new FormData();
       formData.append("folder[name]", name);
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/folders`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_URL}/folders`, {
+        method: "POST",
+        body: formData,
+      });
 
       if (!res.ok) {
         throw new Error("Failed to add folder");
@@ -277,13 +271,20 @@ const EditFolderDialog = ({
 
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (createdFolder) => {
+      if (setCreatedFolder) {
+        setCreatedFolder({
+          name: createdFolder.data.attributes.name,
+          slug: createdFolder.data.attributes.slug,
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["folders"] });
+      setIsSaving(false);
       onOpenChange(false);
     },
   });
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     setIsSaving(true);
     event.preventDefault();
     event.stopPropagation();
@@ -293,7 +294,6 @@ const EditFolderDialog = ({
     } else {
       editFolderMutation.mutate(data.name as string);
     }
-    setIsSaving(false);
   }
 
   function resetOnOpen() {

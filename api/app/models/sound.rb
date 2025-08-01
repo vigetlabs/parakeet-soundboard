@@ -10,7 +10,7 @@ class Sound < ApplicationRecord
   def folder_slugs
     folders.pluck(:slug)
   end
-  
+
   def folder_slugs=(slugs)
     if slugs.present?
       # Filter out empty strings and find folders by slug

@@ -3,7 +3,7 @@ import { Dialog } from "radix-ui";
 import "./confirmDelete.css";
 import { Cross2Icon, UpdateIcon } from "@radix-ui/react-icons";
 import { Button } from "./button";
-import { queryClient } from "../../util/db";
+import { queryClient, API_URL } from "../../util/db";
 import { useMutation } from "@tanstack/react-query";
 
 export interface DeleteDialogProps
@@ -29,14 +29,9 @@ const DeleteDialog = ({
 
   const deleteFolderMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/folders/${slug}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const res = await fetch(`${API_URL}/folders/${slug}`, {
+        method: "DELETE",
+      });
 
       if (res.status === 204) {
         return null;
@@ -50,20 +45,16 @@ const DeleteDialog = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["folders"] });
+      setIsDeleting(false);
       setClose();
     },
   });
 
   const deleteSoundMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/sounds/${dbID}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const res = await fetch(`${API_URL}/sounds/${dbID}`, {
+        method: "DELETE",
+      });
 
       if (res.status === 204) {
         return null;
@@ -77,6 +68,7 @@ const DeleteDialog = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sounds"] });
+      setIsDeleting(false);
       setClose();
     },
   });
@@ -88,7 +80,6 @@ const DeleteDialog = ({
     } else {
       deleteSoundMutation.mutate();
     }
-    setIsDeleting(false);
   }
 
   return (

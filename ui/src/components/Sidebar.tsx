@@ -6,7 +6,9 @@ import { EditDialog } from "./reuseable/editDialog";
 import { Slider } from "radix-ui";
 import { SpeakerLoudIcon, StopIcon } from "@radix-ui/react-icons";
 import { AudioPlayer, useAudioPlaying } from "../util/audio";
-import type { Tag } from "./reuseable/tagPicker";
+import { useQuery } from "@tanstack/react-query";
+import type { Tag } from "../util/types";
+import { API_URL } from "../util/db";
 
 interface Props {
   children: React.ReactNode;
@@ -20,6 +22,25 @@ const Sidebar = ({ children }: Props) => {
   const isPlaying = useAudioPlaying();
   const [volume, setVolume] = useState(50);
   const [uploadOpen, setUploadOpen] = useState(false);
+
+  const currentFolderSlug = location.pathname.startsWith("/folders/")
+    ? location.pathname.substring(9) !== ""
+      ? location.pathname.substring(9)
+      : null
+    : null;
+
+  const { data: currentFolder = undefined } = useQuery({
+    queryKey: ["folders", currentFolderSlug],
+    queryFn: () =>
+      fetch(`${API_URL}/folders/${currentFolderSlug}/get_name`).then(
+        async (res) => {
+          if (!res.ok) throw new Error("Failed to fetch folder name");
+          const name = await res.json();
+          return { name: name.name, slug: currentFolderSlug ?? "" };
+        }
+      ),
+    enabled: currentFolderSlug !== null,
+  });
 
   function updateVolume(value: number) {
     setVolume(value);
@@ -80,6 +101,7 @@ const Sidebar = ({ children }: Props) => {
             uploadFirst
             open={uploadOpen}
             onOpenChange={setUploadOpen}
+            addToFolder={currentFolder}
           >
             <Button icon="plus">Upload</Button>
           </EditDialog>

@@ -25,6 +25,11 @@ class FoldersController < ApplicationController
     render json: folder_slugs
   end
 
+  def get_name
+    folder = Folder.find_by(slug: params[:slug])
+    render json: { name: folder.name }
+  end
+
   # GET /folders/:slug
   def show
     render json: FolderSerializer.new(folder).serializable_hash.to_json

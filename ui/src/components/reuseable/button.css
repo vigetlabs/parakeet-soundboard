@@ -14,7 +14,7 @@
   transition: all 0.2s ease-in-out;
 }
 .button:hover {
-  background-color: var(--primary-active-lighter);
+  background-color: var(--primarysoundButtonMenu-active-lighter);
   color: var(--primary-active);
   border-color: var(--primary-active);
 }
@@ -67,10 +67,11 @@
 }
 
 .soundButtonMenu {
-  position: absolute;
-  transform: translate(38px, 4px);
+  position: relative;
+  transform: translate(38px, 34px);
   height: 30px;
   width: 30px;
+  margin-top: -30px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -141,9 +142,11 @@
   padding: 0;
   transition: all 0.2s ease-in-out;
 }
-
 .iconButtonWrapper:hover {
   color: var(--primary-hover);
+}
+.iconButtonWrapper:focus {
+  outline: 0;
 }
 
 .iconButtonWrapper:hover .iconButton {

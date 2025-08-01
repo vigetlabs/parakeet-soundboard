@@ -18,6 +18,7 @@ import { DropdownMenu } from "radix-ui";
 import { EditFolderDialog } from "../reuseable/folder";
 import { DeleteDialog } from "../reuseable/confirmDelete";
 import { useQuery } from "@tanstack/react-query";
+import { API_URL } from "../../util/db";
 
 interface SoundGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   folderSlug: string; // empty for all sounds
@@ -49,11 +50,7 @@ const SoundGroup = ({
     queryKey: ["sounds", `${folderSlug ? folderSlug : "allSounds"}`],
     queryFn: () => {
       if (folderSlug === "") {
-        return fetch(
-          `${import.meta.env.VITE_API_HOST}:${
-            import.meta.env.VITE_API_PORT
-          }/sounds`
-        ).then(async (res) => {
+        return fetch(`${API_URL}/sounds`).then(async (res) => {
           if (!res.ok) throw new Error("Failed to fetch sounds");
 
           const data = (await res.json()).data;
@@ -64,11 +61,7 @@ const SoundGroup = ({
           return out;
         });
       } else {
-        return fetch(
-          `${import.meta.env.VITE_API_HOST}:${
-            import.meta.env.VITE_API_PORT
-          }/folders/${folderSlug}`
-        ).then(async (res) => {
+        return fetch(`${API_URL}/folders/${folderSlug}`).then(async (res) => {
           if (!res.ok)
             throw new Error("Failed to fetch " + folderSlug + " sounds");
 
@@ -175,7 +168,7 @@ const SoundGroup = ({
           <div className="soundGroupButtonContainer">
             {sortAndFilter().map((sound: any) => (
               <SoundButton
-                key={sound.name}
+                key={sound.id}
                 label={sound.name}
                 dbID={sound.id}
                 emoji={sound.emoji}

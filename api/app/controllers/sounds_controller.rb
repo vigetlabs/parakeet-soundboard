@@ -54,7 +54,7 @@ class SoundsController < ApplicationController
       render json: { errors: sound.errors }, status: :unprocessable_entity
     end
   end
-  
+
   # PATCH /sounds/:id/set_folders
   def set_folders
     folder_slugs = params[:folder_slugs] || []

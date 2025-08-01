@@ -6,6 +6,7 @@ import {
   playLocalAudio,
   stopLocalAudio,
   setLocalVolume,
+  openInfoPage,
 } from "@/utils";
 import { storage } from "#imports";
 import { CrossFunctions } from "@/utils/constants";
@@ -14,11 +15,11 @@ import { storeSound, retrieveSound, isSoundCached } from "@/utils/db.ts";
 
 import {
   BoxIcon,
-  DesktopIcon,
   DotsHorizontalIcon,
   ExternalLinkIcon,
   InfoCircledIcon,
   MagnifyingGlassIcon,
+  QuestionMarkCircledIcon,
   SpeakerLoudIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
@@ -174,7 +175,8 @@ function App() {
   }
 
   function sortAndFilter() {
-    let outputSounds;
+    let outputSounds = soundButtons.sort((a: any, b: any) => a.id - b.id);
+
     if (selectedFolder !== "") {
       outputSounds = soundButtons.filter((sound) =>
         sound.folders.some((folder: any) => folder.slug === selectedFolder)
@@ -238,9 +240,12 @@ function App() {
 
     if (context) {
       context.font = `12px 'Instrument Sans', sans-serif`;
-      const textWidth = context.measureText(
-        selectedFolder === "" ? "All Sounds" : selectedFolder
-      ).width;
+      const selectedFolderText =
+        selectedFolder === ""
+          ? "All Sounds"
+          : folders.find((folder) => folder.slug === selectedFolder)?.name ??
+            "All Sounds";
+      const textWidth = context.measureText(selectedFolderText).width;
       setFolderSelectWidth(textWidth + 48);
     }
   }, [selectedFolder]);
@@ -297,7 +302,7 @@ function App() {
               className="logoButton"
               tabIndex={-1}
               onClick={() =>
-                browser.tabs.create({ url: "http://localhost:3000" })
+                browser.tabs.create({ url: import.meta.env.VITE_WEBSITE_HOST })
               }
             >
               <img
@@ -325,17 +330,26 @@ function App() {
                   className="topBarMenuItem"
                   onSelect={handleSync}
                 >
-                  <DesktopIcon className="topBarMenuItemIcon" />
+                  <UpdateIcon className="topBarMenuItemIcon" />
                   Sync
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className="topBarMenuItem"
                   onSelect={() => {
-                    browser.tabs.create({ url: "http://localhost:3000" });
+                    browser.tabs.create({
+                      url: import.meta.env.VITE_WEBSITE_HOST,
+                    });
                   }}
                 >
                   <ExternalLinkIcon className="topBarMenuItemIcon" />
                   Settings
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  className="topBarMenuItem"
+                  onSelect={() => openInfoPage()}
+                >
+                  <QuestionMarkCircledIcon className="topBarMenuItemIcon" />
+                  Help
                 </DropdownMenu.Item>
 
                 <DropdownMenu.Arrow className="topBarMenuArrow" />

@@ -14,14 +14,15 @@ import Dropzone, {
   type FileRejection,
 } from "react-dropzone";
 import { TextInput } from "./input";
-import { TagPicker, type Tag } from "./tagPicker";
+import { TagPicker } from "./tagPicker";
 import { Button } from "./button";
 import { SoundButtonDisplay } from "./folder";
 import { EmojiPicker } from "./emojiPicker";
 import { defaultColors } from "../../util/placeholderData";
-import { FolderPicker, type Folder } from "./folderPicker";
+import { FolderPicker } from "./folderPicker";
 import { useMutation } from "@tanstack/react-query";
-import { queryClient } from "../../util/db";
+import { queryClient, API_URL } from "../../util/db";
+import type { Folder, Tag } from "../../util/types";
 
 export interface EditProps {
   name: string;
@@ -39,6 +40,7 @@ export interface EditDialogProps
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sound?: EditProps;
+  addToFolder?: Folder;
 }
 
 const defaultSound: EditProps = {
@@ -55,6 +57,7 @@ const EditDialog = ({
   sound = defaultSound,
   open,
   onOpenChange,
+  addToFolder,
   className = "",
   children,
   ...props
@@ -84,9 +87,13 @@ const EditDialog = ({
       formData.append("sound[name]", editedSound.name);
       formData.append("sound[color]", editedSound.color);
       formData.append("sound[emoji]", editedSound.emoji);
+
+      // Force the array to exist (in case it's empty so it still removes from tags/folders)
+      formData.append("sound[tag_ids][]", "");
       editedSound.tags.forEach((tagId: number) => {
         formData.append("sound[tag_ids][]", tagId.toString());
       });
+      formData.append("sound[folder_slugs][]", "");
       editedSound.folders.forEach((folderSlug: string) => {
         formData.append("sound[folder_slugs][]", folderSlug);
       });
@@ -94,15 +101,10 @@ const EditDialog = ({
         formData.append("sound[audio_file]", editedSound.audio_file); // key matches model attribute
       }
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/sounds/${sound.id}`,
-        {
-          method: "PATCH",
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_URL}/sounds/${sound.id}`, {
+        method: "PATCH",
+        body: formData,
+      });
 
       if (!res.ok) {
         throw new Error("Failed to edit sound");
@@ -112,6 +114,7 @@ const EditDialog = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sounds"] });
+      setIsSaving(false);
       onOpenChange(false);
     },
   });
@@ -132,15 +135,10 @@ const EditDialog = ({
         formData.append("sound[audio_file]", newSound.audio_file); // key matches model attribute
       }
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/sounds`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_URL}/sounds`, {
+        method: "POST",
+        body: formData,
+      });
 
       if (!res.ok) {
         throw new Error("Failed to add sound");
@@ -150,6 +148,7 @@ const EditDialog = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sounds"] });
+      setIsSaving(false);
       onOpenChange(false);
     },
   });
@@ -160,7 +159,11 @@ const EditDialog = ({
     setEditingEmoji(sound.emoji);
     setEditingColor(sound.color.toLowerCase());
     setEditingTags(sound.tags);
-    setEditingFolders(sound.folders);
+    if (addToFolder) {
+      setEditingFolders([...sound.folders, addToFolder]);
+    } else {
+      setEditingFolders(sound.folders);
+    }
   }
 
   function handleUpload(acceptedFiles: File[]) {
@@ -204,7 +207,6 @@ const EditDialog = ({
         });
       }
     }
-    setIsSaving(false);
   }
 
   useEffect(() => {

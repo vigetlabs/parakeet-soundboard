@@ -29,6 +29,12 @@
 .textInput[disabled] {
   pointer-events: none;
 }
+.textInput::placeholder {
+  color: var(--primary-muted-dark);
+}
+.textInput::selection {
+  background: var(--primary-active);
+}
 
 .passwordInput {
   &::selection {
@@ -50,16 +56,21 @@
 }
 
 .filterInputIcon {
-  height: 24px;
-  width: 24px;
-}
-
-.filterInputIcon {
-  transition: color 0.2s ease-in-out;
+  height: 20px;
+  width: 20px;
+  color: var(--primary-hover);
+  transition: all 0.2s ease-in-out;
 }
 
 .filterInputIcon:hover {
   color: var(--primary-foreground);
+}
+
+.filterInputIconActive {
+  color: var(--elevated-background);
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 4px var(--primary-hover))
+    drop-shadow(0 0 4px var(--primary-hover));
 }
 
 .tagPickerButton:disabled > .filterInputIcon {

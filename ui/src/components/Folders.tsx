@@ -10,6 +10,7 @@ import { useState } from "react";
 import { DeleteDialog } from "./reuseable/confirmDelete";
 import { useQuery } from "@tanstack/react-query";
 import { UpdateIcon } from "@radix-ui/react-icons";
+import { API_URL } from "../util/db";
 
 const Home = () => {
   const [searchParams] = useSearchParams();
@@ -50,11 +51,7 @@ const Home = () => {
   const { data: folders = [], isLoading } = useQuery({
     queryKey: ["folders", "allFolders"],
     queryFn: () =>
-      fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/folders`
-      ).then(async (res) => {
+      fetch(`${API_URL}/folders`).then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch folders");
         return (await res.json()).data;
       }),
@@ -76,7 +73,9 @@ const Home = () => {
               editFunction={handleEditClicked}
               deleteFunction={handleDeleteClicked}
               numSounds={folder.attributes.sounds.length}
-              firstSounds={folder.attributes.sounds.slice(0, 4)}
+              firstSounds={folder.attributes.sounds
+                .sort((a: any, b: any) => a.id - b.id)
+                .slice(0, 4)}
             />
           ))}
           <EditFolderDialog

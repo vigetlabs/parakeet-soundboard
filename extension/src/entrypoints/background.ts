@@ -3,6 +3,12 @@ import { CrossFunctions } from "@/utils/constants";
 export default defineBackground(() => {
   console.log("Background loaded!", { id: browser.runtime.id });
 
+  browser.runtime.onInstalled.addListener(function (object) {
+    if (object.reason === browser.runtime.OnInstalledReason.INSTALL) {
+      openInfoPage();
+    }
+  });
+
   browser.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
     if (msg.type === CrossFunctions.GET_MIC_MUTED) {
       storage

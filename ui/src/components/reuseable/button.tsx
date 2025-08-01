@@ -12,7 +12,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { queryClient } from "../../util/db";
+import { API_URL, queryClient } from "../../util/db";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -71,15 +71,10 @@ const SoundButton = ({
       const folder = favorites ? "favorites" : withinFolder ?? "";
       formData.append("sound_id", dbID.toString());
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/folders/${folder}/add_sound`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_URL}/folders/${folder}/add_sound`, {
+        method: "POST",
+        body: formData,
+      });
 
       if (!res.ok) {
         throw new Error("Failed to add sound to folder");
@@ -98,15 +93,10 @@ const SoundButton = ({
       const folder = addToFavorites ? "favorites" : withinFolder ?? "";
       formData.append("sound_id", dbID.toString());
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_HOST}:${
-          import.meta.env.VITE_API_PORT
-        }/folders/${folder}/remove_sound`,
-        {
-          method: "DELETE",
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_URL}/folders/${folder}/remove_sound`, {
+        method: "DELETE",
+        body: formData,
+      });
 
       if (res.status === 204) {
         return null;
