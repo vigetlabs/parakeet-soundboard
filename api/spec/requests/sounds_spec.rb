@@ -26,7 +26,7 @@ RSpec.describe "Sounds API", type: :request do
   describe "GET /my_sounds" do
     it "returns user's sounds" do
       sound = Sound.create!(name: "Test Sound Belongs to User", audio_file: audio, user: user)
-      get "/my_sounds", headers: auth_headers
+      get "/sounds/my_sounds", headers: auth_headers
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body)["data"].first["id"]).to eq(sound.id.to_s)
       expect(JSON.parse(response.body)["data"].first["attributes"]["name"]).to eq("Test Sound Belongs to User")

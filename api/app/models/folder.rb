@@ -2,8 +2,7 @@ class Folder < ApplicationRecord
   belongs_to :user, optional: true
   has_and_belongs_to_many :sounds
 
-  before_validation :set_slug, on: :create
-  before_validation :set_slug, on: :update, if: :name_changed?
+  before_validation :set_slug, if: -> { new_record? || will_save_change_to_name? }
 
   validates :name, presence: true
 

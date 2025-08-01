@@ -22,7 +22,7 @@ RSpec.describe "Folders API", type: :request do
   describe "GET /my_folders" do
     it "returns user's folders" do
       folder = Folder.create!(name: "Test Folder Belongs to User", user: user)
-      get "/my_folders", headers: auth_headers
+      get "/folders/my_folders", headers: auth_headers
       folders = JSON.parse(response.body)["data"]
 
       matching_folder = folders.find { |f| f["id"] == folder.id.to_s }
