@@ -11,6 +11,8 @@ import {
   TrashIcon,
 } from "@radix-ui/react-icons";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "../../util/db";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -31,17 +33,24 @@ const Button = ({ className = "", icon, children, ...props }: ButtonProps) => {
 export interface SoundButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   label: string;
+  dbID: number;
   color: string;
   emoji: string;
   isPlaying?: boolean;
   isFavorite?: boolean;
   withinFolder?: string;
-  editFunction: (name: string, color: string, emoji: string) => void;
-  deleteFunction: (name: string) => void;
+  editFunction: (
+    name: string,
+    dbID: number,
+    color: string,
+    emoji: string
+  ) => void;
+  deleteFunction: (name: string, dbID: number) => void;
 }
 
 const SoundButton = ({
   label,
+  dbID,
   color,
   emoji,
   isPlaying,
@@ -56,17 +65,74 @@ const SoundButton = ({
   const [displayMenu, setDisplayMenu] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const addToFolderMutation = useMutation({
+    mutationFn: async (favorites: boolean) => {
+      const formData = new FormData();
+      const folder = favorites ? "favorites" : withinFolder ?? "";
+      formData.append("sound_id", dbID.toString());
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_HOST}:${
+          import.meta.env.VITE_API_PORT
+        }/folders/${folder}/add_sound`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to add sound to folder");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sounds"] });
+    },
+  });
+
+  const removeFromFolderMutation = useMutation({
+    mutationFn: async (addToFavorites: boolean) => {
+      const formData = new FormData();
+      const folder = addToFavorites ? "favorites" : withinFolder ?? "";
+      formData.append("sound_id", dbID.toString());
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_HOST}:${
+          import.meta.env.VITE_API_PORT
+        }/folders/${folder}/remove_sound`,
+        {
+          method: "DELETE",
+          body: formData,
+        }
+      );
+
+      if (res.status === 204) {
+        return null;
+      }
+
+      if (!res.ok) {
+        throw new Error("Failed to add sound to folder");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sounds"] });
+    },
+  });
+
   function updateFavorite(setFavorite: boolean) {
-    console.log(
-      "This would " +
-        (setFavorite ? "add " : "remove ") +
-        label +
-        " to favorites"
-    );
+    if (setFavorite) {
+      addToFolderMutation.mutate(true);
+    } else {
+      removeFromFolderMutation.mutate(true);
+    }
   }
 
   function removeFromFolder() {
-    console.log("This would remove " + label + " from " + withinFolder);
+    removeFromFolderMutation.mutate(false);
   }
 
   return (
@@ -116,7 +182,7 @@ const SoundButton = ({
             )}
             <DropdownMenu.Item
               className="soundButtonMenuItem"
-              onSelect={() => editFunction(label, color, emoji)}
+              onSelect={() => editFunction(label, dbID, color, emoji)}
             >
               <Pencil1Icon className="soundButtonMenuItemIcon" />
               Edit
@@ -132,7 +198,7 @@ const SoundButton = ({
             )}
             <DropdownMenu.Item
               className="soundButtonMenuItem soundButtonMenuItemDanger"
-              onSelect={() => deleteFunction(label)}
+              onSelect={() => deleteFunction(label, dbID)}
             >
               <TrashIcon className="soundButtonMenuItemIcon" />
               Delete Sound

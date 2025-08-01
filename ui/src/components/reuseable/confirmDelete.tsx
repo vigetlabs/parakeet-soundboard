@@ -1,34 +1,94 @@
 import * as React from "react";
 import { Dialog } from "radix-ui";
 import "./confirmDelete.css";
-import { Cross2Icon } from "@radix-ui/react-icons";
+import { Cross2Icon, UpdateIcon } from "@radix-ui/react-icons";
 import { Button } from "./button";
+import { queryClient } from "../../util/db";
+import { useMutation } from "@tanstack/react-query";
 
 export interface DeleteDialogProps
   extends React.ComponentPropsWithoutRef<typeof Dialog.Content> {
   open: boolean;
   setClose: () => void;
-  isFolder: boolean;
+  slug?: string; // for folders
+  dbID?: number; // for sounds
   name: string;
 }
 
 const DeleteDialog = ({
   open,
   setClose,
-  isFolder,
+  slug,
+  dbID,
   name,
   className = "",
   ...props
 }: DeleteDialogProps) => {
   const classes = `confirmDeleteModal ${className}`.trim();
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  const deleteFolderMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_HOST}:${
+          import.meta.env.VITE_API_PORT
+        }/folders/${slug}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (res.status === 204) {
+        return null;
+      }
+
+      if (!res.ok) {
+        throw new Error("Failed to delete folder");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      setClose();
+    },
+  });
+
+  const deleteSoundMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_HOST}:${
+          import.meta.env.VITE_API_PORT
+        }/sounds/${dbID}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (res.status === 204) {
+        return null;
+      }
+
+      if (!res.ok) {
+        throw new Error("Failed to delete sound");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sounds"] });
+      setClose();
+    },
+  });
 
   function submitDelete() {
-    if (isFolder) {
-      console.log("delete folder " + name);
+    setIsDeleting(true);
+    if (slug) {
+      deleteFolderMutation.mutate();
     } else {
-      console.log("delete sound " + name);
+      deleteSoundMutation.mutate();
     }
-    setClose();
+    setIsDeleting(false);
   }
 
   return (
@@ -41,13 +101,17 @@ const DeleteDialog = ({
           </Dialog.Title>
           <Dialog.Description asChild>
             <p>
-              This will permanently delete the {isFolder ? "folder" : "sound"} "
+              This will permanently delete the {slug ? "folder" : "sound"} "
               {name}"
             </p>
           </Dialog.Description>
           <div className="confirmDeleteButtons">
-            <Button className="dangerButton" onClick={submitDelete}>
-              Delete
+            <Button
+              className="dangerButton"
+              onClick={submitDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? <UpdateIcon className="spinIcon" /> : "Delete"}
             </Button>
             <Dialog.Close asChild>
               <Button>Cancel</Button>

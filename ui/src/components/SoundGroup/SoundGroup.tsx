@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link, useSearchParams } from "react-router-dom";
 import { chooseIcon, type AvaliableIcons } from "../../util";
 import { SoundButton } from "../reuseable";
@@ -7,27 +8,26 @@ import {
   DotsHorizontalIcon,
   Pencil1Icon,
   TrashIcon,
+  UpdateIcon,
 } from "@radix-ui/react-icons";
-import type { SoundType } from "../../util/tempData";
 import { AudioPlayer } from "../../util/audio";
 import { useState } from "react";
 import fuzzysort from "fuzzysort";
-import { EditDialog } from "../reuseable/editDialog";
+import { EditDialog, type EditProps } from "../reuseable/editDialog";
 import { DropdownMenu } from "radix-ui";
 import { EditFolderDialog } from "../reuseable/folder";
 import { DeleteDialog } from "../reuseable/confirmDelete";
+import { useQuery } from "@tanstack/react-query";
 
 interface SoundGroupProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: string;
+  folderSlug: string; // empty for all sounds
   icon: AvaliableIcons;
-  sounds: SoundType;
   backLink?: string;
 }
 
 const SoundGroup = ({
-  title,
+  folderSlug,
   icon,
-  sounds,
   backLink,
   style,
   ...props
@@ -36,11 +36,52 @@ const SoundGroup = ({
   const [searchParams] = useSearchParams();
   const [currentlyEditingFolder, setCurrentlyEditingFolder] = useState(false);
   const [currentlyEditing, setCurrentlyEditing] = useState(false);
-  const [editingName, setEditingName] = useState("");
-  const [editingColor, setEditingColor] = useState("");
-  const [editingEmoji, setEditingEmoji] = useState("");
+  const [editingSound, setEditingSound] = useState<EditProps>();
 
-  const [currentlyDeleting, setCurrentlyDeleting] = useState("");
+  const [currentlyDeleting, setCurrentlyDeleting] = useState(false);
+  const [deletingObject, setDeletingObject] = useState<{
+    name: string;
+    id?: number;
+    slug?: string;
+  }>();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["sounds", `${folderSlug ? folderSlug : "allSounds"}`],
+    queryFn: () => {
+      if (folderSlug === "") {
+        return fetch(
+          `${import.meta.env.VITE_API_HOST}:${
+            import.meta.env.VITE_API_PORT
+          }/sounds`
+        ).then(async (res) => {
+          if (!res.ok) throw new Error("Failed to fetch sounds");
+
+          const data = (await res.json()).data;
+          const out = {
+            name: "All Sounds",
+            sounds: data.map((sound: any) => sound.attributes),
+          };
+          return out;
+        });
+      } else {
+        return fetch(
+          `${import.meta.env.VITE_API_HOST}:${
+            import.meta.env.VITE_API_PORT
+          }/folders/${folderSlug}`
+        ).then(async (res) => {
+          if (!res.ok)
+            throw new Error("Failed to fetch " + folderSlug + " sounds");
+
+          const data = (await res.json()).data.attributes;
+          const out = {
+            name: data.name,
+            sounds: data.sounds,
+          };
+          return out;
+        });
+      }
+    },
+  });
 
   function handleButtonClick(name: string, url: string) {
     AudioPlayer.play(url, () => setCurrentlyPlaying(""));
@@ -48,14 +89,18 @@ const SoundGroup = ({
   }
 
   function sortAndFilter() {
+    const allSounds = data?.sounds.sort((a: any, b: any) => a.id - b.id) ?? [];
     let outputSounds;
+
     const filters = searchParams.getAll("filter");
     if (filters.length > 0) {
-      outputSounds = sounds.filter((sound) => {
-        return filters.every((tag) => sound.tags.includes(tag));
+      outputSounds = allSounds.filter((sound: any) => {
+        return filters.every((tag) =>
+          sound.tags.some((t: any) => t.name === tag)
+        );
       });
     } else {
-      outputSounds = sounds;
+      outputSounds = allSounds;
     }
 
     const searchInput = searchParams.get("search");
@@ -68,112 +113,127 @@ const SoundGroup = ({
     return outputSounds;
   }
 
-  function handleEditClicked(name: string, color: string, emoji: string) {
-    setEditingName(name);
-    setEditingColor(color);
-    setEditingEmoji(emoji);
-    setCurrentlyEditing(true);
-  }
-
-  function handleDeleteClicked(name: string) {
-    setEditingName(name);
-    setCurrentlyDeleting("sound");
-  }
-
   function editFolder() {
     setCurrentlyEditingFolder(true);
   }
 
-  function deleteFolder() {
-    setEditingName(title);
-    setCurrentlyDeleting("folder");
-  }
-
   return (
-    <div className="soundGroup" {...props}>
-      <div className="soundGroupTitle" style={style}>
-        {backLink && (
-          <Link to={backLink} className="soundGroupBack">
-            <ChevronLeftIcon className="soundGroupBackIcon" />
-          </Link>
-        )}
-        {chooseIcon(icon, { className: "soundGroupIcon" })}
-        <h2>{title}</h2>
-        {title !== "All Sounds" && title !== "Favorites" && (
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <button type="button" className="folderViewMenu">
-                <DotsHorizontalIcon className="soundButtonMenuIcon" />
-              </button>
-            </DropdownMenu.Trigger>
+    <>
+      {isLoading ? (
+        <UpdateIcon className="spinIcon spinIconLarge" />
+      ) : (
+        <div className="soundGroup" {...props}>
+          <div className="soundGroupTitle" style={style}>
+            {backLink && (
+              <Link to={backLink} className="soundGroupBack">
+                <ChevronLeftIcon className="soundGroupBackIcon" />
+              </Link>
+            )}
+            {chooseIcon(icon, { className: "soundGroupIcon" })}
+            <h2>{data?.name}</h2>
+            {folderSlug !== "" && folderSlug !== "favorites" && (
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button type="button" className="folderViewMenu">
+                    <DotsHorizontalIcon className="soundButtonMenuIcon" />
+                  </button>
+                </DropdownMenu.Trigger>
 
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content
-                side="right"
-                sideOffset={5}
-                className="soundButtonMenuContent"
-              >
-                <DropdownMenu.Item
-                  className="soundButtonMenuItem"
-                  onSelect={editFolder}
-                >
-                  <Pencil1Icon className="soundButtonMenuItemIcon" />
-                  Edit
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  className="soundButtonMenuItem soundButtonMenuItemDanger"
-                  onSelect={deleteFolder}
-                >
-                  <TrashIcon className="soundButtonMenuItemIcon" />
-                  Delete Folder
-                </DropdownMenu.Item>
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content
+                    side="right"
+                    sideOffset={5}
+                    className="soundButtonMenuContent"
+                  >
+                    <DropdownMenu.Item
+                      className="soundButtonMenuItem"
+                      onSelect={editFolder}
+                    >
+                      <Pencil1Icon className="soundButtonMenuItemIcon" />
+                      Edit
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      className="soundButtonMenuItem soundButtonMenuItemDanger"
+                      onSelect={() => {
+                        setDeletingObject({
+                          name: data?.name,
+                          slug: folderSlug,
+                        });
+                        setCurrentlyDeleting(true);
+                      }}
+                    >
+                      <TrashIcon className="soundButtonMenuItemIcon" />
+                      Delete Folder
+                    </DropdownMenu.Item>
 
-                <DropdownMenu.Arrow className="soundButtonMenuArrow" />
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
-        )}
-      </div>
-      <div className="soundGroupButtonContainer">
-        {sortAndFilter().map((sound) => (
-          <SoundButton
-            key={sound.name}
-            label={sound.name}
-            emoji={sound.emoji}
-            color={sound.color}
-            withinFolder={
-              title === "All Sounds" || title === "Favorites" ? "" : title
-            }
-            isFavorite={sound.folders.includes("Favorites")}
-            editFunction={handleEditClicked}
-            deleteFunction={handleDeleteClicked}
-            onClick={() => handleButtonClick(sound.name, sound.url)}
-            isPlaying={currentlyPlaying === sound.name}
-            className="soundGroupButton"
+                    <DropdownMenu.Arrow className="soundButtonMenuArrow" />
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
+            )}
+          </div>
+          <div className="soundGroupButtonContainer">
+            {sortAndFilter().map((sound: any) => (
+              <SoundButton
+                key={sound.name}
+                label={sound.name}
+                dbID={sound.id}
+                emoji={sound.emoji}
+                color={sound.color}
+                withinFolder={
+                  folderSlug === "" || folderSlug === "favorites"
+                    ? ""
+                    : folderSlug
+                }
+                isFavorite={sound.folders.some(
+                  (folder: any) => folder.slug === "favorites"
+                )}
+                editFunction={() => {
+                  setEditingSound({
+                    name: sound.name,
+                    id: sound.id,
+                    emoji: sound.emoji,
+                    color: sound.color,
+                    tags: sound.tags,
+                    folders: sound.folders,
+                  });
+                  setCurrentlyEditing(true);
+                }}
+                deleteFunction={() => {
+                  setDeletingObject({ name: sound.name, id: sound.id });
+                  setCurrentlyDeleting(true);
+                }}
+                onClick={() =>
+                  handleButtonClick(sound.name, sound.audio_file_url)
+                }
+                isPlaying={currentlyPlaying === sound.name}
+                className="soundGroupButton"
+              />
+            ))}
+          </div>
+          <EditDialog
+            open={currentlyEditing}
+            onOpenChange={setCurrentlyEditing}
+            sound={editingSound}
           />
-        ))}
-      </div>
-      <EditDialog
-        open={currentlyEditing}
-        onOpenChange={setCurrentlyEditing}
-        name={editingName}
-        color={editingColor}
-        emoji={editingEmoji}
-      />
 
-      <EditFolderDialog
-        open={currentlyEditingFolder}
-        onOpenChange={setCurrentlyEditingFolder}
-        previousName={title}
-      />
+          <EditFolderDialog
+            open={currentlyEditingFolder}
+            onOpenChange={setCurrentlyEditingFolder}
+            previousName={data?.name}
+            slug={folderSlug}
+          />
 
-      <DeleteDialog
-        open={currentlyDeleting !== ""}
-        setClose={() => setCurrentlyDeleting("")}
-        name={editingName}
-        isFolder={currentlyDeleting === "folder"}
-      />
-    </div>
+          <DeleteDialog
+            open={currentlyDeleting}
+            setClose={() => setCurrentlyDeleting(false)}
+            name={deletingObject?.name ?? ""}
+            slug={deletingObject?.slug}
+            dbID={deletingObject?.id}
+          />
+        </div>
+      )}
+    </>
   );
 };
 

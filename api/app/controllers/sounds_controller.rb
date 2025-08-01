@@ -1,7 +1,7 @@
 class SoundsController < ApplicationController
-  before_action :authenticate_user!, except: [ :index, :show ]
-  before_action :authorize_user!, only: [ :update, :destroy ]
-  before_action :set_current_user, only: [ :index, :show ]
+  # before_action :authenticate_user!, except: [ :index, :show, :in_folders ]
+  # before_action :authorize_user!, only: [ :update, :destroy, :set_folders ]
+  before_action :set_current_user, only: [ :index, :show, :in_folders, :my_sounds, :create, :update, :destroy ]
 
   def index
     if current_user
@@ -15,6 +15,16 @@ class SoundsController < ApplicationController
   def my_sounds
     sounds = current_user.sounds
     render json: SoundSerializer.new(sounds, params: { scope: current_user }).serializable_hash.to_json
+  end
+
+  def in_folders
+    if current_user
+      folders = sound.folders.where(user_id: nil).or(sound.folders.where(user: current_user))
+      render json: folders.pluck(:slug)
+    else
+      folders = sound.folders.where(user_id: nil)
+      render json: folders.pluck(:slug)
+    end
   end
 
   def show
@@ -44,6 +54,21 @@ class SoundsController < ApplicationController
       render json: { errors: sound.errors }, status: :unprocessable_entity
     end
   end
+  
+  # PATCH /sounds/:id/set_folders
+  def set_folders
+    folder_slugs = params[:folder_slugs] || []
+
+    folders = Folder
+      .where(slug: folder_slugs)
+      .where(user_id: nil)
+      .or(Folder.where(slug: folder_slugs, user: current_user))
+
+    sound.folders = folders
+    sound.save!
+
+    render json: { success: true, folder_slugs: sound.folders.pluck(:slug) }
+  end
 
   def destroy
     sound.destroy
@@ -57,7 +82,7 @@ class SoundsController < ApplicationController
   end
 
   def sound_params
-    params.require(:sound).permit(:name, :audio_file, :color, :emoji, tag_ids: [])
+    params.require(:sound).permit(:name, :audio_file, :color, :emoji, tag_ids: [], folder_slugs: [])
   end
 
   def authorize_user!

@@ -1,45 +1,59 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { Dialog, Form } from "radix-ui";
 import "./editDialog.css";
-import { Cross2Icon, FaceIcon, PinTopIcon } from "@radix-ui/react-icons";
+import {
+  Cross2Icon,
+  FaceIcon,
+  PinTopIcon,
+  UpdateIcon,
+} from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import Dropzone, {
   type DropzoneState,
   type FileRejection,
 } from "react-dropzone";
 import { TextInput } from "./input";
-import { TagPicker } from "./tagPicker";
+import { TagPicker, type Tag } from "./tagPicker";
 import { Button } from "./button";
 import { SoundButtonDisplay } from "./folder";
 import { EmojiPicker } from "./emojiPicker";
-import { defaultColors } from "../../util/tempData";
-import { FolderPicker } from "./folderPicker";
+import { defaultColors } from "../../util/placeholderData";
+import { FolderPicker, type Folder } from "./folderPicker";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "../../util/db";
 
 export interface EditProps {
-  filename: string;
   name: string;
+  id: number;
   emoji: string;
   color: string;
-  tags: string[];
-  folders: string[];
+  tags: Tag[];
+  folders: Folder[];
 }
 
 export interface EditDialogProps
-  extends Partial<EditProps>,
-    React.ComponentPropsWithoutRef<typeof Dialog.Root> {
+  extends React.ComponentPropsWithoutRef<typeof Dialog.Root> {
   uploadFirst?: boolean;
   className?: string;
-  onOpenChange?: (open: boolean) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  sound?: EditProps;
 }
+
+const defaultSound: EditProps = {
+  name: "",
+  id: -1,
+  emoji: "🎉",
+  color: "#bb27ff",
+  tags: [],
+  folders: [],
+};
 
 const EditDialog = ({
   uploadFirst = false,
-  filename = "",
-  name = "",
-  emoji = "🎉",
-  color = "#bb27ff",
-  tags = [],
-  folders = [],
+  sound = defaultSound,
+  open,
   onOpenChange,
   className = "",
   children,
@@ -47,44 +61,166 @@ const EditDialog = ({
 }: EditDialogProps) => {
   const classes = `editDialog ${className}`.trim();
   const [uploading, setUploading] = useState(uploadFirst);
-  const [editingFilename, setEditingFilename] = useState(filename);
-  const [editingName, setEditingName] = useState(name);
-  const [editingEmoji, setEditingEmoji] = useState(emoji);
-  const [editingColor, setEditingColor] = useState(color);
-  const [editingTags, setEditingTags] = useState(tags);
-  const [editingFolders, setEditingFolders] = useState(folders);
+  const [editingFile, setEditingFile] = useState<File | null>(null);
+  const [editingName, setEditingName] = useState(sound.name);
+  const [editingEmoji, setEditingEmoji] = useState(sound.emoji);
+  const [editingColor, setEditingColor] = useState(sound.color);
+  const [editingTags, setEditingTags] = useState<Tag[]>(sound.tags);
+  const [editingFolders, setEditingFolders] = useState<Folder[]>(sound.folders);
+  const [isSaving, setIsSaving] = useState(false);
+
+  type CreateEditSoundProps = {
+    name: string;
+    color: string;
+    emoji: string;
+    tags: number[];
+    folders: string[];
+    audio_file?: File;
+  };
+
+  const editSoundMutation = useMutation({
+    mutationFn: async (editedSound: CreateEditSoundProps) => {
+      const formData = new FormData();
+      formData.append("sound[name]", editedSound.name);
+      formData.append("sound[color]", editedSound.color);
+      formData.append("sound[emoji]", editedSound.emoji);
+      editedSound.tags.forEach((tagId: number) => {
+        formData.append("sound[tag_ids][]", tagId.toString());
+      });
+      editedSound.folders.forEach((folderSlug: string) => {
+        formData.append("sound[folder_slugs][]", folderSlug);
+      });
+      if (editedSound.audio_file) {
+        formData.append("sound[audio_file]", editedSound.audio_file); // key matches model attribute
+      }
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_HOST}:${
+          import.meta.env.VITE_API_PORT
+        }/sounds/${sound.id}`,
+        {
+          method: "PATCH",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to edit sound");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sounds"] });
+      onOpenChange(false);
+    },
+  });
+
+  const createSoundMutation = useMutation({
+    mutationFn: async (newSound: CreateEditSoundProps) => {
+      const formData = new FormData();
+      formData.append("sound[name]", newSound.name);
+      formData.append("sound[color]", newSound.color);
+      formData.append("sound[emoji]", newSound.emoji);
+      newSound.tags.forEach((tagId: number) => {
+        formData.append("sound[tag_ids][]", tagId.toString());
+      });
+      newSound.folders.forEach((folderSlug: string) => {
+        formData.append("sound[folder_slugs][]", folderSlug);
+      });
+      if (newSound.audio_file) {
+        formData.append("sound[audio_file]", newSound.audio_file); // key matches model attribute
+      }
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_HOST}:${
+          import.meta.env.VITE_API_PORT
+        }/sounds`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to add sound");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sounds"] });
+      onOpenChange(false);
+    },
+  });
 
   function resetOnOpen() {
     setUploading(uploadFirst);
-    setEditingFilename(filename);
-    setEditingName(name);
-    setEditingEmoji(emoji);
-    setEditingColor(color.toLowerCase());
-    setEditingTags(tags);
-    setEditingFolders(folders);
+    setEditingName(sound.name);
+    setEditingEmoji(sound.emoji);
+    setEditingColor(sound.color.toLowerCase());
+    setEditingTags(sound.tags);
+    setEditingFolders(sound.folders);
   }
 
   function handleUpload(acceptedFiles: File[]) {
     if (acceptedFiles.length === 0) return;
     const uploadedFile = acceptedFiles[0];
-    setEditingFilename(uploadedFile.name);
+    setEditingFile(uploadedFile);
     setEditingName(uploadedFile.name.split(".")[0]);
     setUploading(false);
   }
 
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    setIsSaving(true);
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    if (sound.id === -1) {
+      createSoundMutation.mutate({
+        name: data.name as string,
+        color: data.color as string,
+        emoji: data.emoji as string,
+        tags: JSON.parse(data.tags as string),
+        folders: JSON.parse(data.folders as string),
+        audio_file: editingFile as File,
+      });
+    } else {
+      if (data.editingFile) {
+        editSoundMutation.mutate({
+          name: data.name as string,
+          color: data.color as string,
+          emoji: data.emoji as string,
+          tags: JSON.parse(data.tags as string),
+          folders: JSON.parse(data.folders as string),
+        });
+      } else {
+        editSoundMutation.mutate({
+          name: data.name as string,
+          color: data.color as string,
+          emoji: data.emoji as string,
+          tags: JSON.parse(data.tags as string),
+          folders: JSON.parse(data.folders as string),
+          audio_file: editingFile as File,
+        });
+      }
+    }
+    setIsSaving(false);
+  }
+
   useEffect(() => {
-    if (props.open) {
+    if (open) {
       resetOnOpen();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.open]);
+  }, [open]);
 
   return (
     <Dialog.Root
       {...props}
+      open={open}
       onOpenChange={(open) => {
         resetOnOpen();
-        onOpenChange?.(open);
+        onOpenChange(open);
       }}
     >
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>
@@ -95,7 +231,7 @@ const EditDialog = ({
             <UploadDialogContent handleUpload={handleUpload} />
           ) : (
             <EditDialogContent
-              filename={editingFilename}
+              filename={editingFile?.name ?? ""}
               name={editingName}
               setName={setEditingName}
               emoji={editingEmoji}
@@ -107,6 +243,9 @@ const EditDialog = ({
               folders={editingFolders}
               setFolders={setEditingFolders}
               setUploading={setUploading}
+              handleSubmit={handleSubmit}
+              isSaving={isSaving}
+              id={0} // will never be used don't worry about it
             />
           )}
           <Dialog.Close asChild>
@@ -179,12 +318,15 @@ const UploadDialogContent = ({
 };
 
 export interface EditScreenProps {
+  filename: string;
   setName: React.Dispatch<React.SetStateAction<string>>;
   setEmoji: React.Dispatch<React.SetStateAction<string>>;
   setColor: React.Dispatch<React.SetStateAction<string>>;
-  setTags: React.Dispatch<React.SetStateAction<string[]>>;
-  setFolders: React.Dispatch<React.SetStateAction<string[]>>;
+  setTags: React.Dispatch<React.SetStateAction<Tag[]>>;
+  setFolders: React.Dispatch<React.SetStateAction<Folder[]>>;
   setUploading: React.Dispatch<React.SetStateAction<boolean>>;
+  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  isSaving: boolean;
 }
 
 const EditDialogContent = ({
@@ -200,6 +342,8 @@ const EditDialogContent = ({
   folders,
   setFolders,
   setUploading,
+  handleSubmit,
+  isSaving,
 }: EditProps & EditScreenProps) => {
   const colorPickerRef = React.useRef<HTMLInputElement>(null);
 
@@ -211,13 +355,7 @@ const EditDialogContent = ({
   return (
     <>
       <Dialog.Title className="editDialogTitle">Edit Sound</Dialog.Title>
-      <Form.Root
-        onSubmit={(e) => {
-          e.preventDefault();
-          const data = Object.fromEntries(new FormData(e.currentTarget));
-          console.log(data);
-        }}
-      >
+      <Form.Root onSubmit={handleSubmit}>
         <Form.Field
           className="editDialogFieldContainer editDialogFieldContainerDisabled editDialogFieldContainerSelector"
           name="filename"
@@ -336,14 +474,26 @@ const EditDialogContent = ({
             <Form.Label className="visually-hidden">Tags</Form.Label>
             <TextInput
               disabled
-              value={tags.length > 0 ? tags.join(", ") : "Apply Tags"}
+              value={
+                tags.length > 0
+                  ? tags.map((tag: any) => tag.name).join(", ")
+                  : "Apply Tags"
+              }
               leftIcon="idCard"
               rightIcon="chevronRight"
               iconSize={32}
               className="editDialogInput editDialogInputDisabled"
+              style={{
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+              }}
             />
             <Form.Control asChild>
-              <input type="hidden" value={JSON.stringify(tags)} />
+              <input
+                type="hidden"
+                value={JSON.stringify(tags.map((tag) => tag.id))}
+              />
             </Form.Control>
           </TagPicker>
         </Form.Field>
@@ -363,20 +513,34 @@ const EditDialogContent = ({
             <Form.Label className="visually-hidden">Folders</Form.Label>
             <TextInput
               disabled
-              value={folders.length > 0 ? folders.join(", ") : "Add to Folder"}
+              value={
+                folders.length > 0
+                  ? folders.map((folder: any) => folder.name).join(", ")
+                  : "Add to Folder"
+              }
               leftIcon="archive"
               rightIcon="chevronRight"
               iconSize={32}
               className="editDialogInput editDialogInputDisabled"
+              style={{
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+              }}
             />
             <Form.Control asChild>
-              <input type="hidden" value={JSON.stringify(folders)} />
+              <input
+                type="hidden"
+                value={JSON.stringify(folders.map((folder) => folder.slug))}
+              />
             </Form.Control>
           </FolderPicker>
         </Form.Field>
 
         <Form.Submit asChild>
-          <Button className="rightAlign editDialogSubmit">Finish</Button>
+          <Button className="rightAlign editDialogSubmit" disabled={isSaving}>
+            {isSaving ? <UpdateIcon className="spinIcon" /> : "Finish"}
+          </Button>
         </Form.Submit>
       </Form.Root>
     </>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { Popover, Label, Checkbox } from "radix-ui";
 import "./folderPicker.css";
@@ -6,31 +7,34 @@ import {
   CheckIcon,
   Cross2Icon,
   PlusIcon,
+  UpdateIcon,
 } from "@radix-ui/react-icons";
-import { tempFolders } from "../../util/tempData";
 import { EditFolderDialog } from "./folder";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+export type Folder = { name: string; slug: string };
 
 export interface FolderListingProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
-  folder: string;
+  folder: Folder;
   checked: boolean;
-  setChecked: (folder: string, pressed: boolean) => void;
+  setChecked: (folder: Folder, pressed: boolean) => void;
 }
 
 const FolderListing = ({ folder, checked, setChecked }: FolderListingProps) => {
   return (
     <Label.Root
-      htmlFor={folder}
+      htmlFor={folder.slug}
       className={"folderListing" + (checked ? " folderListingChecked" : "")}
     >
       <div>
         <ArchiveIcon className="folderListingIcon" />
-        {folder}
+        {folder.name}
       </div>
       <Checkbox.Root
         checked={checked}
-        id={folder}
+        id={folder.slug}
         onCheckedChange={(checked) => setChecked(folder, Boolean(checked))}
         className="folderListingCheckbox"
       >
@@ -44,8 +48,8 @@ const FolderListing = ({ folder, checked, setChecked }: FolderListingProps) => {
 
 export interface FolderPickerProps
   extends React.ComponentPropsWithoutRef<typeof Popover.Content> {
-  selectedFolders: string[];
-  setSelectedFolders: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedFolders: Folder[];
+  setSelectedFolders: React.Dispatch<React.SetStateAction<Folder[]>>;
   disabled?: boolean;
 }
 
@@ -61,14 +65,27 @@ const FolderPicker = ({
   const classes = `folderPicker ${className}`.trim();
   const [newFolderOpen, setNewFolderOpen] = useState(false);
 
-  function handleFolderClick(folder: string, pressed: boolean) {
+  const { data: folders = [], isLoading } = useQuery({
+    queryKey: ["folders", "minimalFolders"],
+    queryFn: () =>
+      fetch(
+        `${import.meta.env.VITE_API_HOST}:${
+          import.meta.env.VITE_API_PORT
+        }/folders/folder_slug_list`
+      ).then(async (res) => {
+        if (!res.ok) throw new Error("Failed to fetch folder slugs");
+        const rawFolders = await res.json();
+        return rawFolders.sort(
+          (a: any, b: any) => parseInt(a.id) - parseInt(b.id)
+        );
+      }),
+  });
+
+  function handleFolderClick(folder: Folder, pressed: boolean) {
     if (pressed) {
       setSelectedFolders((prev) => [...prev, folder]);
     } else {
-      setSelectedFolders((prev) => [
-        ...prev.slice(0, prev.indexOf(folder)),
-        ...prev.slice(prev.indexOf(folder) + 1),
-      ]);
+      setSelectedFolders((prev) => prev.filter((f) => f.slug !== folder.slug));
     }
   }
 
@@ -93,36 +110,43 @@ const FolderPicker = ({
           onWheelCapture={(e) => e.stopPropagation() /* Allows scrolling */}
         >
           <h3 className="popoverTitle">Folders</h3>
-          <div className="folderContainer">
-            {tempFolders.map((folder) => (
-              <FolderListing
-                folder={folder.name}
-                key={folder.name}
-                checked={selectedFolders.includes(folder.name)}
-                setChecked={handleFolderClick}
-                id={folder.name}
-              />
-            ))}
-            <EditFolderDialog
-              open={newFolderOpen}
-              onOpenChange={setNewFolderOpen}
-            >
-              <div className="folderListing folderPickerNewButton">
-                <div>
-                  <PlusIcon className="folderListingIcon" />
-                  Create New Folder
-                </div>
+          {isLoading ? (
+            <UpdateIcon className="spinIcon spinIconLarge" />
+          ) : (
+            <>
+              <div className="folderContainer">
+                {folders.map((folder: any) => (
+                  <FolderListing
+                    folder={folder}
+                    key={folder.slug}
+                    checked={selectedFolders.some(
+                      (f) => f.slug === folder.slug
+                    )}
+                    setChecked={handleFolderClick}
+                  />
+                ))}
+                <EditFolderDialog
+                  open={newFolderOpen}
+                  onOpenChange={setNewFolderOpen}
+                >
+                  <div className="folderListing folderPickerNewButton">
+                    <div>
+                      <PlusIcon className="folderListingIcon" />
+                      Create New Folder
+                    </div>
+                  </div>
+                </EditFolderDialog>
               </div>
-            </EditFolderDialog>
-          </div>
-          <div className="folderPickerClearContainer">
-            <button
-              className="folderPickerClearButton"
-              onClick={() => setSelectedFolders([])}
-            >
-              Clear All
-            </button>
-          </div>
+              <div className="folderPickerClearContainer">
+                <button
+                  className="folderPickerClearButton"
+                  onClick={() => setSelectedFolders([])}
+                >
+                  Clear All
+                </button>
+              </div>
+            </>
+          )}
           <Popover.Close className="folderPickerClose" aria-label="Close">
             <Cross2Icon className="folderPickerCloseIcon" />
           </Popover.Close>

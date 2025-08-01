@@ -20,6 +20,7 @@ import {
   InfoCircledIcon,
   MagnifyingGlassIcon,
   SpeakerLoudIcon,
+  UpdateIcon,
 } from "@radix-ui/react-icons";
 import { DropdownMenu, Popover, Separator, Slider } from "radix-ui";
 import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon } from "../../icons";
@@ -30,12 +31,14 @@ function App() {
   const [searchInput, setSearchInput] = useState("");
   const [isMeet, setIsMeet] = useState<boolean>(false);
   const [soundButtons, setSoundButtons] = useState<any[]>([]);
+  const [folders, setFolders] = useState<{ name: string; slug: string }[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const [folderSelectWidth, setFolderSelectWidth] = useState(0);
 
   const [fxVolume, setFxVolume] = useState(25);
   const [micMuted, setMicMuted] = useState(false);
-  const [selectedFolder, setSelectedFolder] = useState("favorites");
+  const [selectedFolder, setSelectedFolder] = useState("");
 
   const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
     fallback: 25,
@@ -44,7 +47,7 @@ function App() {
     fallback: false,
   });
   const selectedFolderStorage = storage.defineItem<string>(
-    "session:selectedFolder",
+    "local:selectedFolder",
     {
       fallback: "favorites",
     }
@@ -63,6 +66,7 @@ function App() {
   };
 
   async function fetchSounds() {
+    setIsSyncing(true);
     console.log("Fetching sounds...");
     try {
       const response = await getDefaultSounds();
@@ -70,7 +74,8 @@ function App() {
       const sounds = await Promise.all(
         response.data.map(async (sound: any) => {
           const id = sound.id;
-          const { name, color, emoji, audio_file_url } = sound.attributes;
+          const { name, color, emoji, folders, audio_file_url } =
+            sound.attributes;
           const fullUrl = `http://localhost:3001${audio_file_url}`;
 
           const isCached = await isSoundCached(id);
@@ -88,10 +93,24 @@ function App() {
             label: name,
             color: color || "gray",
             emoji: emoji || "🎵",
+            folders: folders || [],
           };
         })
       );
+
+      // finds all folders that have sounds in them
+      const usedFolders: { name: string; slug: string }[] = [];
+      sounds.forEach((sound: any) => {
+        sound.folders.forEach((folder: any) => {
+          if (!usedFolders.some((f: any) => f.slug === folder.slug)) {
+            usedFolders.push(folder);
+          }
+        });
+      });
+
+      setFolders(usedFolders);
       setSoundButtons(sounds);
+      setIsSyncing(false);
     } catch (err) {
       console.error("Failed to fetch sounds:", err);
     }
@@ -154,8 +173,23 @@ function App() {
     }
   }
 
-  function openTab() {
-    browser.tabs.create({ url: browser.runtime.getURL("/fullpage.html") });
+  function sortAndFilter() {
+    let outputSounds;
+    if (selectedFolder !== "") {
+      outputSounds = soundButtons.filter((sound) =>
+        sound.folders.some((folder: any) => folder.slug === selectedFolder)
+      );
+    } else {
+      outputSounds = soundButtons;
+    }
+
+    if (searchInput !== "") {
+      outputSounds = fuzzysort
+        .go(searchInput, outputSounds, { key: "label" })
+        .map((result) => result.obj);
+    }
+
+    return outputSounds;
   }
 
   useEffect(() => {
@@ -188,80 +222,13 @@ function App() {
       browser.runtime.onMessage.removeListener(listener);
     };
   }, []);
+
   useEffect(() => {
     fetchSounds();
   }, []);
 
-  const tempButtons: Array<{
-    label: string;
-    color: string;
-    emoji: string;
-    url: PublicPath;
-  }> = [
-    {
-      label: "Applause",
-      color: "#BB27FF",
-      emoji: "👏",
-      url: "/sounds/applause.mp3",
-    },
-    {
-      label: "Airhorn",
-      color: "#E90C13",
-      emoji: "🔉",
-      url: "/sounds/airhorn.mp3",
-    },
-    {
-      label: "Anime Wow",
-      color: "#FF4BD8",
-      emoji: "🎉",
-      url: "/sounds/anime-wow.mp3",
-    },
-    {
-      label: "Crickets",
-      color: "#FF6E42",
-      emoji: "🦗",
-      url: "/sounds/crickets.mp3",
-    },
-    {
-      label: "Explosion",
-      color: "#008573",
-      emoji: "💥",
-      url: "/sounds/explosion.mp3",
-    },
-    {
-      label: "Duck",
-      color: "#00D5B8",
-      emoji: "🦆",
-      url: "/sounds/quack.mp3",
-    },
-    {
-      label: "Splat",
-      color: "#6200AD",
-      emoji: "♠️",
-      url: "/sounds/splat.mp3",
-    },
-    {
-      label: "Drumroll",
-      color: "#FFC53D",
-      emoji: "🥁",
-      url: "/sounds/drumroll.mp3",
-    },
-    {
-      label: "Yippee",
-      color: "#00C8FF",
-      emoji: "🏳️‍🌈",
-      url: "/sounds/yippee.mp3",
-    },
-    {
-      label: "Undertale Music",
-      color: "#5373F2",
-      emoji: "🎵",
-      url: "/sounds/bg-music.mp3",
-    },
-  ];
-
   function handleSync() {
-    console.log("This would sync!");
+    fetchSounds();
   }
 
   useEffect(() => {
@@ -271,7 +238,9 @@ function App() {
 
     if (context) {
       context.font = `12px 'Instrument Sans', sans-serif`;
-      const textWidth = context.measureText(selectedFolder).width;
+      const textWidth = context.measureText(
+        selectedFolder === "" ? "All Sounds" : selectedFolder
+      ).width;
       setFolderSelectWidth(textWidth + 48);
     }
   }, [selectedFolder]);
@@ -303,6 +272,14 @@ function App() {
       navigator.mediaSession.setActionHandler("pause", () => {});
     }
   }, []);
+
+  useEffect(() => {
+    // If the selected folder is deleted
+    if (!folders.some((folder) => folder.slug === selectedFolder)) {
+      setSelectedFolder("");
+      selectedFolderStorage.setValue("");
+    }
+  }, [folders]);
 
   return (
     <>
@@ -480,10 +457,12 @@ function App() {
               width: `${folderSelectWidth}px`,
             }}
           >
-            <option value="favorites">Favorites</option>
-            <option value="jokes">Jokes</option>
-            <option value="dungeons-and-dragons">Dungeons & Dragons</option>
-            <option value="misc">Misc</option>
+            <option value="">All Sounds</option>
+            {folders.map((folder) => (
+              <option value={folder.slug} key={folder.slug}>
+                {folder.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -494,21 +473,22 @@ function App() {
             minHeight: soundButtonOverflow ? undefined : "500px",
           }}
         >
-          {(searchInput !== ""
-            ? fuzzysort
-                .go(searchInput, soundButtons, { key: "label" })
-                .map((result) => result.obj)
-            : soundButtons
-          ).map((button) => (
-            <SoundButton
-              label={button.label}
-              key={button.label}
-              color={button.color}
-              emoji={button.emoji}
-              onClick={() => playSound(button.id)}
-              isPlaying={currentlyPlaying === button.id}
-            />
-          ))}
+          {isSyncing ? (
+            <UpdateIcon className="spinIcon spinIconLarge" />
+          ) : (
+            <>
+              {sortAndFilter().map((button) => (
+                <SoundButton
+                  label={button.label}
+                  key={button.label}
+                  color={button.color}
+                  emoji={button.emoji}
+                  onClick={() => playSound(button.id)}
+                  isPlaying={currentlyPlaying === button.id}
+                />
+              ))}
+            </>
+          )}
         </div>
         <div className="connectedStatusWrapper">
           <h2>Google Meet Status:</h2>

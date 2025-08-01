@@ -1,36 +1,47 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  tempButtons as sounds,
-  tempFolders as folders,
-} from "../util/tempData";
 import SoundGroup from "./SoundGroup";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { UpdateIcon } from "@radix-ui/react-icons";
 
 const FolderView = () => {
   const navigate = useNavigate();
   const { folder } = useParams();
-  const [folderName, setFolderName] = useState("");
+
+  const { data: folders = [], isLoading } = useQuery({
+    queryKey: ["folders", "minimalFolders"],
+    queryFn: () =>
+      fetch(
+        `${import.meta.env.VITE_API_HOST}:${
+          import.meta.env.VITE_API_PORT
+        }/folders/folder_slug_list`
+      ).then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch folder slugs");
+        return res.json();
+      }),
+  });
 
   useEffect(() => {
-    const foundFolder = folders.find((f) => f.slug === folder);
+    if (isLoading) return;
 
-    if (!folder || !foundFolder) {
-      navigate("/folders");
+    if (!folder || !folders.some((f: any) => f.slug === folder)) {
+      navigate("/folders", { replace: true });
     }
-    setFolderName(foundFolder?.name ?? "");
-  }, [folder, navigate, setFolderName]);
+  }, [folder, folders, isLoading, navigate]);
 
   return (
     <>
-      <SoundGroup
-        title={folderName ?? ""}
-        icon="archive"
-        sounds={sounds.filter((sound) =>
-          sound.folders.includes(folderName ?? "")
-        )}
-        backLink="/folders"
-        style={{ paddingTop: 0 }}
-      />
+      {isLoading ? (
+        <UpdateIcon className="spinIcon spinIconLarge" />
+      ) : (
+        <SoundGroup
+          folderSlug={folder ?? ""}
+          icon="archive"
+          backLink="/folders"
+          style={{ paddingTop: 0 }}
+        />
+      )}
     </>
   );
 };

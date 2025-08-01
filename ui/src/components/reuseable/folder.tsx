@@ -1,6 +1,6 @@
 import * as React from "react";
 import "./folder.css";
-import type { SoundType } from "../../util/tempData";
+import type { SoundType } from "../../util/placeholderData";
 import { Link } from "react-router-dom";
 import {
   Cross2Icon,
@@ -10,11 +10,14 @@ import {
   Pencil1Icon,
   PlusCircledIcon,
   TrashIcon,
+  UpdateIcon,
 } from "@radix-ui/react-icons";
 import { Dialog, DropdownMenu, Form } from "radix-ui";
 import { TextInput } from "./input";
 import { Button } from "./button";
 import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "../../util/db";
 
 export interface SoundButtonDisplayProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -66,8 +69,8 @@ export interface FolderButtonProps
   slug: string;
   numSounds: number;
   firstSounds: SoundType; // only the first 4 (for display)
-  editFunction: (name: string) => void;
-  deleteFunction: (name: string) => void;
+  editFunction: (name: string, slug: string) => void;
+  deleteFunction: (name: string, slug: string) => void;
 }
 
 const FolderButton = ({
@@ -114,14 +117,14 @@ const FolderButton = ({
             >
               <DropdownMenu.Item
                 className="soundButtonMenuItem"
-                onSelect={() => editFunction(name)}
+                onSelect={() => editFunction(name, slug)}
               >
                 <Pencil1Icon className="soundButtonMenuItemIcon" />
                 Edit
               </DropdownMenu.Item>
               <DropdownMenu.Item
                 className="soundButtonMenuItem soundButtonMenuItemDanger"
-                onSelect={() => deleteFunction(name)}
+                onSelect={() => deleteFunction(name, slug)}
               >
                 <TrashIcon className="soundButtonMenuItemIcon" />
                 Delete Folder
@@ -207,33 +210,106 @@ const NewFolderButton = ({
 export interface EditFolderProps
   extends React.ComponentPropsWithoutRef<typeof Dialog.Root> {
   previousName?: string;
+  slug?: string;
   className?: string;
+  open: boolean;
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const EditFolderDialog = ({
   previousName = "",
+  slug = "",
   className = "",
+  open,
   onOpenChange,
   children,
   ...props
 }: EditFolderProps) => {
   const classes = `editFolderDialog ${className}`.trim();
   const [name, setName] = useState(previousName);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const editFolderMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const formData = new FormData();
+      formData.append("folder[name]", name);
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_HOST}:${
+          import.meta.env.VITE_API_PORT
+        }/folders/${slug}`,
+        {
+          method: "PATCH",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to edit folder");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      onOpenChange(false);
+    },
+  });
+
+  const createFolderMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const formData = new FormData();
+      formData.append("folder[name]", name);
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_HOST}:${
+          import.meta.env.VITE_API_PORT
+        }/folders`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to add folder");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
+      onOpenChange(false);
+    },
+  });
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    setIsSaving(true);
+    event.preventDefault();
+    event.stopPropagation();
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    if (slug === "") {
+      createFolderMutation.mutate(data.name as string);
+    } else {
+      editFolderMutation.mutate(data.name as string);
+    }
+    setIsSaving(false);
+  }
 
   function resetOnOpen() {
     setName(previousName);
   }
 
   useEffect(() => {
-    if (props.open) {
+    if (open) {
       resetOnOpen();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.open]);
+  }, [open]);
 
   return (
     <Dialog.Root
+      open={open}
       onOpenChange={(open) => {
         resetOnOpen();
         onOpenChange(open);
@@ -244,19 +320,12 @@ const EditFolderDialog = ({
       <Dialog.Portal>
         <Dialog.Overlay className="dialogOverlay" />
         <Dialog.Content className={classes}>
-          <Form.Root
-            onSubmit={(e) => {
-              e.preventDefault();
-              const data = Object.fromEntries(new FormData(e.currentTarget));
-              console.log(data);
-              onOpenChange(false);
-            }}
-          >
+          <Form.Root onSubmit={handleSubmit}>
             <Form.Field name="name">
               <Dialog.Title>
                 <Form.Label>
                   <h3 className="popoverTitle">
-                    {previousName ? "Edit" : "Create"} Folder
+                    {slug ? "Edit" : "Create"} Folder
                   </h3>
                 </Form.Label>
               </Dialog.Title>
@@ -274,7 +343,9 @@ const EditFolderDialog = ({
               </Form.Control>
             </Form.Field>
             <Form.Submit asChild>
-              <Button className="rightAlign">Done</Button>
+              <Button className="rightAlign" disabled={isSaving}>
+                {isSaving ? <UpdateIcon className="spinIcon" /> : "Done"}
+              </Button>
             </Form.Submit>
           </Form.Root>
           <Dialog.Close asChild>

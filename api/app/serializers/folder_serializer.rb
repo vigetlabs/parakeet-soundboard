@@ -11,7 +11,8 @@ class FolderSerializer
         color: sound.color,
         emoji: sound.emoji,
         audio_file_url: (Rails.application.routes.url_helpers.rails_blob_url(sound.audio_file, only_path: true) if sound.audio_file.attached?),
-        tags: sound.tags.map { |tag| { id: tag.id, name: tag.name, color: tag.color } }
+        tags: sound.tags.map { |tag| { id: tag.id, name: tag.name, color: tag.color } },
+        folders: sound.folders.map { |folder| { name: folder.name, slug: folder.slug } },
       }
     end
   end

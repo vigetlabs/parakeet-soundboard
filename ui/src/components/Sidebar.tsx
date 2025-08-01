@@ -6,6 +6,7 @@ import { EditDialog } from "./reuseable/editDialog";
 import { Slider } from "radix-ui";
 import { SpeakerLoudIcon, StopIcon } from "@radix-ui/react-icons";
 import { AudioPlayer, useAudioPlaying } from "../util/audio";
+import type { Tag } from "./reuseable/tagPicker";
 
 interface Props {
   children: React.ReactNode;
@@ -15,9 +16,10 @@ const Sidebar = ({ children }: Props) => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
-  const [filterTags, setFilterTags] = useState<string[]>([]);
+  const [filterTags, setFilterTags] = useState<Tag[]>([]);
   const isPlaying = useAudioPlaying();
   const [volume, setVolume] = useState(50);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   function updateVolume(value: number) {
     setVolume(value);
@@ -27,9 +29,12 @@ const Sidebar = ({ children }: Props) => {
 
   useEffect(() => {
     if (search.trim() === "") {
-      setSearchParams({ filter: filterTags });
+      setSearchParams({ filter: filterTags.map((tag) => tag.name) });
     } else {
-      setSearchParams({ search: search.trim(), filter: filterTags });
+      setSearchParams({
+        search: search.trim(),
+        filter: filterTags.map((tag) => tag.name),
+      });
     }
   }, [search, filterTags, setSearchParams]);
 
@@ -40,7 +45,9 @@ const Sidebar = ({ children }: Props) => {
 
   useEffect(() => {
     setSearch(searchParams.get("search") ?? "");
-    setFilterTags(searchParams.getAll("filter") ?? []);
+    setFilterTags(
+      searchParams.getAll("filter").map((tag) => ({ name: tag })) ?? []
+    );
   }, [searchParams]);
 
   useEffect(() => {
@@ -69,7 +76,11 @@ const Sidebar = ({ children }: Props) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <EditDialog uploadFirst>
+          <EditDialog
+            uploadFirst
+            open={uploadOpen}
+            onOpenChange={setUploadOpen}
+          >
             <Button icon="plus">Upload</Button>
           </EditDialog>
         </div>

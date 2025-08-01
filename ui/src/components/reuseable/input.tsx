@@ -6,7 +6,7 @@ import {
   EyeOpenIcon,
 } from "@radix-ui/react-icons";
 import "./input.css";
-import { TagPicker } from "./tagPicker";
+import { TagPicker, type Tag } from "./tagPicker";
 import { chooseIcon, type AvaliableIcons } from "../../util";
 
 export interface TextInputProps
@@ -17,9 +17,9 @@ export interface TextInputProps
   rightIconAction?: () => void;
   iconSize?: number;
   filter?: boolean;
-  filterOptions?: string[];
+  filterOptions?: Tag[];
+  setFilterOptions?: React.Dispatch<React.SetStateAction<Tag[]>>;
   filterDisabled?: boolean;
-  setFilterOptions?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const TextInput = ({

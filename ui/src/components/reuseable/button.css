@@ -13,14 +13,13 @@
   border: 2px solid transparent;
   transition: all 0.2s ease-in-out;
 }
-
 .button:hover {
   background-color: var(--primary-active-lighter);
   color: var(--primary-active);
   border-color: var(--primary-active);
 }
-
-.button:focus {
+.button:focus,
+.button:disabled {
   background-color: var(--primary-active);
   color: var(--elevated-background);
 }
@@ -50,6 +49,9 @@
 .buttonEmoji {
   font-size: 2em;
   line-height: 1;
+
+  /* text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white,
+    1px 1px 0 white; */
 }
 
 .soundButtonLabel {

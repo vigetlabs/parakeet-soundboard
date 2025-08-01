@@ -3,6 +3,7 @@
   border-radius: 24px;
   padding: 32px;
   border: 2px solid var(--primary-muted);
+  min-width: 100px;
 }
 
 .tagContainer {

@@ -446,3 +446,25 @@
   height: 12px;
   width: 12px;
 }
+
+.spinIcon {
+  height: 1.25em;
+  width: 1.25em;
+  animation: spin 1s linear infinite;
+  margin: auto;
+  grid-column: span 4;
+}
+.spinIconLarge {
+  padding: 16px;
+  height: 48px;
+  width: 48px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
