@@ -1,0 +1,27 @@
+#root {
+  max-width: 750px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  width: 160px;
+  height: 160px;
+}
+
+.inlineIcon {
+  height: 1em;
+  width: 1em;
+  transform: translateY(3px);
+}
+
+.footnote {
+  color: var(--primary-disabled);
+  font-size: 1.25rem;
+}
+
+.credits {
+  color: var(--primary-disabled);
+  font-size: 1rem;
+}

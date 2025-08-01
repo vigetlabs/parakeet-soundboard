@@ -1,21 +1,39 @@
-import { tempButtons as sounds } from "../util/tempData";
+import { useQuery } from "@tanstack/react-query";
 import SoundGroup from "./SoundGroup";
+import { UpdateIcon } from "@radix-ui/react-icons";
+import { API_URL } from "../util/db";
 
 const Home = () => {
+  const { data: favoriteFolder, isLoading } = useQuery({
+    queryKey: ["sounds", "favorites"],
+    queryFn: () => {
+      return fetch(`${API_URL}/folders/favorites`).then(async (res) => {
+        if (!res.ok) throw new Error("Failed to fetch favorite sounds");
+
+        const data = (await res.json()).data.attributes;
+        const out = {
+          name: data.name,
+          sounds: data.sounds,
+        };
+        return out;
+      });
+    },
+  });
+
   return (
     <>
       <h1>Welcome to Parakeet!</h1>
       <p>Want to upload your own sounds? Sign up or log in</p>
-      {sounds.some((button) => button.folders.includes("Favorites")) && (
-        <SoundGroup
-          title="Favorites"
-          icon="star"
-          sounds={sounds.filter((sound) => {
-            return sound.folders.includes("Favorites");
-          })}
-        />
+      {isLoading ? (
+        <UpdateIcon className="spinIcon spinIconLarge" />
+      ) : (
+        <>
+          {favoriteFolder?.sounds.length > 0 && (
+            <SoundGroup title="Favorites" folderSlug="favorites" icon="star" />
+          )}
+          <SoundGroup title="All Sounds" folderSlug="" icon="disc" />
+        </>
       )}
-      <SoundGroup title="All Sounds" icon="disc" sounds={sounds} />
     </>
   );
 };

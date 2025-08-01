@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_URL } from "./db";
 
 export class AudioPlayer {
   static audio = new Audio();
@@ -13,9 +14,7 @@ export class AudioPlayer {
     this.audio.pause();
     this.audio.currentTime = 0;
     this.audio.volume = this.volume;
-    this.audio.src =
-      `${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}` +
-      fileURL;
+    this.audio.src = API_URL + fileURL;
     this.audio.play().catch((err) => console.error("Playback failed:", err));
     this.setActive(true);
     if (onEnd) {

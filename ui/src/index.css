@@ -60,6 +60,9 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+button:disabled {
+  cursor: not-allowed;
+}
 
 .visually-hidden {
   clip: rect(0 0 0 0);

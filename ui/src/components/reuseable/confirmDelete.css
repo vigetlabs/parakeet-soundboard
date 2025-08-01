@@ -25,13 +25,12 @@
   background-color: var(--warning-light);
   color: inherit;
 }
-
 .dangerButton:hover {
   border-color: var(--warning);
   color: var(--warning);
 }
-
-.dangerButton:focus {
+.dangerButton:focus,
+.dangerButton:disabled {
   background-color: var(--warning);
   color: var(--elevated-background);
 }

@@ -367,15 +367,17 @@
   height: fit-content;
   cursor: text;
   transition: all 0.2s ease-in-out;
-
-  &:hover {
-    box-shadow: 0 0 0 1px var(--primary-active);
-  }
-
-  &:focus-within {
-    background-color: var(--primary-hover);
-    box-shadow: 0 0 0 2px var(--primary-active);
-  }
+}
+.textInputWrapper:hover {
+  box-shadow: 0 0 0 1px var(--primary-active);
+}
+.textInputWrapper:focus-within {
+  background-color: var(--primary-hover);
+  box-shadow: 0 0 0 2px var(--primary-active);
+}
+.textInputWrapper:has(input:not(:placeholder-shown)) {
+  background-color: var(--primary-hover);
+  filter: drop-shadow(0 0 5px var(--primary-hover));
 }
 
 .textInput {
@@ -385,6 +387,10 @@
   color: inherit;
   line-height: 1;
   width: 100%;
+}
+.textInput::selection {
+  background: var(--primary-active);
+  color: var(--elevated-background);
 }
 
 .textInputIcon {
@@ -445,4 +451,26 @@
 .connectedStatusIcon {
   height: 12px;
   width: 12px;
+}
+
+.spinIcon {
+  height: 1.25em;
+  width: 1.25em;
+  animation: spin 1s linear infinite;
+  margin: auto;
+  grid-column: span 4;
+}
+.spinIconLarge {
+  padding: 16px;
+  height: 48px;
+  width: 48px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

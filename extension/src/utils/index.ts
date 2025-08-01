@@ -166,3 +166,7 @@ export async function URLIsValid() {
   ); // TODO: Change this to a toast
   return false;
 }
+
+export function openInfoPage() {
+  browser.tabs.create({ url: browser.runtime.getURL("/infopage.html") });
+}

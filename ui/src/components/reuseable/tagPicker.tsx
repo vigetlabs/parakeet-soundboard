@@ -1,13 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { Popover, Toggle } from "radix-ui";
 import "./tagPicker.css";
-import { Cross2Icon } from "@radix-ui/react-icons";
-import { tempTags } from "../../util/tempData";
+import { Cross2Icon, UpdateIcon } from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
+import type { Tag } from "../../util/types";
+import { API_URL } from "../../util/db";
 
 export interface TagPickerProps
   extends React.ComponentPropsWithoutRef<typeof Popover.Content> {
-  selectedTags: string[];
-  setSelectedTags: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedTags: Tag[];
+  setSelectedTags: React.Dispatch<React.SetStateAction<Tag[]>>;
   disabled?: boolean;
 }
 
@@ -22,11 +25,30 @@ const TagPicker = ({
 }: TagPickerProps) => {
   const classes = `tagPicker ${className}`.trim();
 
-  function handleTagClick(tag: string, pressed: boolean) {
+  const { data: tags, isLoading } = useQuery({
+    queryKey: ["tags", "allTags"],
+    queryFn: () =>
+      fetch(`${API_URL}/tags`).then(async (res) => {
+        if (!res.ok) throw new Error("Failed to fetch tags");
+
+        const rawTags = (await res.json()).data;
+        return rawTags
+          .sort((a: any, b: any) => parseInt(a.id) - parseInt(b.id))
+          .map((tag: any) => {
+            return {
+              name: tag.attributes.name,
+              id: parseInt(tag.id),
+              color: tag.attributes.color,
+            };
+          });
+      }),
+  });
+
+  function handleTagClick(tag: any, pressed: boolean) {
     if (pressed) {
       setSelectedTags((prev) => [...prev, tag]);
     } else {
-      setSelectedTags((prev) => prev.filter((t) => t !== tag));
+      setSelectedTags((prev) => prev.filter((t) => t.name !== tag.name));
     }
   }
 
@@ -50,26 +72,32 @@ const TagPicker = ({
           {...props}
         >
           <h3 className="popoverTitle">Tags</h3>
-          <div className="tagContainer">
-            {tempTags.map((tag) => (
-              <Toggle.Root
-                key={tag.name}
-                className="tagToggle"
-                pressed={selectedTags.includes(tag.name)}
-                onPressedChange={(pressed) => handleTagClick(tag.name, pressed)}
-              >
-                {tag.name}
-              </Toggle.Root>
-            ))}
-          </div>
-          <div className="tagPickerClearContainer">
-            <button
-              className="tagPickerClearButton"
-              onClick={() => setSelectedTags([])}
-            >
-              Clear All
-            </button>
-          </div>
+          {isLoading ? (
+            <UpdateIcon className="spinIcon spinIconLarge" />
+          ) : (
+            <>
+              <div className="tagContainer">
+                {(tags ?? []).map((tag: any) => (
+                  <Toggle.Root
+                    key={tag.name}
+                    className="tagToggle"
+                    pressed={selectedTags.some((t) => t.name == tag.name)}
+                    onPressedChange={(pressed) => handleTagClick(tag, pressed)}
+                  >
+                    {tag.name}
+                  </Toggle.Root>
+                ))}
+              </div>
+              <div className="tagPickerClearContainer">
+                <button
+                  className="tagPickerClearButton"
+                  onClick={() => setSelectedTags([])}
+                >
+                  Clear All
+                </button>
+              </div>
+            </>
+          )}
           <Popover.Close className="tagPickerClose" aria-label="Close">
             <Cross2Icon className="tagPickerCloseIcon" />
           </Popover.Close>

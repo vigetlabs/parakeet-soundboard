@@ -19,6 +19,17 @@ class FoldersController < ApplicationController
     render json: FolderSerializer.new(folders).serializable_hash.to_json
   end
 
+  # GET /folder_slug_list
+  def folder_slug_list
+    folder_slugs = Folder.pluck(:slug, :name, :id).map { |slug, name, id| { slug: slug, name: name, id: id } }
+    render json: folder_slugs
+  end
+
+  def get_name
+    folder = Folder.find_by(slug: params[:slug])
+    render json: { name: folder.name }
+  end
+
   # GET /folders/:slug
   def show
     render json: FolderSerializer.new(folder).serializable_hash.to_json

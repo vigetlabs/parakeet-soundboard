@@ -6,6 +6,9 @@ import { EditDialog } from "./reuseable/editDialog";
 import { Slider } from "radix-ui";
 import { SpeakerLoudIcon, StopIcon } from "@radix-ui/react-icons";
 import { AudioPlayer, useAudioPlaying } from "../util/audio";
+import { useQuery } from "@tanstack/react-query";
+import type { Tag } from "../util/types";
+import { API_URL } from "../util/db";
 
 interface Props {
   children: React.ReactNode;
@@ -15,9 +18,29 @@ const Sidebar = ({ children }: Props) => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
-  const [filterTags, setFilterTags] = useState<string[]>([]);
+  const [filterTags, setFilterTags] = useState<Tag[]>([]);
   const isPlaying = useAudioPlaying();
   const [volume, setVolume] = useState(50);
+  const [uploadOpen, setUploadOpen] = useState(false);
+
+  const currentFolderSlug = location.pathname.startsWith("/folders/")
+    ? location.pathname.substring(9) !== ""
+      ? location.pathname.substring(9)
+      : null
+    : null;
+
+  const { data: currentFolder = undefined } = useQuery({
+    queryKey: ["folders", currentFolderSlug],
+    queryFn: () =>
+      fetch(`${API_URL}/folders/${currentFolderSlug}/get_name`).then(
+        async (res) => {
+          if (!res.ok) throw new Error("Failed to fetch folder name");
+          const name = await res.json();
+          return { name: name.name, slug: currentFolderSlug ?? "" };
+        }
+      ),
+    enabled: currentFolderSlug !== null,
+  });
 
   function updateVolume(value: number) {
     setVolume(value);
@@ -27,9 +50,12 @@ const Sidebar = ({ children }: Props) => {
 
   useEffect(() => {
     if (search.trim() === "") {
-      setSearchParams({ filter: filterTags });
+      setSearchParams({ filter: filterTags.map((tag) => tag.name) });
     } else {
-      setSearchParams({ search: search.trim(), filter: filterTags });
+      setSearchParams({
+        search: search.trim(),
+        filter: filterTags.map((tag) => tag.name),
+      });
     }
   }, [search, filterTags, setSearchParams]);
 
@@ -40,7 +66,9 @@ const Sidebar = ({ children }: Props) => {
 
   useEffect(() => {
     setSearch(searchParams.get("search") ?? "");
-    setFilterTags(searchParams.getAll("filter") ?? []);
+    setFilterTags(
+      searchParams.getAll("filter").map((tag) => ({ name: tag })) ?? []
+    );
   }, [searchParams]);
 
   useEffect(() => {
@@ -69,7 +97,12 @@ const Sidebar = ({ children }: Props) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <EditDialog uploadFirst>
+          <EditDialog
+            uploadFirst
+            open={uploadOpen}
+            onOpenChange={setUploadOpen}
+            addToFolder={currentFolder}
+          >
             <Button icon="plus">Upload</Button>
           </EditDialog>
         </div>

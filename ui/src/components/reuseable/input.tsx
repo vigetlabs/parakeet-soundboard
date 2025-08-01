@@ -8,6 +8,7 @@ import {
 import "./input.css";
 import { TagPicker } from "./tagPicker";
 import { chooseIcon, type AvaliableIcons } from "../../util";
+import type { Tag } from "../../util/types";
 
 export interface TextInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -17,9 +18,9 @@ export interface TextInputProps
   rightIconAction?: () => void;
   iconSize?: number;
   filter?: boolean;
-  filterOptions?: string[];
+  filterOptions?: Tag[];
+  setFilterOptions?: React.Dispatch<React.SetStateAction<Tag[]>>;
   filterDisabled?: boolean;
-  setFilterOptions?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const TextInput = ({
@@ -57,7 +58,12 @@ const TextInput = ({
           align="end"
           alignOffset={-30}
         >
-          <MixerVerticalIcon className="filterInputIcon" />
+          <MixerVerticalIcon
+            className={
+              "filterInputIcon" +
+              (filterOptions?.length ?? 0 > 0 ? " filterInputIconActive" : "")
+            }
+          />
         </TagPicker>
       )}
       {rightIcon &&

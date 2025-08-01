@@ -1,6 +1,6 @@
 class SoundSerializer
   include JSONAPI::Serializer
-  attributes :name, :user_id, :color, :emoji
+  attributes :name, :id, :user_id, :color, :emoji
 
   attribute :audio_file_url do |object|
     if object.audio_file.attached?
@@ -10,10 +10,14 @@ class SoundSerializer
   attribute :tags do |object|
     object.tags.map { |tag| { id: tag.id, name: tag.name, color: tag.color } }
   end
-
-  attribute :is_favorited do |object, params|
-    user = params[:scope]
-    next false unless user.present?
-    user.favorite_folder.sounds.exists?(object.id)
+  attribute :folders do |object|
+    object.folders.map { |folder| { name: folder.name, slug: folder.slug } }
   end
+
+
+  # attribute :is_favorited do |object, params|
+  #   user = params[:scope]
+  #   next false unless user.present?
+  #   user.favorite_folder.sounds.exists?(object.id)
+  # end
 end
