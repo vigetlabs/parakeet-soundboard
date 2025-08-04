@@ -16,8 +16,8 @@ default_sounds = [
   { name: 'Crickets', file_path: 'crickets.mp3', tags: [ "Negative", "Gentle", "Nature", "Animal" ], color: "#ff6e42", emoji: "🦗" },
   { name: 'Drumroll', file_path: 'drumroll.mp3', tags: [ "Impact", "Classic", "Celebration" ], color: "#ffc53d", emoji: "🥁" },
   { name: 'Explosion', file_path: 'explosion.mp3', tags: [ "Funny", "Sharp", "Impact" ], color: "#008573", emoji: "💥" },
-  { name: 'Duck', file_path: 'quack.mp3', tags: [ "Funny", "Smooth", "Meme" ], color: "#6200ad", emoji: "♠️" },
-  { name: 'Splat', file_path: 'splat.mp3', tags: [ "Funny", "Animal", "Meme" ], color: "#00d5b8", emoji: "🦆" },
+  { name: 'Splat', file_path: 'splat.mp3', tags: [ "Funny", "Smooth", "Meme" ], color: "#6200ad", emoji: "♠️" },
+  { name: 'Quack', file_path: 'quack.mp3', tags: [ "Funny", "Animal", "Meme" ], color: "#00d5b8", emoji: "🦆" },
   { name: 'Yippee', file_path: 'yippee.mp3', tags: [ "Positive", "Funny", "Cute", "Voice", "Meme", "Celebration" ], color: "#00c8ff", emoji: "🏳️‍🌈" }
 ]
 
@@ -48,7 +48,7 @@ default_tags = [
 tag_records = default_tags.map { |t| [ t[:name], Tag.find_or_create_by!(name: t[:name]) ] }.to_h
 
 sound_records = default_sounds.map do |sound|
-  s = Sound.find_or_create_by!(name: sound[:name]) do |snd|
+  s = Sound.find_or_create_by!(name: sound[:name], color: sound[:color], emoji: sound[:emoji]) do |snd|
     snd.audio_file.attach(io: File.open(Rails.root.join("db", "seeds", "audio", sound[:file_path])), filename: sound[:file_path])
   end
 
@@ -65,7 +65,7 @@ jokes_folder = Folder.find_or_create_by!(name: "Jokes")
 dnd_folder = Folder.find_or_create_by!(name: "Dungeons & Dragons")
 misc_folder = Folder.find_or_create_by!(name: "Misc")
 
-favorites_sounds = [ 'Explosion', 'Duck', 'Drumroll', 'Yippee', 'Background Music' ]
+favorites_sounds = [ 'Explosion', 'Quack', 'Drumroll', 'Yippee', 'Background Music' ]
 jokes_sounds = [ 'Airhorn', 'Anime Wow' ]
 misc_sounds = [ 'Crickets', 'Drumroll', 'Background Music' ]
 
@@ -74,7 +74,7 @@ favorites_sounds.each do |sound_name|
   favorites_folder.sounds << sound unless favorites_folder.sounds.include?(sound)
 end
 
-jokes_folder.each do |sound_name|
+jokes_sounds.each do |sound_name|
   sound = sound_records[sound_name]
   jokes_folder.sounds << sound unless jokes_folder.sounds.include?(sound)
 end
