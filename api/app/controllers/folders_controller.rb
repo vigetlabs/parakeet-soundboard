@@ -21,7 +21,8 @@ class FoldersController < ApplicationController
 
   # GET /folder_slug_list
   def folder_slug_list
-    folder_slugs = Folder.pluck(:slug, :name, :id).map { |slug, name, id| { slug: slug, name: name, id: id } }
+    folders = Folder.where(user_id: nil).or(Folder.where(user: current_user))
+    folder_slugs = folders.pluck(:slug, :name, :id).map { |slug, name, id| { slug: slug, name: name, id: id } }
     render json: folder_slugs
   end
 
