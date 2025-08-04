@@ -10,6 +10,9 @@ class Folder < ApplicationRecord
 
   def set_slug
     base_slug = name.parameterize
+    if base_slug.blank?
+      base_slug = "folder-#{SecureRandom.hex(4)}"
+    end
     candidate = base_slug
     count = 2
 
