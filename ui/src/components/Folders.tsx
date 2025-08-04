@@ -19,6 +19,15 @@ const Home = () => {
   const [editingName, setEditingName] = useState("");
   const [editingSlug, setEditingSlug] = useState("");
 
+  const { data: folders = [], isLoading } = useQuery({
+    queryKey: ["folders", "allFolders"],
+    queryFn: () =>
+      fetch(`${API_URL}/folders`).then(async (res) => {
+        if (!res.ok) throw new Error("Failed to fetch folders");
+        return (await res.json()).data;
+      }),
+  });
+
   function handleEditClicked(name: string, slug: string) {
     setEditingName(name);
     setEditingSlug(slug);
@@ -38,24 +47,17 @@ const Home = () => {
 
     const searchInput = searchParams.get("search") ?? "";
     if (searchInput) {
-      outputFolders = fuzzysort.go(searchInput, allFolders, {
-        key: "attributes.name",
-      });
+      outputFolders = fuzzysort
+        .go(searchInput, allFolders, {
+          key: "attributes.name",
+        })
+        .map((result) => result.obj);
     } else {
       outputFolders = allFolders;
     }
 
     return outputFolders;
   }
-
-  const { data: folders = [], isLoading } = useQuery({
-    queryKey: ["folders", "allFolders"],
-    queryFn: () =>
-      fetch(`${API_URL}/folders`).then(async (res) => {
-        if (!res.ok) throw new Error("Failed to fetch folders");
-        return (await res.json()).data;
-      }),
-  });
 
   return (
     <>
