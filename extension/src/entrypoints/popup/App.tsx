@@ -1,6 +1,5 @@
 import { useState } from "react";
 import "./App.css";
-import { PublicPath } from "wxt/browser";
 import {
   postMessage,
   playLocalAudio,
@@ -23,7 +22,7 @@ import {
   SpeakerLoudIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
-import { DropdownMenu, Popover, Separator, Slider } from "radix-ui";
+import { DropdownMenu, Separator, Slider, Tooltip } from "radix-ui";
 import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon } from "../../icons";
 import fuzzysort from "fuzzysort";
 
@@ -68,10 +67,8 @@ function App() {
 
   async function fetchSounds() {
     setIsSyncing(true);
-    console.log("Fetching sounds...");
     try {
       const response = await getDefaultSounds();
-      console.log("Default Sounds:", response);
       const sounds = await Promise.all(
         response.data.map(async (sound: any) => {
           const id = sound.id;
@@ -83,10 +80,8 @@ function App() {
           if (!isCached) {
             const audioResponse = await fetch(fullUrl);
             const blob = await audioResponse.blob();
-            console.log("Caching new sound:", id);
             await storeSound(id, blob);
           } else {
-            console.log("Sound already cached:", id);
           }
 
           return {
@@ -138,9 +133,7 @@ function App() {
   }
 
   async function playSound(id: number) {
-    console.log("Playing sound with id:", id);
     const blob = await retrieveSound(id);
-    console.log("(app.tsx)Retrieved sound blob:", blob);
     const base64 = await blobToBase64(blob);
     if (isMeet) {
       postMessage(CrossFunctions.INJECT_AUDIO, {
@@ -150,6 +143,10 @@ function App() {
     }
     const success = await playLocalAudio(base64, fxVolume);
     if (success) {
+      browser.runtime.sendMessage({
+        type: CrossFunctions.SET_AUDIO_PLAYING,
+        audioID: id,
+      });
       setCurrentlyPlaying(id);
     }
   }
@@ -206,12 +203,23 @@ function App() {
       setFxVolume(await fxVolumeStorage.getValue());
       setMicMuted(await micMutedStorage.getValue());
       setSelectedFolder(await selectedFolderStorage.getValue());
+      console.log("------------------");
+      console.log(
+        await browser.runtime.sendMessage({
+          type: CrossFunctions.GET_AUDIO_PLAYING,
+        })
+      );
+      console.log("------------------");
+      setCurrentlyPlaying(
+        await browser.runtime.sendMessage({
+          type: CrossFunctions.GET_AUDIO_PLAYING,
+        })
+      );
     }
     loadStates();
   }, []);
 
   useEffect(() => {
-    // TODO: Make it check if the audio is still playing on reopen
     const listener = (msg: any) => {
       if (msg.type === CrossFunctions.AUDIO_ENDED) {
         setCurrentlyPlaying(-1);
@@ -399,28 +407,34 @@ function App() {
           <div className="controlPanelContainer">
             <h2 className="voiceLabel">
               Voice{" "}
-              <Popover.Root>
-                <Popover.Trigger asChild>
-                  <button className="iconButton infoButton">
-                    <InfoCircledIcon className="infoButtonIcon" />
-                  </button>
-                </Popover.Trigger>
-                <Popover.Portal>
-                  <Popover.Content
-                    className="infoButtonPopover"
-                    side="top"
-                    sideOffset={2}
-                    collisionPadding={8}
+              <Tooltip.Provider delayDuration={200}>
+                <Tooltip.Root>
+                  <Tooltip.Trigger
+                    asChild
+                    onClick={(event) => event.preventDefault()}
                   >
-                    <p>
-                      This extension can only inject audio when your Google Meet
-                      microphone is unmuted. To play sound effects but mute your
-                      microphone, use this button!
-                    </p>
-                    <Popover.Arrow className="infoButtonArrow" />
-                  </Popover.Content>
-                </Popover.Portal>
-              </Popover.Root>
+                    <button className="iconButton infoButton">
+                      <InfoCircledIcon className="infoButtonIcon" />
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      className="infoButtonPopover"
+                      side="top"
+                      sideOffset={2}
+                      collisionPadding={8}
+                      onClick={(event) => event.preventDefault()}
+                    >
+                      <p>
+                        This extension can only inject audio when your Google
+                        Meet microphone is unmuted. To play sound effects but
+                        mute your microphone, use this button!
+                      </p>
+                      <Tooltip.Arrow className="infoButtonArrow" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              </Tooltip.Provider>
             </h2>
             <button
               className={

@@ -96,6 +96,7 @@ const FolderButton = ({
       onMouseLeave={() => {
         setDisplayMenu(false);
       }}
+      title={name}
     >
       {name !== "Favorites" && (
         <DropdownMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>

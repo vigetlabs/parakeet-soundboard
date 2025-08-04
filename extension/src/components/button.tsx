@@ -22,7 +22,7 @@ const SoundButton = ({
   const classes = `soundButton ${className}`.trim();
 
   return (
-    <div className="soundButtonWrapper">
+    <div className="soundButtonWrapper" title={label}>
       <button
         className={classes}
         name={label}

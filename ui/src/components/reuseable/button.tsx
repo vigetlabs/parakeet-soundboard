@@ -134,6 +134,7 @@ const SoundButton = ({
       onMouseLeave={() => {
         setDisplayMenu(false);
       }}
+      title={label}
     >
       <DropdownMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenu.Trigger asChild>
@@ -250,7 +251,6 @@ const InnerIconButton = ({
           size
         )}
       </div>
-      {/* TODO: Add tooltip if the name is too long */}
       {label && <div className="iconButtonLabel">{label}</div>}
     </button>
   );

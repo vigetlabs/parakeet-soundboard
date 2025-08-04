@@ -27,21 +27,21 @@ function sendMessage(command: CrossFunctions) {
 }
 
 function base64ToArrayBuffer(base64: string) {
-  const real_base64 = base64.split(',')[1];
+  const real_base64 = base64.split(",")[1];
   const binaryString = atob(real_base64);
 
-    const length = binaryString.length;
-    const bytes = new Uint8Array(length);
+  const length = binaryString.length;
+  const bytes = new Uint8Array(length);
 
-    for (let i = 0; i < length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
+  for (let i = 0; i < length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
 
-    return bytes.buffer;
+  return bytes.buffer;
 }
 
 export default defineUnlistedScript(() => {
-  console.log("Successfully Injected!");
+  console.log("Parakeet Successfully Injected!");
 
   (async function () {
     const originalGUM = navigator.mediaDevices.getUserMedia.bind(
@@ -66,7 +66,6 @@ export default defineUnlistedScript(() => {
 
         async function playSoundEffect(base64: string, volume: number) {
           // Prepare sound‐effect node (but don’t play yet)
-          console.log("(inject.ts)Received sound effect base64");
           const buffer = base64ToArrayBuffer(base64);
           const fxBuffer = await loadEffectBuffer(audioCtx, buffer);
           let fxNode = null;
@@ -80,7 +79,6 @@ export default defineUnlistedScript(() => {
             fxGain.gain.value = 0;
           };
           fxNode.start();
-          console.log("playing new audio");
 
           window.soundboard.stopAudio = () => {
             fxGain.gain.value = 0;
@@ -155,7 +153,6 @@ export default defineUnlistedScript(() => {
     if (event.source !== window) return;
     switch (event.data.command) {
       case CrossFunctions.INJECT_AUDIO:
-        console.log("Event received for playing audio:", event.data);
         if (window.soundboard.triggerAudio) {
           window.soundboard.triggerAudio(
             event.data.base64,

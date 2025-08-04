@@ -3,6 +3,8 @@ import { CrossFunctions } from "@/utils/constants";
 export default defineBackground(() => {
   console.log("Background loaded!", { id: browser.runtime.id });
 
+  let audioPlaying = -1;
+
   browser.runtime.onInstalled.addListener(function (object) {
     if (object.reason === browser.runtime.OnInstalledReason.INSTALL) {
       openInfoPage();
@@ -28,6 +30,13 @@ export default defineBackground(() => {
       } catch (e) {
         console.error("openPopup failed:", e);
       }
+    } else if (msg.type === CrossFunctions.SET_AUDIO_PLAYING) {
+      audioPlaying = msg.audioID;
+    } else if (msg.type === CrossFunctions.GET_AUDIO_PLAYING) {
+      sendResponse(audioPlaying);
+      return true;
+    } else if (msg.type === CrossFunctions.AUDIO_ENDED) {
+      audioPlaying = -1;
     }
   });
 
