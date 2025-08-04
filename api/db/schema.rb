@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_04_172702) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_04_180359) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -49,7 +49,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_04_172702) do
     t.datetime "updated_at", null: false
     t.string "slug", null: false
     t.boolean "is_favorite", default: false, null: false
-    t.index ["slug"], name: "index_folders_on_slug", unique: true
+    t.index ["user_id", "slug"], name: "index_folders_on_user_id_and_slug", unique: true
     t.index ["user_id"], name: "index_favorite_folders_unique_per_user", unique: true, where: "is_favorite"
     t.index ["user_id"], name: "index_folders_on_user_id"
   end

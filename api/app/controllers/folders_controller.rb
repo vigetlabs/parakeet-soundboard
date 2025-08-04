@@ -2,6 +2,7 @@ class FoldersController < ApplicationController
   # before_action :authenticate_user!, except: [:index, :show]
   before_action :authenticate_user!, only: [ :my_folders ] # temporary until users
   # before_action :authorize_user!, only: [ :update, :destroy, :add_sound, :remove_sound ]
+  before_action :set_current_user
 
   # GET /folders (default + a user's folder if signed in)
   def index
@@ -85,7 +86,12 @@ class FoldersController < ApplicationController
   private
 
   def folder
-    @folder ||= Folder.find_by!(slug: params[:slug])
+    if current_user
+      @folder ||= Folder.find_by(slug: params[:slug], user_id: current_user.id) ||
+        Folder.find_by(slug: params[:slug], user_id: nil)
+    else
+      @folder ||= Folder.where(user_id: nil).find_by!(slug: params[:slug])
+    end
   end
 
   def folder_params
@@ -96,5 +102,9 @@ class FoldersController < ApplicationController
     if folder.user.present? && folder.user != current_user
       render json: { error: "Not authorized" }, status: :forbidden
     end
+  end
+
+  def set_current_user
+    request.env["warden"].authenticate(scope: :user)
   end
 end

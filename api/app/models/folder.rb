@@ -5,6 +5,7 @@ class Folder < ApplicationRecord
   before_validation :set_slug, if: -> { new_record? || will_save_change_to_name? }
 
   validates :name, presence: true
+  validates :slug, uniqueness: { scope: :user_id }
 
   private
 
@@ -16,7 +17,7 @@ class Folder < ApplicationRecord
     candidate = base_slug
     count = 2
 
-    while Folder.exists?(slug: candidate)
+    while Folder.where(user_id: user_id).exists?(slug: candidate)
       candidate = "#{base_slug}-#{count}"
       count += 1
     end
