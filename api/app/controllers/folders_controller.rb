@@ -22,8 +22,8 @@ class FoldersController < ApplicationController
 
   # GET /folder_slug_list
   def folder_slug_list
-    folders = Folder.where(user_id: nil).or(Folder.where(user: current_user))
-    folder_slugs = folders.pluck(:slug, :name, :id).map { |slug, name, id| { slug: slug, name: name, id: id } }
+    folders = Folder.where(user: [ current_user, nil ])
+    folder_slugs = folders.select(:slug, :name, :id).map { |f| f.attributes }
     render json: folder_slugs
   end
 
@@ -86,11 +86,11 @@ class FoldersController < ApplicationController
   private
 
   def folder
-    if current_user
-      @folder ||= Folder.find_by(slug: params[:slug], user_id: current_user.id) ||
-        Folder.find_by(slug: params[:slug], user_id: nil)
+    @folder ||= if current_user
+      Folder.find_by(slug: params[:slug], user_id: current_user.id) ||
+      Folder.find_by(slug: params[:slug], user_id: nil)
     else
-      @folder ||= Folder.where(user_id: nil).find_by!(slug: params[:slug])
+      Folder.find_by!(slug: params[:slug], user_id: nil)
     end
   end
 
