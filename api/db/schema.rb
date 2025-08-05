@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_30_233210) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_04_180359) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -49,7 +49,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_233210) do
     t.datetime "updated_at", null: false
     t.string "slug", null: false
     t.boolean "is_favorite", default: false, null: false
-    t.index ["slug"], name: "index_folders_on_slug", unique: true
+    t.index ["user_id", "slug"], name: "index_folders_on_user_id_and_slug", unique: true
     t.index ["user_id"], name: "index_favorite_folders_unique_per_user", unique: true, where: "is_favorite"
     t.index ["user_id"], name: "index_folders_on_user_id"
   end
@@ -96,6 +96,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_233210) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "jti", null: false
+    t.string "provider"
+    t.string "uid"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["jti"], name: "index_users_on_jti", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -103,8 +105,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_233210) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "folders", "users"
-  add_foreign_key "folders_sounds", "folders"
-  add_foreign_key "folders_sounds", "sounds"
-  add_foreign_key "sounds", "users"
+  add_foreign_key "folders", "users", on_delete: :cascade
+  add_foreign_key "folders_sounds", "folders", on_delete: :cascade
+  add_foreign_key "folders_sounds", "sounds", on_delete: :cascade
+  add_foreign_key "sounds", "users", on_delete: :cascade
 end
