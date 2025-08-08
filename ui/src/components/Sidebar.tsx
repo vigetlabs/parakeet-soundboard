@@ -22,6 +22,10 @@ const Sidebar = ({ children }: Props) => {
   const isPlaying = useAudioPlaying();
   const [volume, setVolume] = useState(50);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const currentFolderSlug = location.pathname.startsWith("/folders/")
     ? location.pathname.substring(9) !== ""
@@ -77,6 +81,36 @@ const Sidebar = ({ children }: Props) => {
     AudioPlayer.setVolume(localVolume);
   }, [setVolume]);
 
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoginError(null);
+    try {
+      const res = await fetch("http://localhost:3001/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: { email: loginEmail, password: loginPassword },
+        }),
+      });
+      const data = await res.json();
+      let token = data.token;
+      if (!token) {
+        const authHeader = res.headers.get("Authorization");
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+          token = authHeader.split(" ")[1];
+        }
+      }
+      if (!token) throw new Error("No token received");
+      localStorage.setItem("jwt", token);
+      setShowLogin(false);
+      setLoginEmail("");
+      setLoginPassword("");
+      alert("Logged in!");
+    } catch {
+      setLoginError("Login failed");
+    }
+  }
+
   return (
     <>
       <div className="sidebarWrapper">
@@ -129,7 +163,11 @@ const Sidebar = ({ children }: Props) => {
                 />
               </Link>
             </div>
-            <IconButton icon="person" label="Account" />
+            <IconButton
+              icon="person"
+              label="Account"
+              onClick={() => setShowLogin(true)}
+            />
           </div>
           <div className="contentArea">{children}</div>
         </div>
@@ -163,6 +201,49 @@ const Sidebar = ({ children }: Props) => {
           <StopIcon className="controlBarStopIcon" />
         </button>
       </div>
+      {showLogin && (
+        <div
+          style={{
+            position: "fixed",
+            top: 100,
+            left: 100,
+            background: "white",
+            zIndex: 9999,
+            padding: 24,
+            border: "1px solid #ccc",
+            borderRadius: 8,
+          }}
+        >
+          <form onSubmit={handleLogin}>
+            <h3>Login</h3>
+            {loginError && <p style={{ color: "red" }}>{loginError}</p>}
+            <input
+              type="email"
+              placeholder="Email"
+              required
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              style={{ display: "block", marginBottom: 8 }}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              required
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              style={{ display: "block", marginBottom: 8 }}
+            />
+            <button type="submit">Login</button>
+            <button
+              type="button"
+              onClick={() => setShowLogin(false)}
+              style={{ marginLeft: 8 }}
+            >
+              Close
+            </button>
+          </form>
+        </div>
+      )}
     </>
   );
 };
