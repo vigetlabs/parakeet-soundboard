@@ -13,7 +13,11 @@ const FolderView = () => {
   const { data: folders = [], isLoading } = useQuery({
     queryKey: ["folders", "minimalFolders"],
     queryFn: () =>
-      fetch(`${API_URL}/folders/folder_slug_list`).then((res) => {
+      fetch(`${API_URL}/folders/folder_slug_list`, {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      }).then((res) => {
         if (!res.ok) throw new Error("Failed to fetch folder slugs");
         return res.json();
       }),

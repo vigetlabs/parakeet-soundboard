@@ -90,7 +90,6 @@ const Sidebar = ({ children }: Props) => {
   }, []);
 
   async function handleLogin(e: React.FormEvent) {
-    console.log("handleLogin called");
     e.preventDefault();
     setLoginError(null);
     try {

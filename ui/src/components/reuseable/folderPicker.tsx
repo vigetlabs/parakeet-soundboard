@@ -69,7 +69,11 @@ const FolderPicker = ({
   const { data: folders = [], isLoading } = useQuery({
     queryKey: ["folders", "minimalFolders"],
     queryFn: () =>
-      fetch(`${API_URL}/folders/folder_slug_list`).then(async (res) => {
+      fetch(`${API_URL}/folders/folder_slug_list`, {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      }).then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch folder slugs");
         const rawFolders = await res.json();
         return rawFolders.sort(
