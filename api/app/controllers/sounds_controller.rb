@@ -36,8 +36,9 @@ class SoundsController < ApplicationController
   end
 
   def create
-    sound = Sound.new(sound_params)
+    sound = Sound.new(sound_params.except(:folder_slugs))
     sound.user = current_user if user_signed_in?
+    sound.folders = Folder.where(slug: sound_params[:folder_slugs], user: current_user) if sound_params[:folder_slugs].present?
     sound.audio_file.attach(sound_params[:audio_file])
     sound.tag_ids = sound_params[:tag_ids] if sound_params[:tag_ids]
     if sound.save
@@ -48,7 +49,8 @@ class SoundsController < ApplicationController
   end
 
   def update
-    if sound.update(sound_params)
+    if sound.update(sound_params.except(:folder_slugs))
+      sound.folders = Folder.where(slug: sound_params[:folder_slugs], user: current_user) if sound_params[:folder_slugs].present?
       render json: SoundSerializer.new(sound,  params: { scope: current_user }).serializable_hash.to_json
     else
       render json: { errors: sound.errors }, status: :unprocessable_entity
@@ -59,10 +61,7 @@ class SoundsController < ApplicationController
   def set_folders
     folder_slugs = params[:folder_slugs] || []
 
-    folders = Folder
-      .where(slug: folder_slugs)
-      .where(user_id: nil)
-      .or(Folder.where(slug: folder_slugs, user: current_user))
+    folders = Folder.where(slug: folder_slugs, user: current_user)
 
     sound.folders = folders
     sound.save!
