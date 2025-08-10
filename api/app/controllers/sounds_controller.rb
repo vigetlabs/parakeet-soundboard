@@ -1,7 +1,7 @@
 class SoundsController < ApplicationController
-  # before_action :authenticate_user!, except: [ :index, :show, :in_folders ]
-  # before_action :authorize_user!, only: [ :update, :destroy, :set_folders ]
-  before_action :set_current_user, only: [ :index, :show, :in_folders, :my_sounds, :create, :update, :destroy ]
+  before_action :authenticate_user!, except: [ :index, :show, :in_folders ]
+  before_action :authorize_user!, only: [ :update, :destroy, :set_folders ]
+  before_action :set_current_user
 
   def index
     if current_user
