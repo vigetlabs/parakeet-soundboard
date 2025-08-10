@@ -24,6 +24,7 @@ const Sidebar = ({ children }: Props) => {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
+  const [username, setUsername] = useState<string | null>(null);
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
 
@@ -81,7 +82,15 @@ const Sidebar = ({ children }: Props) => {
     AudioPlayer.setVolume(localVolume);
   }, [setVolume]);
 
+  useEffect(() => {
+    const savedUsername = localStorage.getItem("username");
+    if (savedUsername) {
+      setUsername(savedUsername);
+    }
+  }, []);
+
   async function handleLogin(e: React.FormEvent) {
+    console.log("handleLogin called");
     e.preventDefault();
     setLoginError(null);
     try {
@@ -92,19 +101,19 @@ const Sidebar = ({ children }: Props) => {
           user: { email: loginEmail, password: loginPassword },
         }),
       });
-      const data = await res.json();
-      let token = data.token;
-      if (!token) {
-        const authHeader = res.headers.get("Authorization");
-        if (authHeader && authHeader.startsWith("Bearer ")) {
-          token = authHeader.split(" ")[1];
-        }
+      const response = await res.json();
+      const authHeader = res.headers.get("Authorization");
+      let token;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
       }
       if (!token) throw new Error("No token received");
       localStorage.setItem("jwt", token);
       setShowLogin(false);
       setLoginEmail("");
       setLoginPassword("");
+      setUsername(response.status.data.user.username);
+      localStorage.setItem("username", response.status.data.user.username);
       alert("Logged in!");
     } catch {
       setLoginError("Login failed");
@@ -165,7 +174,7 @@ const Sidebar = ({ children }: Props) => {
             </div>
             <IconButton
               icon="person"
-              label="Account"
+              label={username ? username : "Account"}
               onClick={() => setShowLogin(true)}
             />
           </div>
