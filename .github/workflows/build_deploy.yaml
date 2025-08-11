@@ -71,11 +71,11 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./api
+          file: ./api/Dockerfile
           platforms: linux/amd64
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          file: Dockerfile
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}/api:${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}/api:${{ env.DEPLOY_ENV }}
