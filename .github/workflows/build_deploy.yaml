@@ -92,7 +92,7 @@ jobs:
       contents: read
     env:
       DEPLOY_ENV: ${{ needs.set_env.outputs.deploy_env }}
-      VITE_API_HOST: 'api.${{ needs.set_env.outputs.deploy_env }}.parakeet.vigetx.com'
+      VITE_API_HOST: 'https://api.${{ needs.set_env.outputs.deploy_env }}.parakeet.vigetx.com'
     steps:
       - uses: actions/checkout@v4
 
