@@ -56,9 +56,10 @@ COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
 # Run and own only the runtime files as a non-root user for security
-RUN groupadd --system --gid 33 rails && \
-    useradd rails --uid 1001 --gid 33 --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
+RUN groupadd --system --gid 1001 rails && \
+    useradd rails --uid 1001 --gid 1001 --create-home --shell /bin/bash && \
+    usermod -a -G 33 rails && \
+    chown -R 1001:33 db log storage tmp
 USER 1001:33
 
 # Entrypoint prepares the database.
