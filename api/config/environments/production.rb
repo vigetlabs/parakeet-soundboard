@@ -86,5 +86,8 @@ Rails.application.configure do
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
   # TODO: Replace with the actual frontend domain when ready
-  config.allowed_cors_origins = [ "https://parakeet.vigetx.com" ]
+  config.allowed_cors_origins = [
+    "https://parakeet.vigetx.com",
+    "https://staging.parakeet.vigetx.com"
+  ]
 end
