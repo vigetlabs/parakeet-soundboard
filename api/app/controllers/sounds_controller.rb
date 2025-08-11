@@ -1,7 +1,6 @@
 class SoundsController < ApplicationController
   before_action :authenticate_user!, except: [ :index, :show, :in_folders ]
   before_action :authorize_user!, only: [ :update, :destroy, :set_folders ]
-  before_action :set_current_user
 
   def index
     if current_user
@@ -90,7 +89,4 @@ class SoundsController < ApplicationController
     end
   end
 
-  def set_current_user
-    request.env["warden"].authenticate(scope: :user)
-  end
 end
