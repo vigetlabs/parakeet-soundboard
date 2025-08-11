@@ -41,9 +41,6 @@ jobs:
   build_api:
     needs: set_env
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./api
     permissions:
       id-token: write
       contents: read
@@ -73,7 +70,7 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./api
           platforms: linux/amd64
           push: true
           cache-from: type=gha
@@ -110,6 +107,7 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
+          cache-dependency-path: ./ui
 
       - name: Install dependencies
         run: pnpm install
