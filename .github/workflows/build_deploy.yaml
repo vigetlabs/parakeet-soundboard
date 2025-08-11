@@ -152,7 +152,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ui
-          path: .
+          path: dist
 
       - name: Deploy UI
         env:
