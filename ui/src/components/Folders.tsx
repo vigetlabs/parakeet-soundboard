@@ -22,7 +22,11 @@ const Home = () => {
   const { data: folders = [], isLoading } = useQuery({
     queryKey: ["folders", "allFolders"],
     queryFn: () =>
-      fetch(`${API_URL}/folders`).then(async (res) => {
+      fetch(`${API_URL}/folders`, {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      }).then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch folders");
         return (await res.json()).data;
       }),

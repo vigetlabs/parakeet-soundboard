@@ -6,10 +6,10 @@ import {
   setLocalVolume,
   stopLocalAudio,
 } from "@/utils";
-import { getDefaultSounds, getMySounds, login } from "@/utils/api";
+import { getMySounds, getSounds, login } from "@/utils/api";
 import { CrossFunctions } from "@/utils/constants";
 import { isSoundCached, retrieveSound, storeSound } from "@/utils/db.ts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 import {
@@ -40,6 +40,12 @@ function App() {
   const [micMuted, setMicMuted] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState("");
 
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+
   const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
     fallback: 25,
   });
@@ -53,11 +59,18 @@ function App() {
     }
   );
 
+  useEffect(() => {
+    async function fetchUsername() {
+      const result = await browser.storage.local.get("username");
+      if (result && result.username) setUsername(result.username);
+    }
+    fetchUsername();
+  }, []);
+
   const handleTestLogin = async () => {
     console.log("Testing login...");
     try {
       const jwt = await login("natalietest@example.com", "password123");
-      console.log("JWT:", jwt);
       const sounds = await getMySounds();
       console.log("My Sounds:", sounds);
     } catch (err) {
@@ -68,7 +81,7 @@ function App() {
   async function fetchSounds() {
     setIsSyncing(true);
     try {
-      const response = await getDefaultSounds();
+      const response = await getSounds();
       const sounds = await Promise.all(
         response.data.map(async (sound: any) => {
           const id = sound.id;
@@ -203,13 +216,6 @@ function App() {
       setFxVolume(await fxVolumeStorage.getValue());
       setMicMuted(await micMutedStorage.getValue());
       setSelectedFolder(await selectedFolderStorage.getValue());
-      console.log("------------------");
-      console.log(
-        await browser.runtime.sendMessage({
-          type: CrossFunctions.GET_AUDIO_PLAYING,
-        })
-      );
-      console.log("------------------");
       setCurrentlyPlaying(
         await browser.runtime.sendMessage({
           type: CrossFunctions.GET_AUDIO_PLAYING,
@@ -294,6 +300,44 @@ function App() {
     }
   }, [folders]);
 
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoginError(null);
+    try {
+      const res = await fetch("http://localhost:3001/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "" },
+        body: JSON.stringify({
+          user: { email: loginEmail, password: loginPassword },
+        }),
+        credentials: "omit",
+      });
+      const response = await res.json();
+      const authHeader = res.headers.get("Authorization");
+      let token;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
+      }
+      if (!token) throw new Error("No token received");
+      try {
+        await browser.storage.local.set({ jwt: token });
+      } catch (e) {
+        console.error("Failed to store JWT in browser storage:", e);
+      }
+      await browser.storage.local.get("jwt").then((result) => {});
+      setShowLogin(false);
+      setLoginEmail("");
+      setLoginPassword("");
+      setUsername(response.status.data.user.username);
+      await browser.storage.local.set({
+        username: response.status.data.user.username,
+      });
+      alert("Logged in!");
+    } catch {
+      setLoginError("Login failed");
+    }
+  }
+
   return (
     <>
       <div className="wrapper">
@@ -359,7 +403,14 @@ function App() {
                   <QuestionMarkCircledIcon className="topBarMenuItemIcon" />
                   Help
                 </DropdownMenu.Item>
-
+                <DropdownMenu.Separator />
+                <DropdownMenu.Item
+                  className="topBarMenuItem"
+                  onSelect={() => setShowLogin(true)}
+                >
+                  <BoxIcon className="topBarMenuItemIcon" />
+                  {username ? `Logged in as ${username}` : "Login"}
+                </DropdownMenu.Item>
                 <DropdownMenu.Arrow className="topBarMenuArrow" />
               </DropdownMenu.Content>
             </DropdownMenu.Portal>
@@ -546,6 +597,49 @@ function App() {
           </p>
         </div>
       </div>
+      {showLogin && (
+        <div
+          style={{
+            position: "fixed",
+            top: 100,
+            left: 100,
+            background: "white",
+            zIndex: 9999,
+            padding: 24,
+            border: "1px solid #ccc",
+            borderRadius: 8,
+          }}
+        >
+          <form onSubmit={handleLogin}>
+            <h3>Login</h3>
+            {loginError && <p style={{ color: "red" }}>{loginError}</p>}
+            <input
+              type="email"
+              placeholder="Email"
+              required
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              style={{ display: "block", marginBottom: 8 }}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              required
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              style={{ display: "block", marginBottom: 8 }}
+            />
+            <button type="submit">Login</button>
+            <button
+              type="button"
+              onClick={() => setShowLogin(false)}
+              style={{ marginLeft: 8 }}
+            >
+              Close
+            </button>
+          </form>
+        </div>
+      )}
     </>
   );
 }

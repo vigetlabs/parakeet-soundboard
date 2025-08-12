@@ -31,6 +31,9 @@ const DeleteDialog = ({
     mutationFn: async () => {
       const res = await fetch(`${API_URL}/folders/${slug}`, {
         method: "DELETE",
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        }
       });
 
       if (res.status === 204) {
@@ -54,6 +57,9 @@ const DeleteDialog = ({
     mutationFn: async () => {
       const res = await fetch(`${API_URL}/sounds/${dbID}`, {
         method: "DELETE",
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        }
       });
 
       if (res.status === 204) {

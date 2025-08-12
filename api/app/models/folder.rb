@@ -5,15 +5,19 @@ class Folder < ApplicationRecord
   before_validation :set_slug, if: -> { new_record? || will_save_change_to_name? }
 
   validates :name, presence: true
+  validates :slug, uniqueness: { scope: :user_id }
 
   private
 
   def set_slug
     base_slug = name.parameterize
+    if base_slug.blank?
+      base_slug = "folder-#{SecureRandom.hex(4)}"
+    end
     candidate = base_slug
     count = 2
 
-    while Folder.exists?(slug: candidate)
+    while Folder.where(user_id: user_id).exists?(slug: candidate)
       candidate = "#{base_slug}-#{count}"
       count += 1
     end

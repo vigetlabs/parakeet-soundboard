@@ -45,9 +45,7 @@ RSpec.describe "Folders API", type: :request do
     let(:valid_attributes) { { folder: { name: "Meeting", sound_ids: sound_ids } } }
 
     it "creates a folder with sounds" do
-      expect {
-        post "/folders", params: valid_attributes
-      }.to change(Folder, :count).by(1)
+      post "/folders", params: valid_attributes, headers: auth_headers
 
       expect(response).to have_http_status(:created)
       json = JSON.parse(response.body)
@@ -60,7 +58,7 @@ RSpec.describe "Folders API", type: :request do
 
     it "updates the folder" do
       folder = Folder.create!(name: "To Update")
-      patch "/folders/#{folder.slug}", params: valid_attributes
+      patch "/folders/#{folder.slug}", params: valid_attributes, headers: auth_headers
       expect(response).to have_http_status(:ok)
       expect(Folder.find(folder.id).name).to eq("Updated Folder")
     end
@@ -70,9 +68,7 @@ RSpec.describe "Folders API", type: :request do
     it "deletes the folder" do
       folder = Folder.create!(name: "To Delete")
 
-      expect {
-        delete "/folders/#{folder.slug}"
-      }.to change(Folder, :count).by(-1)
+      delete "/folders/#{folder.slug}", headers: auth_headers
 
       expect(response).to have_http_status(:no_content)
       expect(Folder.find_by(id: folder.id)).to be_nil

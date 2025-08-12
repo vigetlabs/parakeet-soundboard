@@ -1,7 +1,6 @@
 class FoldersController < ApplicationController
-  # before_action :authenticate_user!, except: [:index, :show]
-  before_action :authenticate_user!, only: [ :my_folders ] # temporary until users
-  # before_action :authorize_user!, only: [ :update, :destroy, :add_sound, :remove_sound ]
+  before_action :authenticate_user!, only: [ :my_folders, :create, :update, :destroy, :add_sound, :remove_sound ]
+  before_action :authorize_user!, only: [ :update, :destroy, :add_sound, :remove_sound ]
 
   # GET /folders (default + a user's folder if signed in)
   def index
@@ -21,7 +20,8 @@ class FoldersController < ApplicationController
 
   # GET /folder_slug_list
   def folder_slug_list
-    folder_slugs = Folder.pluck(:slug, :name, :id).map { |slug, name, id| { slug: slug, name: name, id: id } }
+    folders = Folder.where(user: [ current_user, nil ])
+    folder_slugs = folders.select(:slug, :name, :id).map { |f| f.attributes }
     render json: folder_slugs
   end
 
@@ -84,7 +84,12 @@ class FoldersController < ApplicationController
   private
 
   def folder
-    @folder ||= Folder.find_by!(slug: params[:slug])
+    @folder ||= if current_user
+      Folder.find_by(slug: params[:slug], user_id: current_user.id) ||
+      Folder.find_by(slug: params[:slug], user_id: nil)
+    else
+      Folder.find_by!(slug: params[:slug], user_id: nil)
+    end
   end
 
   def folder_params
