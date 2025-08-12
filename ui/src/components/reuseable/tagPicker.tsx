@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as React from "react";
-import { Popover, Toggle } from "radix-ui";
-import "./tagPicker.css";
 import { Cross2Icon, UpdateIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import type { Tag } from "../../util/types";
+import { Popover, Toggle } from "radix-ui";
+import * as React from "react";
 import { API_URL } from "../../util/db";
+import type { Tag } from "../../util/types";
+import "./tagPicker.css";
 
 export interface TagPickerProps
   extends React.ComponentPropsWithoutRef<typeof Popover.Content> {

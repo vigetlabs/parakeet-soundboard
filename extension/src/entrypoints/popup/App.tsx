@@ -1,17 +1,16 @@
+import { storage } from "#imports";
+import {
+  openInfoPage,
+  playLocalAudio,
+  postMessage,
+  setLocalVolume,
+  stopLocalAudio,
+} from "@/utils";
+import { getMySounds, getSounds, login } from "@/utils/api";
+import { CrossFunctions } from "@/utils/constants";
+import { isSoundCached, retrieveSound, storeSound } from "@/utils/db.ts";
 import { useEffect, useState } from "react";
 import "./App.css";
-import { PublicPath } from "wxt/browser";
-import {
-  postMessage,
-  playLocalAudio,
-  stopLocalAudio,
-  setLocalVolume,
-  openInfoPage,
-} from "@/utils";
-import { storage } from "#imports";
-import { CrossFunctions } from "@/utils/constants";
-import { login, getMySounds, getSounds } from "@/utils/api";
-import { storeSound, retrieveSound, isSoundCached } from "@/utils/db.ts";
 
 import {
   BoxIcon,
@@ -23,12 +22,12 @@ import {
   SpeakerLoudIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
-import { DropdownMenu, Popover, Separator, Slider } from "radix-ui";
-import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon } from "../../icons";
 import fuzzysort from "fuzzysort";
+import { DropdownMenu, Separator, Slider, Tooltip } from "radix-ui";
+import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon } from "../../icons";
 
 function App() {
-  const [currentlyPlaying, setCurrentlyPlaying] = useState(-1);
+  const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [isMeet, setIsMeet] = useState<boolean>(false);
   const [soundButtons, setSoundButtons] = useState<any[]>([]);
@@ -81,10 +80,8 @@ function App() {
 
   async function fetchSounds() {
     setIsSyncing(true);
-    console.log("Fetching sounds...");
     try {
       const response = await getSounds();
-      console.log("Default Sounds:", response);
       const sounds = await Promise.all(
         response.data.map(async (sound: any) => {
           const id = sound.id;
@@ -96,10 +93,8 @@ function App() {
           if (!isCached) {
             const audioResponse = await fetch(fullUrl);
             const blob = await audioResponse.blob();
-            console.log("Caching new sound:", id);
             await storeSound(id, blob);
           } else {
-            console.log("Sound already cached:", id);
           }
 
           return {
@@ -151,9 +146,7 @@ function App() {
   }
 
   async function playSound(id: number) {
-    console.log("Playing sound with id:", id);
     const blob = await retrieveSound(id);
-    console.log("(app.tsx)Retrieved sound blob:", blob);
     const base64 = await blobToBase64(blob);
     if (isMeet) {
       postMessage(CrossFunctions.INJECT_AUDIO, {
@@ -163,6 +156,10 @@ function App() {
     }
     const success = await playLocalAudio(base64, fxVolume);
     if (success) {
+      browser.runtime.sendMessage({
+        type: CrossFunctions.SET_AUDIO_PLAYING,
+        audioID: id,
+      });
       setCurrentlyPlaying(id);
     }
   }
@@ -172,7 +169,7 @@ function App() {
       postMessage(CrossFunctions.STOP_AUDIO);
     }
     stopLocalAudio();
-    setCurrentlyPlaying(-1);
+    setCurrentlyPlaying(null);
   }
 
   async function handleMicMute(muteMic: boolean) {
@@ -219,15 +216,19 @@ function App() {
       setFxVolume(await fxVolumeStorage.getValue());
       setMicMuted(await micMutedStorage.getValue());
       setSelectedFolder(await selectedFolderStorage.getValue());
+      setCurrentlyPlaying(
+        await browser.runtime.sendMessage({
+          type: CrossFunctions.GET_AUDIO_PLAYING,
+        })
+      );
     }
     loadStates();
   }, []);
 
   useEffect(() => {
-    // TODO: Make it check if the audio is still playing on reopen
     const listener = (msg: any) => {
       if (msg.type === CrossFunctions.AUDIO_ENDED) {
-        setCurrentlyPlaying(-1);
+        setCurrentlyPlaying(null);
       }
     };
 
@@ -305,13 +306,11 @@ function App() {
     try {
       const res = await fetch("http://localhost:3001/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json",
-          "Authorization": ""
-         },
+        headers: { "Content-Type": "application/json", Authorization: "" },
         body: JSON.stringify({
           user: { email: loginEmail, password: loginPassword },
         }),
-        credentials: "omit"
+        credentials: "omit",
       });
       const response = await res.json();
       const authHeader = res.headers.get("Authorization");
@@ -325,13 +324,14 @@ function App() {
       } catch (e) {
         console.error("Failed to store JWT in browser storage:", e);
       }
-      await browser.storage.local.get("jwt").then((result) => {
-      });
+      await browser.storage.local.get("jwt").then((result) => {});
       setShowLogin(false);
       setLoginEmail("");
       setLoginPassword("");
       setUsername(response.status.data.user.username);
-      await browser.storage.local.set({ username: response.status.data.user.username });
+      await browser.storage.local.set({
+        username: response.status.data.user.username,
+      });
       alert("Logged in!");
     } catch {
       setLoginError("Login failed");
@@ -444,7 +444,7 @@ function App() {
               <button
                 className="iconButton stopButton"
                 onClick={stopSound}
-                disabled={currentlyPlaying === -1}
+                disabled={currentlyPlaying === null}
               >
                 <BoxIcon className="buttonIcon stopButtonIcon" />
               </button>
@@ -458,28 +458,34 @@ function App() {
           <div className="controlPanelContainer">
             <h2 className="voiceLabel">
               Voice{" "}
-              <Popover.Root>
-                <Popover.Trigger asChild>
-                  <button className="iconButton infoButton">
-                    <InfoCircledIcon className="infoButtonIcon" />
-                  </button>
-                </Popover.Trigger>
-                <Popover.Portal>
-                  <Popover.Content
-                    className="infoButtonPopover"
-                    side="top"
-                    sideOffset={2}
-                    collisionPadding={8}
+              <Tooltip.Provider delayDuration={200}>
+                <Tooltip.Root>
+                  <Tooltip.Trigger
+                    asChild
+                    onClick={(event) => event.preventDefault()}
                   >
-                    <p>
-                      This extension can only inject audio when your Google Meet
-                      microphone is unmuted. To play sound effects but mute your
-                      microphone, use this button!
-                    </p>
-                    <Popover.Arrow className="infoButtonArrow" />
-                  </Popover.Content>
-                </Popover.Portal>
-              </Popover.Root>
+                    <button className="iconButton infoButton">
+                      <InfoCircledIcon className="infoButtonIcon" />
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      className="infoButtonPopover"
+                      side="top"
+                      sideOffset={2}
+                      collisionPadding={8}
+                      onClick={(event) => event.preventDefault()}
+                    >
+                      <p>
+                        This extension can only inject audio when your Google
+                        Meet microphone is unmuted. To play sound effects but
+                        mute your microphone, use this button!
+                      </p>
+                      <Tooltip.Arrow className="infoButtonArrow" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              </Tooltip.Provider>
             </h2>
             <button
               className={

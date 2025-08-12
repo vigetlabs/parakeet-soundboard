@@ -1,3 +1,3 @@
-import SoundGroup from './SoundGroup';
+import SoundGroup from "./SoundGroup";
 
 export default SoundGroup;

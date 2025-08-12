@@ -1,14 +1,14 @@
-import * as React from "react";
-import { unstable_PasswordToggleField as PasswordToggleField } from "radix-ui";
 import {
-  MixerVerticalIcon,
   EyeClosedIcon,
   EyeOpenIcon,
+  MixerVerticalIcon,
 } from "@radix-ui/react-icons";
-import "./input.css";
-import { TagPicker } from "./tagPicker";
+import { unstable_PasswordToggleField as PasswordToggleField } from "radix-ui";
+import * as React from "react";
+import { TagPicker } from ".";
 import { chooseIcon, type AvaliableIcons } from "../../util";
 import type { Tag } from "../../util/types";
+import "./input.css";
 
 export interface TextInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -113,4 +113,4 @@ const PasswordInput = ({
   );
 };
 
-export { TextInput, PasswordInput };
+export { PasswordInput, TextInput };

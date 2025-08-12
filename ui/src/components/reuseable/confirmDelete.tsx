@@ -1,10 +1,10 @@
-import * as React from "react";
-import { Dialog } from "radix-ui";
-import "./confirmDelete.css";
 import { Cross2Icon, UpdateIcon } from "@radix-ui/react-icons";
-import { Button } from "./button";
-import { queryClient, API_URL } from "../../util/db";
 import { useMutation } from "@tanstack/react-query";
+import { Dialog } from "radix-ui";
+import * as React from "react";
+import { Button } from ".";
+import { API_URL, queryClient } from "../../util/db";
+import "./confirmDelete.css";
 
 export interface DeleteDialogProps
   extends React.ComponentPropsWithoutRef<typeof Dialog.Content> {

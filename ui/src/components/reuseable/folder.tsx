@@ -1,7 +1,3 @@
-import * as React from "react";
-import "./folder.css";
-import type { SoundType } from "../../util/placeholderData";
-import { Link } from "react-router-dom";
 import {
   Cross2Icon,
   DiscIcon,
@@ -12,13 +8,16 @@ import {
   TrashIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
-import { Dialog, DropdownMenu, Form } from "radix-ui";
-import { TextInput } from "./input";
-import { Button } from "./button";
-import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { queryClient, API_URL } from "../../util/db";
+import { Dialog, DropdownMenu, Form } from "radix-ui";
+import * as React from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Button, TextInput } from ".";
+import { API_URL, queryClient } from "../../util/db";
+import type { SoundType } from "../../util/placeholderData";
 import type { Folder } from "../../util/types";
+import "./folder.css";
 
 export interface SoundButtonDisplayProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -96,6 +95,7 @@ const FolderButton = ({
       onMouseLeave={() => {
         setDisplayMenu(false);
       }}
+      title={name}
     >
       {name !== "Favorites" && (
         <DropdownMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
@@ -365,4 +365,4 @@ const EditFolderDialog = ({
   );
 };
 
-export { SoundButtonDisplay, FolderButton, NewFolderButton, EditFolderDialog };
+export { EditFolderDialog, FolderButton, NewFolderButton, SoundButtonDisplay };

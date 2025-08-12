@@ -1,32 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as React from "react";
-import { Dialog, Form } from "radix-ui";
-import "./editDialog.css";
 import {
   Cross2Icon,
   FaceIcon,
   PinTopIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
+import { useMutation } from "@tanstack/react-query";
+import { Dialog, Form } from "radix-ui";
+import * as React from "react";
 import { useEffect, useState } from "react";
 import Dropzone, {
   type DropzoneState,
   type FileRejection,
 } from "react-dropzone";
-import { TextInput } from "./input";
-import { TagPicker } from "./tagPicker";
-import { Button } from "./button";
-import { SoundButtonDisplay } from "./folder";
-import { EmojiPicker } from "./emojiPicker";
+import {
+  Button,
+  EmojiPicker,
+  FolderPicker,
+  SoundButtonDisplay,
+  TagPicker,
+  TextInput,
+} from ".";
+import { API_URL, queryClient } from "../../util/db";
 import { defaultColors } from "../../util/placeholderData";
-import { FolderPicker } from "./folderPicker";
-import { useMutation } from "@tanstack/react-query";
-import { queryClient, API_URL } from "../../util/db";
 import type { Folder, Tag } from "../../util/types";
+import "./editDialog.css";
 
 export interface EditProps {
   name: string;
-  id: number;
+  id: number | null;
   emoji: string;
   color: string;
   tags: Tag[];
@@ -45,7 +47,7 @@ export interface EditDialogProps
 
 const defaultSound: EditProps = {
   name: "",
-  id: -1,
+  id: null,
   emoji: "🎉",
   color: "#bb27ff",
   tags: [],
@@ -184,7 +186,7 @@ const EditDialog = ({
     setIsSaving(true);
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
-    if (sound.id === -1) {
+    if (sound.id === null) {
       createSoundMutation.mutate({
         name: data.name as string,
         color: data.color as string,

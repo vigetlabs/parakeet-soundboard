@@ -1,15 +1,15 @@
-import "./App.css";
+import { useEffect } from "react";
 import {
+  Navigate,
+  Route,
   BrowserRouter as Router,
   Routes,
-  Route,
-  Navigate,
 } from "react-router-dom";
-import Home from "./components/Home";
+import "./App.css";
 import Folders from "./components/Folders";
-import Sidebar from "./components/Sidebar";
 import FolderView from "./components/FolderView";
-import { useEffect } from "react";
+import Home from "./components/Home";
+import Sidebar from "./components/Sidebar";
 
 function App() {
   useEffect(() => {

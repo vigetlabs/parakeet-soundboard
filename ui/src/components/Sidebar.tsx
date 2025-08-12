@@ -1,14 +1,13 @@
-import { Link, useLocation, useSearchParams } from "react-router-dom";
-import { Button, IconButton, TextInput } from "./reuseable";
-import "./Sidebar.css";
-import { useEffect, useState } from "react";
-import { EditDialog } from "./reuseable/editDialog";
-import { Slider } from "radix-ui";
 import { SpeakerLoudIcon, StopIcon } from "@radix-ui/react-icons";
-import { AudioPlayer, useAudioPlaying } from "../util/audio";
 import { useQuery } from "@tanstack/react-query";
-import type { Tag } from "../util/types";
+import { Slider } from "radix-ui";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { AudioPlayer, useAudioPlaying } from "../util/audio";
 import { API_URL } from "../util/db";
+import type { Tag } from "../util/types";
+import { Button, EditDialog, IconButton, TextInput } from "./reuseable";
+import "./Sidebar.css";
 
 interface Props {
   children: React.ReactNode;

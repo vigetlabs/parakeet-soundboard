@@ -1,7 +1,7 @@
 .button {
   background-color: var(--primary-active-light);
   color: var(--primary-foreground);
-  padding: 8px 24px;
+  padding: 6px 24px;
   border-radius: 12px;
   display: flex;
   flex-direction: row;
