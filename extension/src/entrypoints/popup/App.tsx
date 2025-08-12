@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
-import { PublicPath } from "wxt/browser";
 import {
   postMessage,
   playLocalAudio,
@@ -484,7 +483,7 @@ function App() {
           className="soundButtonContainer"
           style={{
             overflow: soundButtonOverflow,
-            minHeight: soundButtonOverflow ? undefined : "500px",
+            minHeight: soundButtonOverflow ? undefined : "500px", // Forces chrome to load to maximum height
           }}
         >
           {isSyncing ? (

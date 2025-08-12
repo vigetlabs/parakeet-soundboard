@@ -27,17 +27,17 @@ function sendMessage(command: CrossFunctions) {
 }
 
 function base64ToArrayBuffer(base64: string) {
-  const real_base64 = base64.split(',')[1];
+  const real_base64 = base64.split(",")[1];
   const binaryString = atob(real_base64);
 
-    const length = binaryString.length;
-    const bytes = new Uint8Array(length);
+  const length = binaryString.length;
+  const bytes = new Uint8Array(length);
 
-    for (let i = 0; i < length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
+  for (let i = 0; i < length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
 
-    return bytes.buffer;
+  return bytes.buffer;
 }
 
 export default defineUnlistedScript(() => {
@@ -55,7 +55,14 @@ export default defineUnlistedScript(() => {
     navigator.mediaDevices.getUserMedia = async function (constraints) {
       if (constraints?.audio) {
         // Grab the real mic
-        const realStream = await originalGUM({ audio: true, video: false });
+        const realStream = await originalGUM({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
+          video: false,
+        });
         const audioCtx = new AudioContext();
         const srcNode = audioCtx.createMediaStreamSource(realStream);
         const destNode = audioCtx.createMediaStreamDestination();
@@ -63,6 +70,18 @@ export default defineUnlistedScript(() => {
         const micGain = audioCtx.createGain();
         micGain.gain.value = window.soundboard?.micMuted ?? false ? 0 : 1;
         srcNode.connect(micGain).connect(destNode);
+
+        const analyser = audioCtx.createAnalyser();
+        micGain.connect(analyser);
+        const analyserBuf = new Float32Array(analyser.fftSize);
+        setInterval(() => {
+          analyser.getFloatTimeDomainData(analyserBuf);
+          let rms = 0;
+          for (let i = 0; i < analyserBuf.length; i++)
+            rms += analyserBuf[i] ** 2;
+          rms = Math.sqrt(rms / analyserBuf.length);
+          console.log("(soundboard) mic RMS:", rms);
+        }, 1000);
 
         async function playSoundEffect(base64: string, volume: number) {
           // Prepare sound‐effect node (but don’t play yet)
@@ -140,6 +159,18 @@ export default defineUnlistedScript(() => {
           }
         }
         sendMessage(CrossFunctions.GET_MIC_MUTED);
+
+        if (audioCtx.state === "suspended") {
+          try {
+            await audioCtx.resume();
+            console.log("resumed");
+          } catch (e) {
+            console.warn(e);
+          }
+        }
+
+        const outTrack = destNode.stream.getAudioTracks()[0];
+        if (outTrack) outTrack.enabled = true;
 
         console.log("Made it to return!");
         // 5) Return the mixed audio track

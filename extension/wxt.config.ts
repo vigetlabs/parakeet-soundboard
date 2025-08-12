@@ -5,13 +5,13 @@ export default defineConfig({
   modules: ["@wxt-dev/module-react"],
   srcDir: "src",
   manifest: {
+    name: "Parakeet Soundboard",
     permissions: [
       "scripting",
       "tabs",
       "activeTab",
       "storage",
       "unlimitedStorage",
-      "declarativeContent",
     ],
     host_permissions: ["https://meet.google.com/*"],
     web_accessible_resources: [
@@ -25,5 +25,10 @@ export default defineConfig({
         matches: ["https://meet.google.com/*"],
       },
     ],
+  },
+  dev: {
+    server: {
+      port: 3002,
+    },
   },
 });

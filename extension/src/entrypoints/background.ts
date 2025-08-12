@@ -24,6 +24,7 @@ export default defineBackground(() => {
     }
     if (msg.type === CrossFunctions.OPEN_POPUP) {
       try {
+        // Does not work on Firefox
         await browser.action.openPopup();
       } catch (e) {
         console.error("openPopup failed:", e);

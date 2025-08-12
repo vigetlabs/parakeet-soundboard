@@ -1,6 +1,6 @@
 {
-  "name": "vudos-soundboard",
-  "description": "manifest.json description",
+  "name": "parakeet-soundboard",
+  "description": "A soundboard that allows you to play sounds straight through your microphone into Google Meet!",
   "private": true,
   "version": "0.0.0",
   "type": "module",
