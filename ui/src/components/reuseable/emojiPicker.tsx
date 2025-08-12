@@ -1,8 +1,8 @@
-import * as React from "react";
-import { Popover } from "radix-ui";
-import "./emojiPicker.css";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import Picker, { Categories } from "emoji-picker-react";
+import { Popover } from "radix-ui";
+import * as React from "react";
+import "./emojiPicker.css";
 
 const EmojiPickerCategories = [
   { category: Categories.SMILEYS_PEOPLE, name: "Smileys & People" },

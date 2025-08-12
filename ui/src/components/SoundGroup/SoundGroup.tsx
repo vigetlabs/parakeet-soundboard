@@ -1,8 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Link, useSearchParams } from "react-router-dom";
-import { chooseIcon, type AvaliableIcons } from "../../util";
-import { SoundButton } from "../reuseable";
-import "./SoundGroup.css";
 import {
   ChevronLeftIcon,
   DotsHorizontalIcon,
@@ -10,15 +6,22 @@ import {
   TrashIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
-import { AudioPlayer } from "../../util/audio";
-import { useState } from "react";
-import fuzzysort from "fuzzysort";
-import { EditDialog, type EditProps } from "../reuseable/editDialog";
-import { DropdownMenu } from "radix-ui";
-import { EditFolderDialog } from "../reuseable/folder";
-import { DeleteDialog } from "../reuseable/confirmDelete";
 import { useQuery } from "@tanstack/react-query";
+import fuzzysort from "fuzzysort";
+import { DropdownMenu } from "radix-ui";
+import { useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { chooseIcon, type AvaliableIcons } from "../../util";
+import { AudioPlayer } from "../../util/audio";
 import { API_URL } from "../../util/db";
+import {
+  DeleteDialog,
+  EditDialog,
+  EditFolderDialog,
+  SoundButton,
+  type EditProps,
+} from "../reuseable";
+import "./SoundGroup.css";
 
 interface SoundGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   folderSlug: string; // empty for all sounds

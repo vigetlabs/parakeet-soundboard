@@ -1,7 +1,3 @@
-import * as React from "react";
-import "./button.css";
-import { chooseIcon, type AvaliableIcons } from "../../util";
-import { DropdownMenu } from "radix-ui";
 import {
   ArchiveIcon,
   DotsHorizontalIcon,
@@ -10,9 +6,13 @@ import {
   StarIcon,
   TrashIcon,
 } from "@radix-ui/react-icons";
-import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { DropdownMenu } from "radix-ui";
+import * as React from "react";
+import { useState } from "react";
+import { chooseIcon, type AvaliableIcons } from "../../util";
 import { API_URL, queryClient } from "../../util/db";
+import "./button.css";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -24,7 +24,7 @@ const Button = ({ className = "", icon, children, ...props }: ButtonProps) => {
 
   return (
     <button className={classes} {...props}>
-      {icon && chooseIcon(icon, { className: "buttonIcon" })}
+      {icon && chooseIcon(icon, { className: "buttonIcon" }, 20)}
       {children}
     </button>
   );
@@ -262,4 +262,4 @@ const IconButton = ({ className, icon, ...props }: IconButtonProps) => {
 };
 IconButton.displayName = "IconButton";
 
-export { Button, SoundButton, IconButton };
+export { Button, IconButton, SoundButton };

@@ -1,16 +1,16 @@
+import { storage } from "#imports";
+import {
+  openInfoPage,
+  playLocalAudio,
+  postMessage,
+  setLocalVolume,
+  stopLocalAudio,
+} from "@/utils";
+import { getDefaultSounds, getMySounds, login } from "@/utils/api";
+import { CrossFunctions } from "@/utils/constants";
+import { isSoundCached, retrieveSound, storeSound } from "@/utils/db.ts";
 import { useState } from "react";
 import "./App.css";
-import {
-  postMessage,
-  playLocalAudio,
-  stopLocalAudio,
-  setLocalVolume,
-  openInfoPage,
-} from "@/utils";
-import { storage } from "#imports";
-import { CrossFunctions } from "@/utils/constants";
-import { login, getMySounds, getDefaultSounds } from "@/utils/api";
-import { storeSound, retrieveSound, isSoundCached } from "@/utils/db.ts";
 
 import {
   BoxIcon,
@@ -22,12 +22,12 @@ import {
   SpeakerLoudIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
+import fuzzysort from "fuzzysort";
 import { DropdownMenu, Separator, Slider, Tooltip } from "radix-ui";
 import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon } from "../../icons";
-import fuzzysort from "fuzzysort";
 
 function App() {
-  const [currentlyPlaying, setCurrentlyPlaying] = useState(-1);
+  const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [isMeet, setIsMeet] = useState<boolean>(false);
   const [soundButtons, setSoundButtons] = useState<any[]>([]);
@@ -156,7 +156,7 @@ function App() {
       postMessage(CrossFunctions.STOP_AUDIO);
     }
     stopLocalAudio();
-    setCurrentlyPlaying(-1);
+    setCurrentlyPlaying(null);
   }
 
   async function handleMicMute(muteMic: boolean) {
@@ -222,7 +222,7 @@ function App() {
   useEffect(() => {
     const listener = (msg: any) => {
       if (msg.type === CrossFunctions.AUDIO_ENDED) {
-        setCurrentlyPlaying(-1);
+        setCurrentlyPlaying(null);
       }
     };
 
@@ -393,7 +393,7 @@ function App() {
               <button
                 className="iconButton stopButton"
                 onClick={stopSound}
-                disabled={currentlyPlaying === -1}
+                disabled={currentlyPlaying === null}
               >
                 <BoxIcon className="buttonIcon stopButtonIcon" />
               </button>

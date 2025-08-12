@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import SoundGroup from "./SoundGroup";
 import { UpdateIcon } from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "../util/db";
+import SoundGroup from "./SoundGroup";
 
 const Home = () => {
   const { data: favoriteFolder, isLoading } = useQuery({

@@ -4,8 +4,6 @@ export default defineContentScript({
   matches: ["<all_urls>"],
   runAt: "document_start",
   main() {
-    let audioPlaying = -1;
-
     window.addEventListener("message", async (event) => {
       if (event.source !== window) return;
       if (event.data.command === CrossFunctions.GET_MIC_MUTED) {

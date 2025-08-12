@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useNavigate, useParams } from "react-router-dom";
-import SoundGroup from "./SoundGroup";
-import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { UpdateIcon } from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { API_URL } from "../util/db";
+import SoundGroup from "./SoundGroup";
 
 const FolderView = () => {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
-import * as React from "react";
-import "./button.css";
 import { GearIcon } from "@radix-ui/react-icons";
 import { IconProps } from "@radix-ui/react-icons/dist/types";
+import * as React from "react";
+import "./button.css";
 
 export interface SoundButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -81,4 +81,4 @@ function chooseIcon(icon: string, props?: IconProps) {
   }
 }
 
-export { SoundButton, IconButton };
+export { IconButton, SoundButton };

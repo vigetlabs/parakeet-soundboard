@@ -3,7 +3,7 @@ import { CrossFunctions } from "@/utils/constants";
 export default defineBackground(() => {
   console.log("Background loaded!", { id: browser.runtime.id });
 
-  let audioPlaying = -1;
+  let audioPlaying: number | null = null;
 
   browser.runtime.onInstalled.addListener(function (object) {
     if (object.reason === browser.runtime.OnInstalledReason.INSTALL) {
@@ -36,7 +36,7 @@ export default defineBackground(() => {
       sendResponse(audioPlaying);
       return true;
     } else if (msg.type === CrossFunctions.AUDIO_ENDED) {
-      audioPlaying = -1;
+      audioPlaying = null;
     }
   });
 

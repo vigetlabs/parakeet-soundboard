@@ -1,16 +1,16 @@
 import {
-  HomeIcon,
   ArchiveIcon,
+  ChevronRightIcon,
+  Cross2Icon,
+  DiscIcon,
+  FileIcon,
+  HomeIcon,
+  IdCardIcon,
+  MagnifyingGlassIcon,
   PersonIcon,
   PlusIcon,
   StarIcon,
-  DiscIcon,
-  MagnifyingGlassIcon,
-  FileIcon,
   TrashIcon,
-  Cross2Icon,
-  IdCardIcon,
-  ChevronRightIcon,
 } from "@radix-ui/react-icons";
 import type { IconProps } from "@radix-ui/react-icons/dist/types";
 

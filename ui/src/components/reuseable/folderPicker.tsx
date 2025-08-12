@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as React from "react";
-import { Popover, Label, Checkbox } from "radix-ui";
-import "./folderPicker.css";
 import {
   ArchiveIcon,
   CheckIcon,
@@ -9,11 +6,14 @@ import {
   PlusIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
-import { EditFolderDialog } from "./folder";
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { Folder } from "../../util/types";
+import { Checkbox, Label, Popover } from "radix-ui";
+import * as React from "react";
+import { useEffect, useState } from "react";
 import { API_URL } from "../../util/db";
+import type { Folder } from "../../util/types";
+import { EditFolderDialog } from "./folder";
+import "./folderPicker.css";
 
 export interface FolderListingProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
