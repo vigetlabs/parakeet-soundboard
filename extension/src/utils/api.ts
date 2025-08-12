@@ -27,8 +27,11 @@ export async function getMySounds() {
   return res.json();
 }
 
-export async function getDefaultSounds() {
-  const res = await fetch(`${API_URL}/sounds`);
-  if (!res.ok) throw new Error("Failed to fetch default sounds");
+export async function getSounds() {
+  const { jwt } = await browser.storage.local.get("jwt");
+  const res = await fetch(`${API_URL}/sounds`, {
+    headers: { Authorization: `Bearer ${jwt}` },
+  });
+  if (!res.ok) throw new Error("Failed to fetch sounds");
   return res.json();
 }

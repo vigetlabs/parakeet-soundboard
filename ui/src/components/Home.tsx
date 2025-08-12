@@ -7,7 +7,11 @@ const Home = () => {
   const { data: favoriteFolder, isLoading } = useQuery({
     queryKey: ["sounds", "favorites"],
     queryFn: () => {
-      return fetch(`${API_URL}/folders/favorites`).then(async (res) => {
+      return fetch(`${API_URL}/folders/favorites`, {
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      }).then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch favorite sounds");
 
         const data = (await res.json()).data.attributes;

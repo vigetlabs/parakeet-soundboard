@@ -104,6 +104,9 @@ const EditDialog = ({
       const res = await fetch(`${API_URL}/sounds/${sound.id}`, {
         method: "PATCH",
         body: formData,
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
       });
 
       if (!res.ok) {
@@ -138,6 +141,9 @@ const EditDialog = ({
       const res = await fetch(`${API_URL}/sounds`, {
         method: "POST",
         body: formData,
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        }
       });
 
       if (!res.ok) {

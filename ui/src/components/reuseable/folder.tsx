@@ -240,6 +240,9 @@ const EditFolderDialog = ({
       const res = await fetch(`${API_URL}/folders/${slug}`, {
         method: "PATCH",
         body: formData,
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
       });
 
       if (!res.ok) {
@@ -263,6 +266,9 @@ const EditFolderDialog = ({
       const res = await fetch(`${API_URL}/folders`, {
         method: "POST",
         body: formData,
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
       });
 
       if (!res.ok) {

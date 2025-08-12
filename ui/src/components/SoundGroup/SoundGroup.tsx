@@ -50,7 +50,11 @@ const SoundGroup = ({
     queryKey: ["sounds", `${folderSlug ? folderSlug : "allSounds"}`],
     queryFn: () => {
       if (folderSlug === "") {
-        return fetch(`${API_URL}/sounds`).then(async (res) => {
+        return fetch(`${API_URL}/sounds`, {
+          headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        }
+        }).then(async (res) => {
           if (!res.ok) throw new Error("Failed to fetch sounds");
 
           const data = (await res.json()).data;
@@ -61,7 +65,11 @@ const SoundGroup = ({
           return out;
         });
       } else {
-        return fetch(`${API_URL}/folders/${folderSlug}`).then(async (res) => {
+        return fetch(`${API_URL}/folders/${folderSlug}`, {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          },
+        }).then(async (res) => {
           if (!res.ok)
             throw new Error("Failed to fetch " + folderSlug + " sounds");
 

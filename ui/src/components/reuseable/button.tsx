@@ -74,6 +74,10 @@ const SoundButton = ({
       const res = await fetch(`${API_URL}/folders/${folder}/add_sound`, {
         method: "POST",
         body: formData,
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+
       });
 
       if (!res.ok) {
@@ -96,6 +100,9 @@ const SoundButton = ({
       const res = await fetch(`${API_URL}/folders/${folder}/remove_sound`, {
         method: "DELETE",
         body: formData,
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
       });
 
       if (res.status === 204) {
