@@ -321,7 +321,7 @@ Devise.setup do |config|
       [ "DELETE", %r{^/logout$} ]
     ]
     jwt.request_formats = {
-      user: [:json]
+      user: [ :json ]
     }
     jwt.expiration_time = 30.minutes.to_i
   end

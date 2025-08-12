@@ -1,5 +1,5 @@
 class SoundsController < ApplicationController
-  before_action :authenticate_user!, except: [ :index, :show, :in_folders ]
+  before_action :authenticate_user!, only: [ :create, :update, :destroy, :set_folders ]
   before_action :authorize_user!, only: [ :update, :destroy, :set_folders ]
 
   def index
@@ -88,5 +88,4 @@ class SoundsController < ApplicationController
       render json: { error: "Not authorized" }, status: :forbidden
     end
   end
-
 end

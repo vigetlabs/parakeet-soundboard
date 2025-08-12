@@ -72,7 +72,6 @@ function App() {
     console.log("Testing login...");
     try {
       const jwt = await login("natalietest@example.com", "password123");
-      console.log("JWT:", jwt);
       const sounds = await getMySounds();
       console.log("My Sounds:", sounds);
     } catch (err) {
@@ -326,9 +325,7 @@ function App() {
       } catch (e) {
         console.error("Failed to store JWT in browser storage:", e);
       }
-      console.log("Stored JWT:", token);
       await browser.storage.local.get("jwt").then((result) => {
-        console.log("Retrieved JWT:", result.jwt);
       });
       setShowLogin(false);
       setLoginEmail("");

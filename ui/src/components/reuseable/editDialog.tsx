@@ -101,7 +101,6 @@ const EditDialog = ({
         formData.append("sound[audio_file]", editedSound.audio_file); // key matches model attribute
       }
 
-      console.log("jwt", localStorage.getItem("jwt"))
       const res = await fetch(`${API_URL}/sounds/${sound.id}`, {
         method: "PATCH",
         body: formData,

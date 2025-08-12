@@ -1,5 +1,5 @@
 class FoldersController < ApplicationController
-  before_action :authenticate_user!, except: [:index, :show, :folder_slug_list, :get_name]
+  before_action :authenticate_user!, only: [ :my_folders, :create, :update, :destroy, :add_sound, :remove_sound ]
   before_action :authorize_user!, only: [ :update, :destroy, :add_sound, :remove_sound ]
 
   # GET /folders (default + a user's folder if signed in)
@@ -101,5 +101,4 @@ class FoldersController < ApplicationController
       render json: { error: "Not authorized" }, status: :forbidden
     end
   end
-
 end
