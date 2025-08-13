@@ -3,7 +3,7 @@
   font-weight: 400;
   max-height: 700px;
 
-  color: #213547;
+  color: var(--primary-foreground);
   background-color: var(--inner-background);
 
   font-synthesis: none;

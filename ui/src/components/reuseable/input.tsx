@@ -58,12 +58,14 @@ const TextInput = ({
           align="end"
           alignOffset={-30}
         >
-          <MixerVerticalIcon
-            className={
-              "filterInputIcon" +
-              (filterOptions?.length ?? 0 > 0 ? " filterInputIconActive" : "")
-            }
-          />
+          <div className="filterInputIconWrapper">
+            <MixerVerticalIcon
+              className={
+                "filterInputIcon" +
+                (filterOptions?.length ?? 0 > 0 ? " filterInputIconActive" : "")
+              }
+            />
+          </div>
         </TagPicker>
       )}
       {rightIcon &&
@@ -96,19 +98,23 @@ const PasswordInput = ({
   className = "",
   ...props
 }: React.ComponentPropsWithoutRef<typeof PasswordToggleField.Input>) => {
-  const classes = `passwordRoot ${className}`.trim();
+  const classes = `textInputWrapper passwordRoot ${className}`.trim();
 
   return (
     <PasswordToggleField.Root>
-      <div className={classes}>
-        <PasswordToggleField.Input className="passwordInput" {...props} />
+      <label className={classes}>
+        <PasswordToggleField.Input
+          className="textInput passwordInput"
+          {...props}
+        />
         <PasswordToggleField.Toggle className="passwordEyeToggle">
           <PasswordToggleField.Icon
             visible={<EyeOpenIcon />}
             hidden={<EyeClosedIcon />}
+            className="passwordEyeToggleIcon"
           />
         </PasswordToggleField.Toggle>
-      </div>
+      </label>
     </PasswordToggleField.Root>
   );
 };

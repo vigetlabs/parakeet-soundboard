@@ -103,7 +103,7 @@
   overflow-y: auto;
 }
 
-.editFolderDialogInput {
+.editFolderDialogInput.textInputWrapper {
   margin: 24px 0;
   font-size: 1rem;
   padding: 16px 20px;

@@ -91,12 +91,17 @@
   border-color: var(--primary-muted-dark);
 }
 
-.editDialogInputDisabled {
-  cursor: pointer;
-}
-
 .editDialogInput {
   width: 100%;
+}
+
+.editDialogFieldContainer[data-invalid],
+.editDialogHexInput[data-invalid] {
+  border-color: var(--warning);
+}
+
+.editDialogInputDisabled {
+  cursor: pointer !important;
 }
 
 .editDialogInputFilename .textInput {

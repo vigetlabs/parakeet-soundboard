@@ -145,7 +145,7 @@ const EditDialog = ({
         body: formData,
         headers: {
           authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        }
+        },
       });
 
       if (!res.ok) {
@@ -258,10 +258,8 @@ const EditDialog = ({
               id={0} // will never be used don't worry about it
             />
           )}
-          <Dialog.Close asChild>
-            <button type="button" className="tagPickerClose" aria-label="Close">
-              <Cross2Icon className="tagPickerCloseIcon" />
-            </button>
+          <Dialog.Close className="tagPickerClose" aria-label="Close">
+            <Cross2Icon className="tagPickerCloseIcon" />
           </Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>
@@ -391,6 +389,9 @@ const EditDialogContent = ({
           <Form.Message className="editDialogMessage" match="valueMissing">
             Please enter a name
           </Form.Message>
+          <Form.Message className="editDialogMessage" match="tooLong">
+            Your name is too long
+          </Form.Message>
           <Form.Control asChild>
             <TextInput
               value={name}
@@ -399,6 +400,7 @@ const EditDialogContent = ({
               rightIconAction={() => setName("")}
               iconSize={32}
               className="editDialogInput"
+              maxLength={64}
               required
             />
           </Form.Control>

@@ -5,4 +5,5 @@ export * from "./emojiPicker";
 export * from "./folder";
 export * from "./folderPicker";
 export * from "./input";
+export * from "./login";
 export * from "./tagPicker";

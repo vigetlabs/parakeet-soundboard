@@ -14,7 +14,7 @@
   transition: all 0.2s ease-in-out;
 }
 .button:hover {
-  background-color: var(--primarysoundButtonMenu-active-lighter);
+  background-color: var(--elevated-background);
   color: var(--primary-active);
   border-color: var(--primary-active);
 }

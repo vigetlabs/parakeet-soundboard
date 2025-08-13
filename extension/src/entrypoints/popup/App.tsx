@@ -87,7 +87,7 @@ function App() {
           const id = sound.id;
           const { name, color, emoji, folders, audio_file_url } =
             sound.attributes;
-          const fullUrl = `http://localhost:3001${audio_file_url}`;
+          const fullUrl = `${API_URL}${audio_file_url}`;
 
           const isCached = await isSoundCached(id);
           if (!isCached) {
@@ -304,7 +304,7 @@ function App() {
     e.preventDefault();
     setLoginError(null);
     try {
-      const res = await fetch("http://localhost:3001/login", {
+      const res = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: "" },
         body: JSON.stringify({
@@ -354,7 +354,7 @@ function App() {
               className="logoButton"
               tabIndex={-1}
               onClick={() =>
-                browser.tabs.create({ url: import.meta.env.VITE_WEBSITE_HOST })
+                browser.tabs.create({ url: import.meta.env.VITE_WEBSITE_URL })
               }
             >
               <img
@@ -389,7 +389,7 @@ function App() {
                   className="topBarMenuItem"
                   onSelect={() => {
                     browser.tabs.create({
-                      url: import.meta.env.VITE_WEBSITE_HOST,
+                      url: import.meta.env.VITE_WEBSITE_URL,
                     });
                   }}
                 >
