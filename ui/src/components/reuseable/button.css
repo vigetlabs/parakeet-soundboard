@@ -192,6 +192,10 @@
   margin-top: 4px;
   font-weight: 700;
   font-size: 0.75rem;
+  max-width: 64px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .iconButtonSelected + .iconButtonLabel {

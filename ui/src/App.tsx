@@ -28,10 +28,6 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/folders" element={<Folders />} />
           <Route path="/folders/:folder" element={<FolderView />} />
-          <Route
-            path="/folders/*"
-            element={<Navigate to="/folders" replace />}
-          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Sidebar>

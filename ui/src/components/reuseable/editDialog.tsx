@@ -21,6 +21,7 @@ import {
   TagPicker,
   TextInput,
 } from ".";
+import { useAuth } from "../../util/auth";
 import { API_URL, queryClient } from "../../util/db";
 import { defaultColors } from "../../util/placeholderData";
 import type { Folder, Tag } from "../../util/types";
@@ -73,6 +74,7 @@ const EditDialog = ({
   const [editingTags, setEditingTags] = useState<Tag[]>(sound.tags);
   const [editingFolders, setEditingFolders] = useState<Folder[]>(sound.folders);
   const [isSaving, setIsSaving] = useState(false);
+  const { fetchWithAuth } = useAuth();
 
   type CreateEditSoundProps = {
     name: string;
@@ -103,12 +105,9 @@ const EditDialog = ({
         formData.append("sound[audio_file]", editedSound.audio_file); // key matches model attribute
       }
 
-      const res = await fetch(`${API_URL}/sounds/${sound.id}`, {
+      const res = await fetchWithAuth(`/sounds/${sound.id}`, {
         method: "PATCH",
         body: formData,
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
       });
 
       if (!res.ok) {
@@ -140,13 +139,11 @@ const EditDialog = ({
         formData.append("sound[audio_file]", newSound.audio_file); // key matches model attribute
       }
 
-      const res = await fetch(`${API_URL}/sounds`, {
+      const res = await fetchWithAuth(`${API_URL}/sounds`, {
         method: "POST",
         body: formData,
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
       });
+      console.log("what??");
 
       if (!res.ok) {
         throw new Error("Failed to add sound");
@@ -155,6 +152,7 @@ const EditDialog = ({
       return res.json();
     },
     onSuccess: () => {
+      console.log("hmm");
       queryClient.invalidateQueries({ queryKey: ["sounds"] });
       setIsSaving(false);
       onOpenChange(false);

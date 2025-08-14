@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Checkbox, Label, Popover } from "radix-ui";
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { API_URL } from "../../util/db";
+import { useAuth } from "../../util/auth";
 import type { Folder } from "../../util/types";
 import { EditFolderDialog } from "./folder";
 import "./folderPicker.css";
@@ -65,21 +65,19 @@ const FolderPicker = ({
   const classes = `folderPicker ${className}`.trim();
   const [newFolderOpen, setNewFolderOpen] = useState(false);
   const [createdFolder, setCreatedFolder] = useState<Folder>();
+  const { userLoading, fetchWithAuth } = useAuth();
 
   const { data: folders = [], isLoading } = useQuery({
     queryKey: ["folders", "minimalFolders"],
     queryFn: () =>
-      fetch(`${API_URL}/folders/folder_slug_list`, {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
-      }).then(async (res) => {
+      fetchWithAuth("/folders/folder_slug_list").then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch folder slugs");
         const rawFolders = await res.json();
         return rawFolders.sort(
           (a: any, b: any) => parseInt(a.id) - parseInt(b.id)
         );
       }),
+    enabled: !userLoading,
   });
 
   function handleFolderClick(folder: Folder, pressed: boolean) {

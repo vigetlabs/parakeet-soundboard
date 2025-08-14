@@ -1,7 +1,6 @@
-// src/auth/provider.tsx
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { API_URL } from "../db";
+import { API_URL, queryClient } from "../db";
 import { AuthContext, type AuthContextValue, type User } from "./context";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -9,10 +8,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  const qc = useQueryClient();
 
   const loginMut = useMutation({
     mutationFn: async (credentials: { email: string; password: string }) => {
@@ -24,10 +19,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }),
       });
 
+      if (res.status === 401) {
+        // TODO: Make this a toast
+        alert("Incorrect username or password");
+      }
+
       if (!res.ok) {
-        setLoading(false);
-        setSuccess(false);
-        alert("Login failed");
+        throw new Error("Failed to create user");
       }
 
       const data = await res.json();
@@ -36,6 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return { data, authHeader };
     },
     onSuccess: (res) => {
+      console.log("what");
       let token;
       if (res.authHeader && res.authHeader.startsWith("Bearer ")) {
         token = res.authHeader.split(" ")[1];
@@ -45,59 +44,137 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem("jwt", token);
 
       setUser(res.data.status.data.user);
-      qc.setQueryData(["auth", "user"], res.data.status.data.user ?? null);
-      qc.invalidateQueries();
-      setLoading(false);
-      setSuccess(true);
+      queryClient.setQueryData(
+        ["auth", "user"],
+        res.data.status.data.user ?? null
+      );
+      queryClient.invalidateQueries();
+
+      window.location.reload();
     },
   });
 
-  // logout mutation
-  const logoutMut = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`${API_URL}/logout`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+  //   const logoutMut = useMutation({
+  //     mutationFn: async () => {
+  //       const res = await fetch(`${API_URL}/logout`, {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //       });
+
+  //       if (!res.ok) {
+  //         setLoading(false);
+  //         throw new Error("Logout failed");
+  //       }
+
+  //       return res.json();
+  //     },
+  //     onSuccess: () => {
+  //       setToken(null);
+  //       setUser(null);
+  //       queryClient.removeQueries();
+  //       queryClient.invalidateQueries();
+  //       setLoading(false);
+  //     },
+  //   });
+
+  async function fetchWithoutAuth(path: string, init?: RequestInit) {
+    const res = await fetch(`${API_URL}${path}`, {
+      ...init,
+      headers: {
+        ...(init?.headers || {}),
+      },
+    });
+
+    return res;
+  }
+
+  async function fetchWithAuth(
+    path: string,
+    init?: RequestInit,
+    overrideToken?: string
+  ) {
+    let res;
+    if (!overrideToken && !token) {
+      res = await fetchWithoutAuth(path, init);
+    } else {
+      res = await fetch(`${API_URL}${path}`, {
+        ...init,
+        headers: {
+          ...(init?.headers || {}),
+          Authorization: `Bearer ${overrideToken ?? token}`,
+        },
       });
 
-      if (!res.ok) {
-        setLoading(false);
-        setSuccess(false);
-        throw new Error("Logout failed");
+      if (res.status === 401) {
+        // This means the token has expired, so remove it
+        alert("You've been logged out!");
+        setUser(null);
+        localStorage.removeItem("jwt");
+        queryClient.setQueryData(["auth", "user"], null);
+        res = fetchWithoutAuth(path, init);
       }
+    }
+    return res;
+  }
 
-      return res.json();
+  // Get the current user on page load
+  const userQuery = useQuery({
+    queryKey: ["auth", "user"],
+    queryFn: async () => {
+      const token = localStorage.getItem("jwt");
+      if (!token) {
+        return null;
+      }
+      setToken(token);
+
+      const res = await fetchWithAuth(
+        "/users/show",
+        undefined,
+        token ?? undefined
+      );
+
+      // TODO: Handle if the server is down
+      const json = await res.json();
+      if (!json.username) {
+        setUser(null);
+      } else {
+        setUser(json);
+      }
+      return json;
     },
-    onSuccess: () => {
-      setToken(null);
-      setUser(null);
-      qc.removeQueries();
-      qc.invalidateQueries();
-      setLoading(false);
-      setSuccess(true);
-    },
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 
   const login = async (creds: { email: string; password: string }) => {
-    setLoading(true);
     await loginMut.mutateAsync(creds);
-    return success;
   };
 
   const logout = async () => {
-    setLoading(true);
-    await logoutMut.mutateAsync();
-    return success;
+    // Enable these when we have tokens that last more than 30 mins
+    // setLoading(true);
+    // await logoutMut.mutateAsync();
+    // return success;
+
+    setUser(null);
+    localStorage.removeItem("jwt");
+    queryClient.setQueryData(["auth", "user"], null);
+    window.location.reload();
   };
 
   const value: AuthContextValue = {
     user,
     token,
-    loading,
+    userLoading: userQuery.isLoading,
+    loginLoading: loginMut.isPending,
     login,
     logout,
+    fetchWithAuth,
   };
+
+  //   if (userQuery.isLoading) {
+  //     return <UpdateIcon className="spinIcon spinIconLarge" />;
+  //   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

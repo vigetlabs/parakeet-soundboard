@@ -4,14 +4,14 @@ import { Slider } from "radix-ui";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { AudioPlayer, useAudioPlaying } from "../util/audio";
-import { useAuth } from "../util/auth/useAuth";
-import { API_URL } from "../util/db";
+import { useAuth } from "../util/auth";
 import type { Tag } from "../util/types";
 import {
   Button,
   EditDialog,
   IconButton,
   LoginDialog,
+  LogoutPopover,
   TextInput,
 } from "./reuseable";
 import "./Sidebar.css";
@@ -28,7 +28,8 @@ const Sidebar = ({ children }: Props) => {
   const isPlaying = useAudioPlaying();
   const [volume, setVolume] = useState(50);
   const [uploadOpen, setUploadOpen] = useState(false);
-  const { user } = useAuth();
+  const [accountOpen, setAccountOpen] = useState(false);
+  const { user, userLoading, fetchWithAuth } = useAuth();
 
   const currentFolderSlug = location.pathname.startsWith("/folders/")
     ? location.pathname.substring(9) !== ""
@@ -36,17 +37,20 @@ const Sidebar = ({ children }: Props) => {
       : null
     : null;
 
+  const onUserOnlyPage =
+    !userLoading && location.pathname.startsWith("/folders");
+
   const { data: currentFolder = undefined } = useQuery({
     queryKey: ["folders", currentFolderSlug],
     queryFn: () =>
-      fetch(`${API_URL}/folders/${currentFolderSlug}/get_name`).then(
+      fetchWithAuth(`/folders/${currentFolderSlug}/get_name`).then(
         async (res) => {
           if (!res.ok) throw new Error("Failed to fetch folder name");
           const name = await res.json();
           return { name: name.name, slug: currentFolderSlug ?? "" };
         }
       ),
-    enabled: currentFolderSlug !== null,
+    enabled: !userLoading && currentFolderSlug !== null,
   });
 
   function updateVolume(value: number) {
@@ -56,6 +60,10 @@ const Sidebar = ({ children }: Props) => {
   }
 
   useEffect(() => {
+    // Prevent this from running on unknown pages (so it can redirect back to home)
+    if (location.pathname !== "/" && !location.pathname.startsWith("/folders"))
+      return;
+
     if (search.trim() === "") {
       setSearchParams({ filter: filterTags.map((tag) => tag.name) });
     } else {
@@ -64,7 +72,7 @@ const Sidebar = ({ children }: Props) => {
         filter: filterTags.map((tag) => tag.name),
       });
     }
-  }, [search, filterTags, setSearchParams]);
+  }, [search, filterTags, setSearchParams, location.pathname]);
 
   useEffect(() => {
     setSearch("");
@@ -104,14 +112,20 @@ const Sidebar = ({ children }: Props) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <EditDialog
-            uploadFirst
-            open={uploadOpen}
-            onOpenChange={setUploadOpen}
-            addToFolder={currentFolder}
-          >
-            <Button icon="plus">Upload</Button>
-          </EditDialog>
+          {user ? (
+            <EditDialog
+              uploadFirst
+              open={uploadOpen}
+              onOpenChange={setUploadOpen}
+              addToFolder={currentFolder}
+            >
+              <Button icon="plus">Upload</Button>
+            </EditDialog>
+          ) : (
+            <Button icon="plus" onClick={() => setAccountOpen(true)}>
+              Upload
+            </Button>
+          )}
         </div>
         <div className="sidebarRest">
           <div className="sidebarLeft">
@@ -136,12 +150,29 @@ const Sidebar = ({ children }: Props) => {
                 />
               </Link>
             </div>
-            <LoginDialog newAccount={true}>
-              <IconButton
-                icon="person"
-                label={user?.username ? user.username : "Account"}
-              />
-            </LoginDialog>
+            {user ? (
+              <LogoutPopover>
+                <IconButton
+                  icon="person"
+                  label={user.username}
+                  title={user.username}
+                  loading={userLoading}
+                />
+              </LogoutPopover>
+            ) : (
+              <LoginDialog
+                newAccount={false}
+                closeable={!onUserOnlyPage}
+                open={accountOpen || onUserOnlyPage}
+                onOpenChange={setAccountOpen}
+              >
+                <IconButton
+                  icon="person"
+                  label={"Account"}
+                  loading={userLoading}
+                />
+              </LoginDialog>
+            )}
           </div>
           <div className="contentArea">{children}</div>
         </div>

@@ -13,7 +13,7 @@ import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { chooseIcon, type AvaliableIcons } from "../../util";
 import { AudioPlayer } from "../../util/audio";
-import { API_URL } from "../../util/db";
+import { useAuth } from "../../util/auth";
 import {
   DeleteDialog,
   EditDialog,
@@ -48,16 +48,13 @@ const SoundGroup = ({
     id?: number;
     slug?: string;
   }>();
+  const { user, userLoading, fetchWithAuth } = useAuth();
 
   const { data, isLoading } = useQuery({
     queryKey: ["sounds", `${folderSlug ? folderSlug : "allSounds"}`],
     queryFn: () => {
       if (folderSlug === "") {
-        return fetch(`${API_URL}/sounds`, {
-          headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        }
-        }).then(async (res) => {
+        return fetchWithAuth("/sounds").then(async (res) => {
           if (!res.ok) throw new Error("Failed to fetch sounds");
 
           const data = (await res.json()).data;
@@ -68,11 +65,7 @@ const SoundGroup = ({
           return out;
         });
       } else {
-        return fetch(`${API_URL}/folders/${folderSlug}`, {
-          headers: {
-            authorization: `Bearer ${localStorage.getItem("jwt")}`,
-          },
-        }).then(async (res) => {
+        return fetchWithAuth(`/folders/${folderSlug}`).then(async (res) => {
           if (!res.ok)
             throw new Error("Failed to fetch " + folderSlug + " sounds");
 
@@ -85,6 +78,7 @@ const SoundGroup = ({
         });
       }
     },
+    enabled: !userLoading,
   });
 
   function handleButtonClick(name: string, url: string) {
@@ -184,6 +178,7 @@ const SoundGroup = ({
                 dbID={sound.id}
                 emoji={sound.emoji}
                 color={sound.color}
+                loggedIn={user !== null}
                 withinFolder={
                   folderSlug === "" || folderSlug === "favorites"
                     ? ""

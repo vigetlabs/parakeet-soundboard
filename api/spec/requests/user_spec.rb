@@ -6,7 +6,6 @@ describe 'User API', type: :request do
       user: {
         email: 'testuser@example.com',
         password: 'password123',
-        password_confirmation: 'password123',
         username: 'testuser'
       }
     }

@@ -1,33 +1,77 @@
 import { Cross2Icon, UpdateIcon } from "@radix-ui/react-icons";
-import { Dialog, Form } from "radix-ui";
+import { useMutation } from "@tanstack/react-query";
+import { Dialog, Form, Popover } from "radix-ui";
 import * as React from "react";
-import { PasswordInput, TextInput } from ".";
-import { useAuth } from "../../util/auth/useAuth";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button, PasswordInput, TextInput } from ".";
+import { useAuth } from "../../util/auth";
 import "./login.css";
 
 export interface LoginDialogProps
   extends React.ComponentPropsWithoutRef<typeof Dialog.Content> {
   newAccount: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  closeable?: boolean;
 }
 
 const LoginDialog = ({
   newAccount,
+  open,
+  onOpenChange,
+  closeable = true,
   className = "",
   children,
   ...props
 }: LoginDialogProps) => {
   const classes = `loginModal ${className}`.trim();
   const [createAccount, setCreateAccount] = React.useState(newAccount);
-  const { login, loading } = useAuth();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const { login, loginLoading, fetchWithAuth } = useAuth();
+  const navigate = useNavigate();
+
+  const signUpMutation = useMutation({
+    mutationFn: async (user: {
+      email: string;
+      username: string;
+      password: string;
+    }) => {
+      const formData = new FormData();
+      formData.append("user[email]", user.email);
+      formData.append("user[username]", user.username);
+      formData.append("user[password]", user.password);
+
+      const res = await fetchWithAuth("/signup", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.status === 422) {
+        // TODO: Make this a toast
+        alert("That email or username already exists!");
+      }
+
+      if (!res.ok) {
+        setIsLoading(false);
+        throw new Error("Failed to create user");
+      }
+
+      return res.json();
+    },
+    onSuccess: (_, vars) => {
+      login({
+        email: vars.email,
+        password: vars.password,
+      });
+    },
+  });
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    // setIsSaving(true);
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
 
     if (createAccount && data.password !== data.reenteredPassword) {
-      event.preventDefault();
-
       const reenteredPasswordElement = event.currentTarget.elements.namedItem(
         "reenteredPassword"
       ) as HTMLInputElement | null;
@@ -40,57 +84,60 @@ const LoginDialog = ({
     }
 
     if (createAccount) {
-      // TODO
+      setIsLoading(true);
+      signUpMutation.mutate({
+        email: data.email as string,
+        username: data.username as string,
+        password: data.password as string,
+      });
     } else {
-      const success = login({
+      login({
         email: data.email as string,
         password: data.password as string,
       });
-      if (!success) {
-        alert("Login failed!");
-      }
     }
   }
 
-  // async function handleLogin(e: React.FormEvent) {
-  //   e.preventDefault();
-  //   setLoginError(null);
-  //   try {
-  //     const res = await fetch("http://localhost:3001/login", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         user: { email: loginEmail, password: loginPassword },
-  //       }),
-  //     });
-  //     const response = await res.json();
-  //     const authHeader = res.headers.get("Authorization");
-  //     let token;
-  //     if (authHeader && authHeader.startsWith("Bearer ")) {
-  //       token = authHeader.split(" ")[1];
-  //     }
-  //     if (!token) throw new Error("No token received");
-  //     localStorage.setItem("jwt", token);
-  //     setShowLogin(false);
-  //     setLoginEmail("");
-  //     setLoginPassword("");
-  //     setUsername(response.status.data.user.username);
-  //     localStorage.setItem("username", response.status.data.user.username);
-  //     alert("Logged in!");
-  //   } catch {
-  //     setLoginError("Login failed");
-  //   }
-  // }
+  useEffect(() => {
+    if (open) {
+      setCreateAccount(newAccount);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   return (
-    <Dialog.Root onOpenChange={() => setCreateAccount(newAccount)}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(open) => {
+        if (!closeable) {
+          navigate("/");
+        }
+        onOpenChange(open);
+        setCreateAccount(newAccount);
+      }}
+    >
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="dialogOverlay" />
-        <Dialog.Content className={classes} {...props}>
+        <Dialog.Content
+          className={classes}
+          {...props}
+          onEscapeKeyDown={(e) => {
+            if (!closeable) e.preventDefault();
+            navigate("/");
+          }}
+          onPointerDownOutside={(e) => {
+            if (!closeable) e.preventDefault();
+            navigate("/");
+          }}
+          onInteractOutside={(e) => {
+            if (!closeable) e.preventDefault();
+            navigate("/");
+          }}
+        >
           <Dialog.Title asChild>
             <h3 className="popoverTitle loginTitle">
-              {createAccount ? "New User" : "Returning User"}
+              {createAccount ? "Create Account" : "Log In"}
             </h3>
           </Dialog.Title>
           <Form.Root onSubmit={handleSubmit} className="loginForm">
@@ -194,8 +241,11 @@ const LoginDialog = ({
               </Form.Field>
             )}
             <Form.Submit asChild>
-              <button className="loginButton" disabled={loading}>
-                {loading ? (
+              <button
+                className="loginButton"
+                disabled={loginLoading || isLoading}
+              >
+                {loginLoading || isLoading ? (
                   <UpdateIcon className="spinIcon" />
                 ) : createAccount ? (
                   "Create Account"
@@ -223,4 +273,46 @@ const LoginDialog = ({
   );
 };
 
-export { LoginDialog };
+const LogoutPopover = ({
+  className = "",
+  children,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof Popover.Content>) => {
+  const classes = `logoutPopover ${className}`.trim();
+  const { logout, loginLoading } = useAuth();
+
+  return (
+    <Popover.Root>
+      <Popover.Trigger asChild>{children}</Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          sideOffset={4}
+          collisionPadding={16}
+          className={classes}
+          side="right"
+          {...props}
+        >
+          <h3 className="popoverTitle">Log out?</h3>
+          <div className="confirmDeleteButtons">
+            <Button
+              className="dangerButton"
+              onClick={logout}
+              disabled={loginLoading}
+            >
+              {loginLoading ? <UpdateIcon className="spinIcon" /> : "Log Out"}
+            </Button>
+            <Popover.Close asChild>
+              <Button>Cancel</Button>
+            </Popover.Close>
+          </div>
+          <Popover.Close className="tagPickerClose" aria-label="Close">
+            <Cross2Icon className="tagPickerCloseIcon" />
+          </Popover.Close>
+          <Popover.Arrow className="tagPickerArrow" />
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+};
+
+export { LoginDialog, LogoutPopover };

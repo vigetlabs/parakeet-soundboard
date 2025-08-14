@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import fuzzysort from "fuzzysort";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { API_URL } from "../util/db";
+import { useAuth } from "../util/auth";
 import {
   DeleteDialog,
   EditFolderDialog,
@@ -18,18 +18,16 @@ const Home = () => {
   const [currentlyDeleting, setCurrentlyDeleting] = useState(false);
   const [editingName, setEditingName] = useState("");
   const [editingSlug, setEditingSlug] = useState("");
+  const { userLoading, fetchWithAuth } = useAuth();
 
   const { data: folders = [], isLoading } = useQuery({
     queryKey: ["folders", "allFolders"],
     queryFn: () =>
-      fetch(`${API_URL}/folders`, {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
-      }).then(async (res) => {
+      fetchWithAuth("/folders").then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch folders");
         return (await res.json()).data;
       }),
+    enabled: !userLoading,
   });
 
   function handleEditClicked(name: string, slug: string) {

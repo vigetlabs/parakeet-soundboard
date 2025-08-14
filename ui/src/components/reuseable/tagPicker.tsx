@@ -3,7 +3,7 @@ import { Cross2Icon, UpdateIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Popover, Toggle } from "radix-ui";
 import * as React from "react";
-import { API_URL } from "../../util/db";
+import { useAuth } from "../../util/auth";
 import type { Tag } from "../../util/types";
 import "./tagPicker.css";
 
@@ -24,11 +24,12 @@ const TagPicker = ({
   ...props
 }: TagPickerProps) => {
   const classes = `tagPicker ${className}`.trim();
+  const { userLoading, fetchWithAuth } = useAuth();
 
   const { data: tags, isLoading } = useQuery({
     queryKey: ["tags", "allTags"],
     queryFn: () =>
-      fetch(`${API_URL}/tags`).then(async (res) => {
+      fetchWithAuth("/tags").then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch tags");
 
         const rawTags = (await res.json()).data;
@@ -42,6 +43,7 @@ const TagPicker = ({
             };
           });
       }),
+    enabled: !userLoading,
   });
 
   function handleTagClick(tag: any, pressed: boolean) {

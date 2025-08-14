@@ -85,7 +85,7 @@
     drop-shadow(0 0 4px var(--primary-hover));
 }
 
-.tagPickerButton:disabled > .filterInputIcon {
+.tagPickerButton:disabled .filterInputIcon {
   color: var(--primary-disabled);
 }
 

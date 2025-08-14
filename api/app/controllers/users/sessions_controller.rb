@@ -35,7 +35,8 @@ class Users::SessionsController < Devise::SessionsController
     if current_user
       render json: {
         email: current_user.email,
-        username: current_user.username
+        username: current_user.username,
+        id: current_user.id
       }, status: :ok
     else
       render json: { status: 401, message: "Invalid or expired token." }, status: :unauthorized

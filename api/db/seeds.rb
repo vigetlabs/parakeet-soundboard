@@ -60,26 +60,26 @@ sound_records = default_sounds.map do |sound|
   [ sound[:name], s ]
 end.to_h
 
-favorites_folder = Folder.find_or_create_by!(name: "Favorites")
-jokes_folder = Folder.find_or_create_by!(name: "Jokes")
-dnd_folder = Folder.find_or_create_by!(name: "Dungeons & Dragons")
-misc_folder = Folder.find_or_create_by!(name: "Misc")
+# favorites_folder = Folder.find_or_create_by!(name: "Favorites")
+# jokes_folder = Folder.find_or_create_by!(name: "Jokes")
+# dnd_folder = Folder.find_or_create_by!(name: "Dungeons & Dragons")
+# misc_folder = Folder.find_or_create_by!(name: "Misc")
 
-favorites_sounds = [ 'Explosion', 'Quack', 'Drumroll', 'Yippee', 'Background Music' ]
-jokes_sounds = [ 'Airhorn', 'Anime Wow' ]
-misc_sounds = [ 'Crickets', 'Drumroll', 'Background Music' ]
+# favorites_sounds = [ 'Explosion', 'Quack', 'Drumroll', 'Yippee', 'Background Music' ]
+# jokes_sounds = [ 'Airhorn', 'Anime Wow' ]
+# misc_sounds = [ 'Crickets', 'Drumroll', 'Background Music' ]
 
-favorites_sounds.each do |sound_name|
-  sound = sound_records[sound_name]
-  favorites_folder.sounds << sound unless favorites_folder.sounds.include?(sound)
-end
+# favorites_sounds.each do |sound_name|
+#   sound = sound_records[sound_name]
+#   favorites_folder.sounds << sound unless favorites_folder.sounds.include?(sound)
+# end
 
-jokes_sounds.each do |sound_name|
-  sound = sound_records[sound_name]
-  jokes_folder.sounds << sound unless jokes_folder.sounds.include?(sound)
-end
+# jokes_sounds.each do |sound_name|
+#   sound = sound_records[sound_name]
+#   jokes_folder.sounds << sound unless jokes_folder.sounds.include?(sound)
+# end
 
-misc_sounds.each do |sound_name|
-  sound = sound_records[sound_name]
-  misc_folder.sounds << sound unless misc_folder.sounds.include?(sound)
-end
+# misc_sounds.each do |sound_name|
+#   sound = sound_records[sound_name]
+#   misc_folder.sounds << sound unless misc_folder.sounds.include?(sound)
+# end
