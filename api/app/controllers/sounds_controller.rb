@@ -48,6 +48,9 @@ class SoundsController < ApplicationController
   end
 
   def update
+    if sound.user.nil?
+      return render json: { error: "Not authorized" }, status: :forbidden
+    end
     if sound.update(sound_params.except(:folder_slugs))
       sound.folders = Folder.where(slug: sound_params[:folder_slugs], user: current_user) if sound_params[:folder_slugs].present?
       render json: SoundSerializer.new(sound,  params: { scope: current_user }).serializable_hash.to_json
@@ -69,6 +72,9 @@ class SoundsController < ApplicationController
   end
 
   def destroy
+    if sound.user.nil?
+      return render json: { error: "Not authorized" }, status: :forbidden
+    end
     sound.destroy
     head :no_content
   end

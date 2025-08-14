@@ -10,14 +10,22 @@
 
 default_sounds = [
   { name: 'Airhorn', file_path: 'airhorn.mp3', tags: [ "Funny", "Sharp", "Meme", "Celebration" ], color: "#e90c13", emoji: "🔉" },
-  { name: 'Anime Wow', file_path: 'anime-wow.mp3', tags: [ "Positive", "Funny", "Cute", "Voice", "Meme" ], color: "#ff4bd8", emoji: "🎉" },
-  { name: 'Applause', file_path: 'applause.mp3', tags: [ "Positive", "Crowd", "Classic", "Celebration" ], color: "#bb27ff", emoji: "👏" },
-  { name: 'Background Music', file_path: 'bg-music.mp3', tags: [ "Positive", "Smooth", "Musical", "Electronic", "Celebration" ], color: "#5373f2", emoji: "🎵" },
+  { name: 'Anime Wow', file_path: 'anime-wow.mp3', tags: [ "Positive", "Funny", "Cute", "Voice", "Meme" ], color: "#ff4bd8", emoji: "🤩" },
+  { name: 'Applause', file_path: 'applause.mp3', tags: [ "Positive", "Crowd", "Celebration" ], color: "#bb27ff", emoji: "👏" },
+  { name: 'Bird Purr', file_path: 'bird-purr.mp3', tags: [ "Positive", "Gentle", "Nature", "Animal", "Tommy", "Voice" ], color: "#5373f2", emoji: "🐦" },
+  { name: 'Bird Whistle', file_path: 'bird-whistle.mp3', tags: [ "Positive", "Gentle", "Nature", "Animal", "Tommy", "Voice" ], color: "#008573", emoji: "🐦‍⬛" },
   { name: 'Crickets', file_path: 'crickets.mp3', tags: [ "Negative", "Gentle", "Nature", "Animal" ], color: "#ff6e42", emoji: "🦗" },
-  { name: 'Drumroll', file_path: 'drumroll.mp3', tags: [ "Impact", "Classic", "Celebration" ], color: "#ffc53d", emoji: "🥁" },
+  { name: 'Drumroll', file_path: 'drumroll.mp3', tags: [ "Impact", "Celebration" ], color: "#ffc53d", emoji: "🥁" },
   { name: 'Explosion', file_path: 'explosion.mp3', tags: [ "Funny", "Sharp", "Impact" ], color: "#008573", emoji: "💥" },
-  { name: 'Splat', file_path: 'splat.mp3', tags: [ "Funny", "Smooth", "Meme" ], color: "#6200ad", emoji: "♠️" },
+  { name: 'FLF Yay', file_path: 'flf-yay.mp3', tags: [ "Positive", "Funny", "Cute", "Voice", "Meme", "Celebration", "Tommy" ], color: "#ff6e42", emoji: "🥳" },
+  { name: 'Like Seriously', file_path: 'like-seriously.mp3', tags: [ "Negative", "Funny", "Voice", "Meme", "Tommy" ], color: "#6200ad", emoji: "😑" },
+  { name: 'Music', file_path: 'music.mp3', tags: [ "Positive", "Musical", "Celebration", "Meme", "Electronic" ], color: "#5373f2", emoji: "🎵" },
   { name: 'Quack', file_path: 'quack.mp3', tags: [ "Funny", "Animal", "Meme" ], color: "#00d5b8", emoji: "🦆" },
+  { name: 'Screenshare', file_path: 'screenshare.mp3', tags: [ "Negative", "Funny", "Voice", "Meme", "Tommy" ], color: "#bb27ff", emoji: "🖥️" },
+  { name: 'Splat', file_path: 'splat.mp3', tags: [ "Funny", "Smooth", "Meme" ], color: "#e90c13", emoji: "♠️" },
+  { name: 'Tada', file_path: 'tada.mp3', tags: [ "Positive", "Funny", "Cute", "Voice", "Meme", "Celebration", "Tommy" ], color: "#ffc53d", emoji: "🎉" },
+  { name: 'Vigét', file_path: 'viget.mp3', tags: [ "Negative", "Funny", "Voice", "Meme", "Tommy" ], color: "#00d5b8", emoji: "🥖" },
+  { name: "Yas Queen", file_path: 'yas-queen.mp3', tags: [ "Positive", "Funny", "Cute", "Voice", "Meme", "Celebration", "Tommy" ], color: "#ff4bd8", emoji: "💅" },
   { name: 'Yippee', file_path: 'yippee.mp3', tags: [ "Positive", "Funny", "Cute", "Voice", "Meme", "Celebration" ], color: "#00c8ff", emoji: "🏳️‍🌈" }
 ]
 
@@ -39,15 +47,15 @@ default_tags = [
   { name: 'Animal' },
   { name: 'Crowd' },
   { name: 'Retro' },
-  { name: 'Classic' },
   { name: 'Meme' },
   { name: 'Celebration' },
-  { name: 'Holiday' }
+  { name: 'Holiday' },
+  { name: 'Tommy'}
 ]
 
 tag_records = default_tags.map { |t| [ t[:name], Tag.find_or_create_by!(name: t[:name]) ] }.to_h
 
-sound_records = default_sounds.map do |sound|
+default_sounds.map do |sound|
   s = Sound.find_or_create_by!(name: sound[:name], color: sound[:color], emoji: sound[:emoji]) do |snd|
     snd.audio_file.attach(io: File.open(Rails.root.join("db", "seeds", "audio", sound[:file_path])), filename: sound[:file_path])
   end
@@ -60,26 +68,3 @@ sound_records = default_sounds.map do |sound|
   [ sound[:name], s ]
 end.to_h
 
-# favorites_folder = Folder.find_or_create_by!(name: "Favorites")
-# jokes_folder = Folder.find_or_create_by!(name: "Jokes")
-# dnd_folder = Folder.find_or_create_by!(name: "Dungeons & Dragons")
-# misc_folder = Folder.find_or_create_by!(name: "Misc")
-
-# favorites_sounds = [ 'Explosion', 'Quack', 'Drumroll', 'Yippee', 'Background Music' ]
-# jokes_sounds = [ 'Airhorn', 'Anime Wow' ]
-# misc_sounds = [ 'Crickets', 'Drumroll', 'Background Music' ]
-
-# favorites_sounds.each do |sound_name|
-#   sound = sound_records[sound_name]
-#   favorites_folder.sounds << sound unless favorites_folder.sounds.include?(sound)
-# end
-
-# jokes_sounds.each do |sound_name|
-#   sound = sound_records[sound_name]
-#   jokes_folder.sounds << sound unless jokes_folder.sounds.include?(sound)
-# end
-
-# misc_sounds.each do |sound_name|
-#   sound = sound_records[sound_name]
-#   misc_folder.sounds << sound unless misc_folder.sounds.include?(sound)
-# end
