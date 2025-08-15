@@ -21,7 +21,8 @@ import {
   TagPicker,
   TextInput,
 } from ".";
-import { API_URL, queryClient } from "../../util/db";
+import { useAuth } from "../../util/auth";
+import { queryClient } from "../../util/db";
 import { defaultColors } from "../../util/placeholderData";
 import type { Folder, Tag } from "../../util/types";
 import "./editDialog.css";
@@ -73,6 +74,7 @@ const EditDialog = ({
   const [editingTags, setEditingTags] = useState<Tag[]>(sound.tags);
   const [editingFolders, setEditingFolders] = useState<Folder[]>(sound.folders);
   const [isSaving, setIsSaving] = useState(false);
+  const { fetchWithAuth } = useAuth();
 
   type CreateEditSoundProps = {
     name: string;
@@ -103,12 +105,9 @@ const EditDialog = ({
         formData.append("sound[audio_file]", editedSound.audio_file); // key matches model attribute
       }
 
-      const res = await fetch(`${API_URL}/sounds/${sound.id}`, {
+      const res = await fetchWithAuth(`/sounds/${sound.id}`, {
         method: "PATCH",
         body: formData,
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
       });
 
       if (!res.ok) {
@@ -140,12 +139,9 @@ const EditDialog = ({
         formData.append("sound[audio_file]", newSound.audio_file); // key matches model attribute
       }
 
-      const res = await fetch(`${API_URL}/sounds`, {
+      const res = await fetchWithAuth(`/sounds`, {
         method: "POST",
         body: formData,
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        }
       });
 
       if (!res.ok) {
@@ -258,10 +254,8 @@ const EditDialog = ({
               id={0} // will never be used don't worry about it
             />
           )}
-          <Dialog.Close asChild>
-            <button type="button" className="tagPickerClose" aria-label="Close">
-              <Cross2Icon className="tagPickerCloseIcon" />
-            </button>
+          <Dialog.Close className="tagPickerClose" aria-label="Close">
+            <Cross2Icon className="tagPickerCloseIcon" />
           </Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>
@@ -391,6 +385,9 @@ const EditDialogContent = ({
           <Form.Message className="editDialogMessage" match="valueMissing">
             Please enter a name
           </Form.Message>
+          <Form.Message className="editDialogMessage" match="tooLong">
+            Your name is too long
+          </Form.Message>
           <Form.Control asChild>
             <TextInput
               value={name}
@@ -399,6 +396,7 @@ const EditDialogContent = ({
               rightIconAction={() => setName("")}
               iconSize={32}
               className="editDialogInput"
+              maxLength={64}
               required
             />
           </Form.Control>

@@ -20,10 +20,24 @@ export default defineContentScript({
           },
           "*"
         );
-      }
-      if (event.data.command === CrossFunctions.AUDIO_ENDED) {
+      } else if (event.data.command === CrossFunctions.AUDIO_ENDED) {
         browser.runtime.sendMessage({
           type: CrossFunctions.AUDIO_ENDED,
+        });
+      } else if (event.data.command === CrossFunctions.OPEN_POPUP) {
+        browser.runtime.sendMessage({
+          type: CrossFunctions.OPEN_POPUP,
+        });
+      } else if (event.data.command === CrossFunctions.SET_AUTH_TOKEN) {
+        if (event.origin !== `${import.meta.env.VITE_WEBSITE_URL}`) return;
+        await browser.runtime.sendMessage({
+          type: CrossFunctions.SET_AUTH_TOKEN,
+          token: event.data.token,
+        });
+      } else if (event.data.command === CrossFunctions.REMOVE_AUTH_TOKEN) {
+        if (event.origin !== `${import.meta.env.VITE_WEBSITE_URL}`) return;
+        await browser.runtime.sendMessage({
+          type: CrossFunctions.REMOVE_AUTH_TOKEN,
         });
       }
     });

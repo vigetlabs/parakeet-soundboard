@@ -41,7 +41,7 @@ function base64ToArrayBuffer(base64: string) {
 }
 
 export default defineUnlistedScript(() => {
-  console.log("Parakeet Successfully Injected!");
+  console.log("[Parakeet] Successfully Injected!");
 
   (async function () {
     const originalGUM = navigator.mediaDevices.getUserMedia.bind(
@@ -55,7 +55,14 @@ export default defineUnlistedScript(() => {
     navigator.mediaDevices.getUserMedia = async function (constraints) {
       if (constraints?.audio) {
         // Grab the real mic
-        const realStream = await originalGUM({ audio: true, video: false });
+        const realStream = await originalGUM({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
+          video: false,
+        });
         const audioCtx = new AudioContext();
         const srcNode = audioCtx.createMediaStreamSource(realStream);
         const destNode = audioCtx.createMediaStreamDestination();
@@ -114,7 +121,6 @@ export default defineUnlistedScript(() => {
           !window.soundboard
           // || Date.now() - (window.soundboard.lastRecieved ?? 0) > 2000
         ) {
-          console.log("Updated soundboard initial");
           window.soundboard = {
             ...sb,
             fakeDiscarded: false,
@@ -126,9 +132,7 @@ export default defineUnlistedScript(() => {
             // && Date.now() - (window.soundboard.lastRecieved ?? 0) < 2000
           ) {
             window.soundboard.fakeDiscarded = true;
-            console.log("Got the fake!");
           } else {
-            console.log("Updated soundboard update");
             window.soundboard = {
               ...sb,
               fakeDiscarded: true,
@@ -139,7 +143,7 @@ export default defineUnlistedScript(() => {
         }
         sendMessage(CrossFunctions.GET_MIC_MUTED);
 
-        console.log("Made it to return!");
+        console.log("[Parakeet] Microphone Overwritten!");
         // 5) Return the mixed audio track
         return new MediaStream(destNode.stream.getAudioTracks());
       }

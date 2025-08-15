@@ -3,37 +3,35 @@ import { UpdateIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { API_URL } from "../util/db";
+import { useAuth } from "../util/auth";
 import SoundGroup from "./SoundGroup";
 
 const FolderView = () => {
   const navigate = useNavigate();
   const { folder } = useParams();
+  const { userLoading, fetchWithAuth } = useAuth();
 
   const { data: folders = [], isLoading } = useQuery({
     queryKey: ["folders", "minimalFolders"],
     queryFn: () =>
-      fetch(`${API_URL}/folders/folder_slug_list`, {
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
-      }).then((res) => {
+      fetchWithAuth("/folders/folder_slug_list").then((res) => {
         if (!res.ok) throw new Error("Failed to fetch folder slugs");
         return res.json();
       }),
+    enabled: !userLoading,
   });
 
   useEffect(() => {
-    if (isLoading) return;
+    if (userLoading || isLoading) return;
 
     if (!folder || !folders.some((f: any) => f.slug === folder)) {
       navigate("/folders", { replace: true });
     }
-  }, [folder, folders, isLoading, navigate]);
+  }, [folder, folders, isLoading, userLoading, navigate]);
 
   return (
     <>
-      {isLoading ? (
+      {userLoading || isLoading ? (
         <UpdateIcon className="spinIcon spinIconLarge" />
       ) : (
         <SoundGroup

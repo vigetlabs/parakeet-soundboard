@@ -5,13 +5,15 @@ import {
   StarFilledIcon,
   StarIcon,
   TrashIcon,
+  UpdateIcon,
 } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
 import { DropdownMenu } from "radix-ui";
 import * as React from "react";
 import { useState } from "react";
 import { chooseIcon, type AvaliableIcons } from "../../util";
-import { API_URL, queryClient } from "../../util/db";
+import { useAuth } from "../../util/auth";
+import { queryClient } from "../../util/db";
 import "./button.css";
 
 export interface ButtonProps
@@ -36,6 +38,8 @@ export interface SoundButtonProps
   dbID: number;
   color: string;
   emoji: string;
+  loggedIn: boolean;
+  userSound: boolean;
   isPlaying?: boolean;
   isFavorite?: boolean;
   withinFolder?: string;
@@ -53,6 +57,8 @@ const SoundButton = ({
   dbID,
   color,
   emoji,
+  loggedIn,
+  userSound,
   isPlaying,
   isFavorite,
   withinFolder,
@@ -64,6 +70,7 @@ const SoundButton = ({
   const classes = `soundButtonWrapper ${className}`.trim();
   const [displayMenu, setDisplayMenu] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { fetchWithAuth } = useAuth();
 
   const addToFolderMutation = useMutation({
     mutationFn: async (favorites: boolean) => {
@@ -71,13 +78,9 @@ const SoundButton = ({
       const folder = favorites ? "favorites" : withinFolder ?? "";
       formData.append("sound_id", dbID.toString());
 
-      const res = await fetch(`${API_URL}/folders/${folder}/add_sound`, {
+      const res = await fetchWithAuth(`/folders/${folder}/add_sound`, {
         method: "POST",
         body: formData,
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
-
       });
 
       if (!res.ok) {
@@ -97,12 +100,9 @@ const SoundButton = ({
       const folder = addToFavorites ? "favorites" : withinFolder ?? "";
       formData.append("sound_id", dbID.toString());
 
-      const res = await fetch(`${API_URL}/folders/${folder}/remove_sound`, {
+      const res = await fetchWithAuth(`/folders/${folder}/remove_sound`, {
         method: "DELETE",
         body: formData,
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
       });
 
       if (res.status === 204) {
@@ -144,15 +144,17 @@ const SoundButton = ({
       title={label}
     >
       <DropdownMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
-        <DropdownMenu.Trigger asChild>
-          <button
-            type="button"
-            className="soundButtonMenu"
-            style={{ opacity: displayMenu || menuOpen ? 1 : 0 }}
-          >
-            <DotsHorizontalIcon className="soundButtonMenuIcon" />
-          </button>
-        </DropdownMenu.Trigger>
+        {loggedIn && (
+          <DropdownMenu.Trigger asChild>
+            <button
+              type="button"
+              className="soundButtonMenu"
+              style={{ opacity: displayMenu || menuOpen ? 1 : 0 }}
+            >
+              <DotsHorizontalIcon className="soundButtonMenuIcon" />
+            </button>
+          </DropdownMenu.Trigger>
+        )}
 
         <DropdownMenu.Portal>
           <DropdownMenu.Content
@@ -178,13 +180,15 @@ const SoundButton = ({
                 Favorite
               </DropdownMenu.Item>
             )}
-            <DropdownMenu.Item
-              className="soundButtonMenuItem"
-              onSelect={() => editFunction(label, dbID, color, emoji)}
-            >
-              <Pencil1Icon className="soundButtonMenuItemIcon" />
-              Edit
-            </DropdownMenu.Item>
+            {userSound && (
+              <DropdownMenu.Item
+                className="soundButtonMenuItem"
+                onSelect={() => editFunction(label, dbID, color, emoji)}
+              >
+                <Pencil1Icon className="soundButtonMenuItemIcon" />
+                Edit
+              </DropdownMenu.Item>
+            )}
             {withinFolder && (
               <DropdownMenu.Item
                 className="soundButtonMenuItem"
@@ -194,14 +198,15 @@ const SoundButton = ({
                 Remove from Folder
               </DropdownMenu.Item>
             )}
-            <DropdownMenu.Item
-              className="soundButtonMenuItem soundButtonMenuItemDanger"
-              onSelect={() => deleteFunction(label, dbID)}
-            >
-              <TrashIcon className="soundButtonMenuItemIcon" />
-              Delete Sound
-            </DropdownMenu.Item>
-
+            {userSound && (
+              <DropdownMenu.Item
+                className="soundButtonMenuItem soundButtonMenuItemDanger"
+                onSelect={() => deleteFunction(label, dbID)}
+              >
+                <TrashIcon className="soundButtonMenuItemIcon" />
+                Delete Sound
+              </DropdownMenu.Item>
+            )}
             <DropdownMenu.Arrow className="soundButtonMenuArrow" />
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
@@ -233,6 +238,7 @@ export interface IconButtonProps
   label?: string;
   selected?: boolean;
   size?: number;
+  loading?: boolean;
 }
 
 const InnerIconButton = ({
@@ -240,6 +246,7 @@ const InnerIconButton = ({
   icon,
   label,
   selected = false,
+  loading = false,
   size = 24,
   ...props
 }: IconButtonProps) => {
@@ -258,7 +265,11 @@ const InnerIconButton = ({
           size
         )}
       </div>
-      {label && <div className="iconButtonLabel">{label}</div>}
+      {label && loading ? (
+        <UpdateIcon className="spinIcon iconButtonLabel" />
+      ) : (
+        <div className="iconButtonLabel">{label}</div>
+      )}
     </button>
   );
 };

@@ -3,7 +3,7 @@
   font-weight: 400;
   max-height: 700px;
 
-  color: #213547;
+  color: var(--primary-foreground);
   background-color: var(--inner-background);
 
   font-synthesis: none;
@@ -26,6 +26,7 @@
   --warning: #ce2c31; /* red 11 */
   --warning-hover: #e5484d; /* red 9 */
   --warning-light: #eb8e90; /* red 6 */
+  --warning-lighter: #feebec; /* red 3 */
 
   --primary-font: "Instrument Sans", sans-serif;
 }

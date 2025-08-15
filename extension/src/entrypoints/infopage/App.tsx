@@ -1,13 +1,13 @@
+import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 import "./App.css";
-import { DotsVerticalIcon } from "@radix-ui/react-icons";
 
 function App() {
   const [count, setCount] = useState(0);
   return (
     <>
       <body>
-        <a href={import.meta.env.VITE_WEBSITE_HOST} target="_blank">
+        <a href={import.meta.env.VITE_WEBSITE_URL} target="_blank">
           <img
             src={browser.runtime.getURL("/images/parakeetLogo.png")}
             alt="Parakeet Logo"

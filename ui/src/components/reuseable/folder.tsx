@@ -14,7 +14,8 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, TextInput } from ".";
-import { API_URL, queryClient } from "../../util/db";
+import { useAuth } from "../../util/auth";
+import { queryClient } from "../../util/db";
 import type { SoundType } from "../../util/placeholderData";
 import type { Folder } from "../../util/types";
 import "./folder.css";
@@ -231,18 +232,16 @@ const EditFolderDialog = ({
   const classes = `editFolderDialog ${className}`.trim();
   const [name, setName] = useState(previousName);
   const [isSaving, setIsSaving] = useState(false);
+  const { fetchWithAuth } = useAuth();
 
   const editFolderMutation = useMutation({
     mutationFn: async (name: string) => {
       const formData = new FormData();
       formData.append("folder[name]", name);
 
-      const res = await fetch(`${API_URL}/folders/${slug}`, {
+      const res = await fetchWithAuth(`/folders/${slug}`, {
         method: "PATCH",
         body: formData,
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
       });
 
       if (!res.ok) {
@@ -263,12 +262,9 @@ const EditFolderDialog = ({
       const formData = new FormData();
       formData.append("folder[name]", name);
 
-      const res = await fetch(`${API_URL}/folders`, {
+      const res = await fetchWithAuth(`/folders`, {
         method: "POST",
         body: formData,
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
       });
 
       if (!res.ok) {

@@ -1,0 +1,145 @@
+.loginModal {
+  background-color: var(--elevated-background);
+  border-radius: 24px;
+  padding: 32px;
+  border: 2px solid var(--primary-muted);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 85vh;
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+  min-width: 500px;
+}
+
+.loginTitle {
+  margin-bottom: 24px;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loginLabelContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: end;
+}
+
+.loginLabel {
+  margin-top: -100px;
+  margin-left: 18px;
+  transform: translateY(-18px);
+  transition: all 0.15s ease-in-out;
+  color: var(--primary-muted-dark);
+  border-radius: 50%;
+  cursor: text;
+}
+.textInputWrapper:has(input:not(:placeholder-shown))
+  ~ .loginLabelContainer
+  > .loginLabel,
+.textInputWrapper:focus-within ~ .loginLabelContainer > .loginLabel {
+  transform: translateY(-48px);
+  font-size: 0.85em;
+  color: var(--primary-disabled);
+  background-color: var(--elevated-background);
+  padding: 0 2px;
+}
+
+.loginField[data-invalid] > .textInputWrapper {
+  border-color: var(--warning);
+}
+
+.loginMessageContainer {
+  display: flex;
+  justify-content: end;
+}
+
+.loginMessage {
+  position: absolute;
+  transform: translate(-16px, -16px);
+  color: var(--warning);
+  font-size: 0.75em;
+}
+
+.loginInput {
+  font-size: 1rem;
+  padding: 18px 16px;
+  border: 2px solid var(--primary-muted-dark);
+  border-radius: 12px;
+  transition: border-color 0.2s ease-in-out;
+}
+.loginInput:hover {
+  border-color: var(--primary-active);
+}
+.loginInput:focus-within:not(.editDialogFieldContainerSelector) {
+  border-color: var(--primary-foreground);
+}
+
+.loginButton {
+  background-color: var(--elevated-background);
+  color: var(--primary-active);
+  padding: 18px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: fit-content;
+  font-weight: 700;
+  border: 2px solid var(--primary-active);
+  transition: all 0.2s ease-in-out;
+}
+.loginButton:hover {
+  background-color: var(--primary-active-light);
+  color: var(--primary-foreground);
+  border-color: var(--primary-foreground);
+}
+.loginButton:focus,
+.loginButton:disabled {
+  background-color: var(--primary-active);
+  border-color: transparent;
+  color: var(--elevated-background);
+}
+
+.loginSectionTitle {
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+.loginSectionTitle:first-of-type {
+  margin-top: -12px;
+}
+
+.loginFooter {
+  color: var(--primary-disabled);
+  font-size: 1rem;
+  margin: auto;
+  text-align: center;
+  margin-top: 24px;
+}
+
+.loginFooterButton {
+  padding: 0;
+  color: var(--primary-active);
+  font-size: 1em;
+  font-weight: 700;
+  outline: none;
+  border: none;
+  transition: color 0.2s ease-in-out;
+}
+.loginFooterButton:hover {
+  color: var(--primary-foreground);
+}
+
+.logoutPopover {
+  background-color: var(--elevated-background);
+  border-radius: 24px;
+  padding: 32px;
+  border: 2px solid var(--primary-muted);
+  min-width: 100px;
+}

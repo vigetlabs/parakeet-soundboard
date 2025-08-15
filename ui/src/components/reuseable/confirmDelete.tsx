@@ -2,8 +2,9 @@ import { Cross2Icon, UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
 import { Dialog } from "radix-ui";
 import * as React from "react";
-import { Button } from ".";
-import { API_URL, queryClient } from "../../util/db";
+import { useAuth } from "../../util/auth";
+import { queryClient } from "../../util/db";
+import { Button } from "./button";
 import "./confirmDelete.css";
 
 export interface DeleteDialogProps
@@ -26,14 +27,12 @@ const DeleteDialog = ({
 }: DeleteDialogProps) => {
   const classes = `confirmDeleteModal ${className}`.trim();
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const { fetchWithAuth } = useAuth();
 
   const deleteFolderMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`${API_URL}/folders/${slug}`, {
+      const res = await fetchWithAuth(`/folders/${slug}`, {
         method: "DELETE",
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        }
       });
 
       if (res.status === 204) {
@@ -55,11 +54,8 @@ const DeleteDialog = ({
 
   const deleteSoundMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`${API_URL}/sounds/${dbID}`, {
+      const res = await fetchWithAuth(`/sounds/${dbID}`, {
         method: "DELETE",
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        }
       });
 
       if (res.status === 204) {
@@ -114,8 +110,8 @@ const DeleteDialog = ({
               <Button>Cancel</Button>
             </Dialog.Close>
           </div>
-          <Dialog.Close className="emojiPickerClose" aria-label="Close">
-            <Cross2Icon className="emojiPickerCloseIcon" />
+          <Dialog.Close className="tagPickerClose" aria-label="Close">
+            <Cross2Icon className="tagPickerCloseIcon" />
           </Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>

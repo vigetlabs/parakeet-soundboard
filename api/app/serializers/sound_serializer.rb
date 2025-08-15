@@ -10,8 +10,15 @@ class SoundSerializer
   attribute :tags do |object|
     object.tags.map { |tag| { id: tag.id, name: tag.name, color: tag.color } }
   end
-  attribute :folders do |object|
-    object.folders.map { |folder| { name: folder.name, slug: folder.slug } }
+  attribute :folders do |object, params|
+    user = params && params[:scope]
+    if user
+      object.folders.where(user: user).map do
+        |folder| { name: folder.name, slug: folder.slug }
+      end
+    else
+      []
+    end
   end
 
 

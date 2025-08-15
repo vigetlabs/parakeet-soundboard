@@ -2,6 +2,8 @@
 
 class Users::SessionsController < Devise::SessionsController
   respond_to :json
+  before_action :authenticate_user!, only: [ :show ]
+
   def respond_with(current_user, _opts = {})
     render json: {
       status: {
@@ -26,6 +28,18 @@ class Users::SessionsController < Devise::SessionsController
         status: 401,
         message: "Couldn't find an active session."
       }, status: :unauthorized
+    end
+  end
+
+  def show
+    if current_user
+      render json: {
+        email: current_user.email,
+        username: current_user.username,
+        id: current_user.id
+      }, status: :ok
+    else
+      render json: { status: 401, message: "Invalid or expired token." }, status: :unauthorized
     end
   end
 end

@@ -107,11 +107,22 @@
 }
 
 .topBarMenuContent,
-.infoButtonPopover {
+.infoButtonPopover,
+.topBarSubMenu {
   background-color: var(--elevated-background);
   padding: 8px;
   border: 2px solid var(--primary-muted);
   border-radius: 8px;
+}
+
+.topBarSubMenu {
+  padding: 0;
+  border-color: var(--warning-light);
+  transition: border-color 0.2s ease-in-out;
+}
+
+.topBarSubMenu:has(.topBarMenuItem[data-highlighted]) {
+  border-color: var(--warning);
 }
 
 .infoButtonPopover {
@@ -143,7 +154,8 @@
   border-color: var(--primary-active);
 }
 
-.topBarMenuItemDanger {
+.topBarMenuItemDanger,
+.topBarMenuItemLogOut {
   color: var(--warning);
 }
 
@@ -151,10 +163,23 @@
   border-color: var(--warning);
 }
 
+.topBarMenuItemLogOut {
+  margin: 0;
+  transition: color 0.2s ease-in-out;
+}
+
+.topBarMenuItemLogOut[data-highlighted] {
+  color: var(--warning-dark);
+  border-color: transparent;
+}
+
 .topBarMenuItemIcon {
   height: 1rem;
   width: 1rem;
   margin-right: 8px;
+}
+.topBarMenuItemIconRight {
+  margin-right: 0;
 }
 
 .controlPanel {
@@ -433,12 +458,19 @@
   row-gap: 16px;
 }
 
-.connectedStatusWrapper {
+.bottomBar {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   margin-top: 16px;
+}
+
+.connectedStatusWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .connectedStatus {
@@ -453,6 +485,34 @@
   width: 12px;
 }
 
+.bottomBarButton {
+  padding: 2px 8px;
+  background-color: transparent;
+  color: inherit;
+  border: none;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease-in-out;
+}
+
+.bottomBarLogin:hover {
+  background-color: var(--primary-active-light);
+}
+.bottomBarLogout:hover {
+  background-color: var(--warning-lighter);
+}
+
+.bottomBarLogin:active {
+  background-color: var(--primary-hover);
+}
+.bottomBarLogout:active {
+  background-color: var(--warning-light);
+  color: var(--warning-dark);
+}
+
 .spinIcon {
   height: 1.25em;
   width: 1.25em;
@@ -464,6 +524,10 @@
   padding: 16px;
   height: 48px;
   width: 48px;
+}
+.spinIconSmall {
+  height: 1em;
+  width: 1em;
 }
 
 @keyframes spin {

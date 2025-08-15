@@ -23,12 +23,11 @@ export default defineBackground(() => {
           sendResponse(false);
         });
       return true; // tells the caller that there will be a response
-    }
-    if (msg.type === CrossFunctions.OPEN_POPUP) {
+    } else if (msg.type === CrossFunctions.OPEN_POPUP) {
       try {
         await browser.action.openPopup();
       } catch (e) {
-        console.error("openPopup failed:", e);
+        console.warn("openPopup failed:", e);
       }
     } else if (msg.type === CrossFunctions.SET_AUDIO_PLAYING) {
       audioPlaying = msg.audioID;
@@ -37,6 +36,10 @@ export default defineBackground(() => {
       return true;
     } else if (msg.type === CrossFunctions.AUDIO_ENDED) {
       audioPlaying = null;
+    } else if (msg.type === CrossFunctions.SET_AUTH_TOKEN) {
+      storage.setItem("local:jwt", msg.token);
+    } else if (msg.type === CrossFunctions.REMOVE_AUTH_TOKEN) {
+      storage.removeItem("local:jwt");
     }
   });
 
