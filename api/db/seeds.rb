@@ -50,7 +50,7 @@ default_tags = [
   { name: 'Meme' },
   { name: 'Celebration' },
   { name: 'Holiday' },
-  { name: 'Tommy'}
+  { name: 'Tommy' }
 ]
 
 tag_records = default_tags.map { |t| [ t[:name], Tag.find_or_create_by!(name: t[:name]) ] }.to_h
@@ -67,4 +67,3 @@ default_sounds.map do |sound|
 
   [ sound[:name], s ]
 end.to_h
-
