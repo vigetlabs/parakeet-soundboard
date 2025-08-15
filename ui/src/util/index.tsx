@@ -68,3 +68,28 @@ export function chooseIcon(
       return;
   }
 }
+
+const welcomeMessages = [
+  "It's great to see you again, {user}!",
+  "What will you play today, {user}?",
+  "{user}'s soundboard awaits!",
+  "It's time to make some noise, {user}!",
+  "Get loud, {user}!",
+];
+
+const rand = Math.floor(Math.random() * welcomeMessages.length);
+const split = welcomeMessages[rand].split("{user}");
+
+export function chooseWelcomeMessage(username: string) {
+  return (
+    <>
+      {split[0]}
+      {split.length > 1 && (
+        <>
+          <b>{username}</b>
+          {split[1]}
+        </>
+      )}
+    </>
+  );
+}

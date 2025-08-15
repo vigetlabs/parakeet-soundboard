@@ -26,6 +26,7 @@
   --warning: #ce2c31; /* red 11 */
   --warning-hover: #e5484d; /* red 9 */
   --warning-light: #eb8e90; /* red 6 */
+  --warning-lighter: #feebec; /* red 3 */
 
   --primary-font: "Instrument Sans", sans-serif;
 }

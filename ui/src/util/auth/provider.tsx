@@ -34,7 +34,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return { data, authHeader };
     },
     onSuccess: (res) => {
-      console.log("what");
       let token;
       if (res.authHeader && res.authHeader.startsWith("Bearer ")) {
         token = res.authHeader.split(" ")[1];
@@ -42,6 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!token) throw new Error("No token received");
       setToken(token);
       localStorage.setItem("jwt", token);
+      window.postMessage({ command: "parakeet-setAuthToken", token }, origin);
 
       setUser(res.data.status.data.user);
       queryClient.setQueryData(
@@ -109,7 +109,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         // This means the token has expired, so remove it
         alert("You've been logged out!");
         setUser(null);
+        setToken(null);
         localStorage.removeItem("jwt");
+        window.postMessage({ command: "parakeet-removeAuthToken" }, origin);
         queryClient.setQueryData(["auth", "user"], null);
         res = fetchWithoutAuth(path, init);
       }
@@ -126,6 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return null;
       }
       setToken(token);
+      window.postMessage({ command: "parakeet-setAuthToken", token }, origin);
 
       const res = await fetchWithAuth(
         "/users/show",
@@ -158,6 +161,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setUser(null);
     localStorage.removeItem("jwt");
+    window.postMessage({ command: "parakeet-removeAuthToken" }, origin);
     queryClient.setQueryData(["auth", "user"], null);
     window.location.reload();
   };

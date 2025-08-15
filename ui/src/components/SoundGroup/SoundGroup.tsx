@@ -36,7 +36,7 @@ const SoundGroup = ({
   style,
   ...props
 }: SoundGroupProps) => {
-  const [currentlyPlaying, setCurrentlyPlaying] = useState("");
+  const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null);
   const [searchParams] = useSearchParams();
   const [currentlyEditingFolder, setCurrentlyEditingFolder] = useState(false);
   const [currentlyEditing, setCurrentlyEditing] = useState(false);
@@ -81,9 +81,9 @@ const SoundGroup = ({
     enabled: !userLoading,
   });
 
-  function handleButtonClick(name: string, url: string) {
-    AudioPlayer.play(url, () => setCurrentlyPlaying(""));
-    setCurrentlyPlaying(name);
+  function handleButtonClick(id: number, url: string) {
+    AudioPlayer.play(url, () => setCurrentlyPlaying(null));
+    setCurrentlyPlaying(id);
   }
 
   function sortAndFilter() {
@@ -163,7 +163,7 @@ const SoundGroup = ({
                       <TrashIcon className="soundButtonMenuItemIcon" />
                       Delete Folder
                     </DropdownMenu.Item>
-
+                    {/* TODO: Bulk adding sounds to folder */}
                     <DropdownMenu.Arrow className="soundButtonMenuArrow" />
                   </DropdownMenu.Content>
                 </DropdownMenu.Portal>
@@ -179,6 +179,7 @@ const SoundGroup = ({
                 emoji={sound.emoji}
                 color={sound.color}
                 loggedIn={user !== null}
+                userSound={sound.user_id !== null}
                 withinFolder={
                   folderSlug === "" || folderSlug === "favorites"
                     ? ""
@@ -203,9 +204,9 @@ const SoundGroup = ({
                   setCurrentlyDeleting(true);
                 }}
                 onClick={() =>
-                  handleButtonClick(sound.name, sound.audio_file_url)
+                  handleButtonClick(sound.id, sound.audio_file_url)
                 }
-                isPlaying={currentlyPlaying === sound.name}
+                isPlaying={currentlyPlaying === sound.id}
                 className="soundGroupButton"
               />
             ))}

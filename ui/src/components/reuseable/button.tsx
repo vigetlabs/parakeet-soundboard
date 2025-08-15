@@ -39,6 +39,7 @@ export interface SoundButtonProps
   color: string;
   emoji: string;
   loggedIn: boolean;
+  userSound: boolean;
   isPlaying?: boolean;
   isFavorite?: boolean;
   withinFolder?: string;
@@ -57,6 +58,7 @@ const SoundButton = ({
   color,
   emoji,
   loggedIn,
+  userSound,
   isPlaying,
   isFavorite,
   withinFolder,
@@ -178,13 +180,15 @@ const SoundButton = ({
                 Favorite
               </DropdownMenu.Item>
             )}
-            <DropdownMenu.Item
-              className="soundButtonMenuItem"
-              onSelect={() => editFunction(label, dbID, color, emoji)}
-            >
-              <Pencil1Icon className="soundButtonMenuItemIcon" />
-              Edit
-            </DropdownMenu.Item>
+            {userSound && (
+              <DropdownMenu.Item
+                className="soundButtonMenuItem"
+                onSelect={() => editFunction(label, dbID, color, emoji)}
+              >
+                <Pencil1Icon className="soundButtonMenuItemIcon" />
+                Edit
+              </DropdownMenu.Item>
+            )}
             {withinFolder && (
               <DropdownMenu.Item
                 className="soundButtonMenuItem"
@@ -194,14 +198,15 @@ const SoundButton = ({
                 Remove from Folder
               </DropdownMenu.Item>
             )}
-            <DropdownMenu.Item
-              className="soundButtonMenuItem soundButtonMenuItemDanger"
-              onSelect={() => deleteFunction(label, dbID)}
-            >
-              <TrashIcon className="soundButtonMenuItemIcon" />
-              Delete Sound
-            </DropdownMenu.Item>
-
+            {userSound && (
+              <DropdownMenu.Item
+                className="soundButtonMenuItem soundButtonMenuItemDanger"
+                onSelect={() => deleteFunction(label, dbID)}
+              >
+                <TrashIcon className="soundButtonMenuItemIcon" />
+                Delete Sound
+              </DropdownMenu.Item>
+            )}
             <DropdownMenu.Arrow className="soundButtonMenuArrow" />
           </DropdownMenu.Content>
         </DropdownMenu.Portal>

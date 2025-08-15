@@ -22,7 +22,7 @@ import {
   TextInput,
 } from ".";
 import { useAuth } from "../../util/auth";
-import { API_URL, queryClient } from "../../util/db";
+import { queryClient } from "../../util/db";
 import { defaultColors } from "../../util/placeholderData";
 import type { Folder, Tag } from "../../util/types";
 import "./editDialog.css";
@@ -139,11 +139,10 @@ const EditDialog = ({
         formData.append("sound[audio_file]", newSound.audio_file); // key matches model attribute
       }
 
-      const res = await fetchWithAuth(`${API_URL}/sounds`, {
+      const res = await fetchWithAuth(`/sounds`, {
         method: "POST",
         body: formData,
       });
-      console.log("what??");
 
       if (!res.ok) {
         throw new Error("Failed to add sound");
@@ -152,7 +151,6 @@ const EditDialog = ({
       return res.json();
     },
     onSuccess: () => {
-      console.log("hmm");
       queryClient.invalidateQueries({ queryKey: ["sounds"] });
       setIsSaving(false);
       onOpenChange(false);

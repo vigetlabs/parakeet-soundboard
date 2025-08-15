@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, TextInput } from ".";
 import { useAuth } from "../../util/auth";
-import { API_URL, queryClient } from "../../util/db";
+import { queryClient } from "../../util/db";
 import type { SoundType } from "../../util/placeholderData";
 import type { Folder } from "../../util/types";
 import "./folder.css";
@@ -239,7 +239,7 @@ const EditFolderDialog = ({
       const formData = new FormData();
       formData.append("folder[name]", name);
 
-      const res = await fetchWithAuth(`${API_URL}/folders/${slug}`, {
+      const res = await fetchWithAuth(`/folders/${slug}`, {
         method: "PATCH",
         body: formData,
       });
@@ -262,7 +262,7 @@ const EditFolderDialog = ({
       const formData = new FormData();
       formData.append("folder[name]", name);
 
-      const res = await fetchWithAuth(`${API_URL}/folders`, {
+      const res = await fetchWithAuth(`/folders`, {
         method: "POST",
         body: formData,
       });

@@ -2,36 +2,50 @@ export const API_URL = `${import.meta.env.VITE_API_HOST}:${
   import.meta.env.VITE_API_PORT
 }`;
 
-export async function login(email: string, password: string) {
-  const res = await fetch(`${API_URL}/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user: { email, password } }),
+async function fetchWithAuth(
+  token: string | null,
+  path: string,
+  init?: RequestInit
+) {
+  let res = await fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      ...(init?.headers || {}),
+      Authorization: `Bearer ${token}`,
+    },
   });
-  const data = await res.json();
-  if (res.ok && res.headers.get("Authorization")) {
-    const jwt = res.headers.get("Authorization")?.replace("Bearer ", "") ?? "";
-    await browser.storage.local.set({ jwt });
-    return jwt;
+
+  if (res.status === 401 && token) {
+    // This means the token has expired, so remove it
+    alert("You've been logged out!");
+    storage.removeItem("local:jwt");
+    res = await fetchWithAuth(null, path, init);
   }
-  throw new Error(data.status?.message || "Login failed");
+  return res;
 }
 
-export async function getMySounds() {
-  const { jwt } = await browser.storage.local.get("jwt");
-  if (!jwt) throw new Error("Not logged in");
-  const res = await fetch(`${API_URL}/my_sounds`, {
-    headers: { Authorization: `Bearer ${jwt}` },
-  });
-  if (!res.ok) throw new Error("Failed to fetch sounds");
-  return res.json();
+export async function login(token: string) {
+  if (!token) {
+    return null;
+  }
+
+  let user: User = null;
+
+  const res = await fetchWithAuth(token, "/users/show");
+
+  // TODO: Handle if the server is down
+  const json = await res.json();
+  if (json.username) {
+    user = json;
+  }
+
+  return user;
 }
 
 export async function getSounds() {
-  const { jwt } = await browser.storage.local.get("jwt");
-  const res = await fetch(`${API_URL}/sounds`, {
-    headers: { Authorization: `Bearer ${jwt}` },
-  });
+  const token = (await storage.getItem("local:jwt")) ?? null;
+  const res = await fetchWithAuth(token as string, "/sounds");
+
   if (!res.ok) throw new Error("Failed to fetch sounds");
   return res.json();
 }

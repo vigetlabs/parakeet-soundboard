@@ -2,7 +2,7 @@
 
 class Users::SessionsController < Devise::SessionsController
   respond_to :json
-  before_action :authenticate_user!, only: [:show]
+  before_action :authenticate_user!, only: [ :show ]
 
   def respond_with(current_user, _opts = {})
     render json: {

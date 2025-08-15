@@ -6,7 +6,7 @@ import {
   setLocalVolume,
   stopLocalAudio,
 } from "@/utils";
-import { getMySounds, getSounds, login } from "@/utils/api";
+import { getSounds } from "@/utils/api";
 import { CrossFunctions } from "@/utils/constants";
 import { isSoundCached, retrieveSound, storeSound } from "@/utils/db.ts";
 import { useEffect, useState } from "react";
@@ -14,10 +14,14 @@ import "./App.css";
 
 import {
   BoxIcon,
+  ChevronRightIcon,
   DotsHorizontalIcon,
+  EnterIcon,
+  ExitIcon,
   ExternalLinkIcon,
   InfoCircledIcon,
   MagnifyingGlassIcon,
+  PersonIcon,
   QuestionMarkCircledIcon,
   SpeakerLoudIcon,
   UpdateIcon,
@@ -39,12 +43,7 @@ function App() {
   const [fxVolume, setFxVolume] = useState(25);
   const [micMuted, setMicMuted] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState("");
-
-  const [showLogin, setShowLogin] = useState(false);
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
+  const [user, setUser] = useState<User>(null);
 
   const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
     fallback: 25,
@@ -59,24 +58,20 @@ function App() {
     }
   );
 
+  let loaded = false;
   useEffect(() => {
-    async function fetchUsername() {
-      const result = await browser.storage.local.get("username");
-      if (result && result.username) setUsername(result.username);
+    if (loaded) return;
+    loaded = true;
+    async function startLogin() {
+      const token = (await storage.getItem("local:jwt")) ?? null;
+      if (token) {
+        setUser(await login(token as string));
+      }
+      getSounds();
     }
-    fetchUsername();
-  }, []);
 
-  const handleTestLogin = async () => {
-    console.log("Testing login...");
-    try {
-      const jwt = await login("natalietest@example.com", "password123");
-      const sounds = await getMySounds();
-      console.log("My Sounds:", sounds);
-    } catch (err) {
-      console.error("Login failed:", err);
-    }
-  };
+    startLogin();
+  }, []);
 
   async function fetchSounds() {
     setIsSyncing(true);
@@ -300,44 +295,6 @@ function App() {
     }
   }, [folders]);
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setLoginError(null);
-    try {
-      const res = await fetch(`${API_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: "" },
-        body: JSON.stringify({
-          user: { email: loginEmail, password: loginPassword },
-        }),
-        credentials: "omit",
-      });
-      const response = await res.json();
-      const authHeader = res.headers.get("Authorization");
-      let token;
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        token = authHeader.split(" ")[1];
-      }
-      if (!token) throw new Error("No token received");
-      try {
-        await browser.storage.local.set({ jwt: token });
-      } catch (e) {
-        console.error("Failed to store JWT in browser storage:", e);
-      }
-      await browser.storage.local.get("jwt").then((result) => {});
-      setShowLogin(false);
-      setLoginEmail("");
-      setLoginPassword("");
-      setUsername(response.status.data.user.username);
-      await browser.storage.local.set({
-        username: response.status.data.user.username,
-      });
-      alert("Logged in!");
-    } catch {
-      setLoginError("Login failed");
-    }
-  }
-
   return (
     <>
       <div className="wrapper">
@@ -378,20 +335,61 @@ function App() {
                 collisionPadding={8}
                 className="topBarMenuContent"
               >
+                {user ? (
+                  <DropdownMenu.Sub>
+                    <DropdownMenu.SubTrigger className="topBarMenuItem">
+                      <PersonIcon className="topBarMenuItemIcon" />
+                      {user.username}
+                    </DropdownMenu.SubTrigger>
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.SubContent
+                        className="topBarSubMenu"
+                        sideOffset={8}
+                        alignOffset={-2}
+                      >
+                        <DropdownMenu.Item
+                          className="topBarMenuItem topBarMenuItemLogOut"
+                          onSelect={() =>
+                            browser.tabs.create({
+                              url: `${import.meta.env.VITE_WEBSITE_URL}/logout`,
+                            })
+                          }
+                        >
+                          Log Out
+                          <ChevronRightIcon className="topBarMenuItemIcon topBarMenuItemIconRight" />
+                        </DropdownMenu.Item>
+                      </DropdownMenu.SubContent>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Sub>
+                ) : (
+                  <DropdownMenu.Item
+                    className="topBarMenuItem"
+                    onSelect={() =>
+                      browser.tabs.create({
+                        url: `${import.meta.env.VITE_WEBSITE_URL}/login`,
+                      })
+                    }
+                  >
+                    <PersonIcon className="topBarMenuItemIcon" />
+                    Log In
+                  </DropdownMenu.Item>
+                )}
+                {user && (
+                  <DropdownMenu.Item
+                    className="topBarMenuItem"
+                    onSelect={handleSync}
+                  >
+                    <UpdateIcon className="topBarMenuItemIcon" />
+                    Sync
+                  </DropdownMenu.Item>
+                )}
                 <DropdownMenu.Item
                   className="topBarMenuItem"
-                  onSelect={handleSync}
-                >
-                  <UpdateIcon className="topBarMenuItemIcon" />
-                  Sync
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  className="topBarMenuItem"
-                  onSelect={() => {
+                  onSelect={() =>
                     browser.tabs.create({
                       url: import.meta.env.VITE_WEBSITE_URL,
-                    });
-                  }}
+                    })
+                  }
                 >
                   <ExternalLinkIcon className="topBarMenuItemIcon" />
                   Settings
@@ -402,14 +400,6 @@ function App() {
                 >
                   <QuestionMarkCircledIcon className="topBarMenuItemIcon" />
                   Help
-                </DropdownMenu.Item>
-                <DropdownMenu.Separator />
-                <DropdownMenu.Item
-                  className="topBarMenuItem"
-                  onSelect={() => setShowLogin(true)}
-                >
-                  <BoxIcon className="topBarMenuItemIcon" />
-                  {username ? `Logged in as ${username}` : "Login"}
                 </DropdownMenu.Item>
                 <DropdownMenu.Arrow className="topBarMenuArrow" />
               </DropdownMenu.Content>
@@ -559,7 +549,7 @@ function App() {
               {sortAndFilter().map((button) => (
                 <SoundButton
                   label={button.label}
-                  key={button.label}
+                  key={button.id}
                   color={button.color}
                   emoji={button.emoji}
                   onClick={() => playSound(button.id)}
@@ -569,77 +559,76 @@ function App() {
             </>
           )}
         </div>
-        <div className="connectedStatusWrapper">
-          <h2>Google Meet Status:</h2>
-          <p
-            className="connectedStatus"
-            style={{ color: isMeet ? "green" : "red" }}
-          >
-            {isMeet ? (
-              <>
-                <VideoIcon
-                  className="connectedStatusIcon"
-                  fill="none"
-                  stroke="currentColor"
-                />
-                Connected
-              </>
-            ) : (
-              <>
-                <VideoOffIcon
-                  className="connectedStatusIcon"
-                  fill="none"
-                  stroke="currentColor"
-                />
-                Disconnected
-              </>
-            )}
-          </p>
+        <div className="bottomBar">
+          <div className="connectedStatusWrapper">
+            <h2>Google Meet:</h2>
+            <p
+              className="connectedStatus"
+              style={{
+                color: isMeet ? "var(--primary-active)" : "var(--warning)",
+              }}
+            >
+              {isMeet ? (
+                <>
+                  <VideoIcon
+                    className="connectedStatusIcon"
+                    fill="none"
+                    stroke="currentColor"
+                  />
+                  Connected
+                </>
+              ) : (
+                <>
+                  <VideoOffIcon
+                    className="connectedStatusIcon"
+                    fill="none"
+                    stroke="currentColor"
+                  />
+                  Disconnected
+                </>
+              )}
+            </p>
+          </div>
+          <div className="connectedStatusWrapper">
+            <p
+              className="connectedStatus"
+              style={{
+                color: user ? "var(--warning)" : "var(--primary-foreground)",
+              }}
+            >
+              {user ? (
+                <>
+                  <button
+                    className="bottomBarButton bottomBarLogout"
+                    onClick={() =>
+                      browser.tabs.create({
+                        url: `${import.meta.env.VITE_WEBSITE_URL}/logout`,
+                      })
+                    }
+                  >
+                    <ExitIcon className="connectedStatusIcon" />
+                    Log Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="bottomBarButton bottomBarLogin"
+                    onClick={() =>
+                      browser.tabs.create({
+                        url: `${import.meta.env.VITE_WEBSITE_URL}/login`,
+                      })
+                    }
+                  >
+                    <EnterIcon className="connectedStatusIcon" />
+                    Log In
+                  </button>
+                </>
+              )}
+            </p>
+          </div>
         </div>
       </div>
-      {showLogin && (
-        <div
-          style={{
-            position: "fixed",
-            top: 100,
-            left: 100,
-            background: "white",
-            zIndex: 9999,
-            padding: 24,
-            border: "1px solid #ccc",
-            borderRadius: 8,
-          }}
-        >
-          <form onSubmit={handleLogin}>
-            <h3>Login</h3>
-            {loginError && <p style={{ color: "red" }}>{loginError}</p>}
-            <input
-              type="email"
-              placeholder="Email"
-              required
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
-              style={{ display: "block", marginBottom: 8 }}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              required
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-              style={{ display: "block", marginBottom: 8 }}
-            />
-            <button type="submit">Login</button>
-            <button
-              type="button"
-              onClick={() => setShowLogin(false)}
-              style={{ marginLeft: 8 }}
-            >
-              Close
-            </button>
-          </form>
-        </div>
-      )}
     </>
   );
 }

@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Dialog } from "radix-ui";
 import * as React from "react";
 import { useAuth } from "../../util/auth";
-import { API_URL, queryClient } from "../../util/db";
+import { queryClient } from "../../util/db";
 import { Button } from "./button";
 import "./confirmDelete.css";
 
@@ -31,7 +31,7 @@ const DeleteDialog = ({
 
   const deleteFolderMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetchWithAuth(`${API_URL}/folders/${slug}`, {
+      const res = await fetchWithAuth(`/folders/${slug}`, {
         method: "DELETE",
       });
 
@@ -54,7 +54,7 @@ const DeleteDialog = ({
 
   const deleteSoundMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetchWithAuth(`${API_URL}/sounds/${dbID}`, {
+      const res = await fetchWithAuth(`/sounds/${dbID}`, {
         method: "DELETE",
       });
 
