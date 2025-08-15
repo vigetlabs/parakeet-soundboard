@@ -7,9 +7,12 @@ const LogoutPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    logout();
-    window.postMessage({ command: "parakeet-openPopup" }, origin);
-    navigate("/");
+    async function startLogout() {
+      await logout();
+      window.postMessage({ command: "parakeet-openPopup" }, origin);
+      navigate("/");
+    }
+    startLogout();
   }, [logout, navigate]);
 
   return <></>;

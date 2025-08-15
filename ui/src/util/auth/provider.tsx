@@ -165,7 +165,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.removeItem("jwt");
     window.postMessage({ command: "parakeet-removeAuthToken" }, origin);
     queryClient.setQueryData(["auth", "user"], null);
-    window.location.reload();
   }, []);
 
   const value: AuthContextValue = {

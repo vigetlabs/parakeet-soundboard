@@ -296,7 +296,10 @@ const LogoutPopover = ({
           <div className="confirmDeleteButtons">
             <Button
               className="dangerButton"
-              onClick={logout}
+              onClick={() => {
+                logout();
+                window.location.reload();
+              }}
               disabled={loginLoading}
             >
               {loginLoading ? <UpdateIcon className="spinIcon" /> : "Log Out"}
