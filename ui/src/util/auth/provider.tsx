@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { API_URL, queryClient } from "../db";
 import { AuthContext, type AuthContextValue, type User } from "./context";
 
@@ -88,36 +88,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return res;
   }
 
-  async function fetchWithAuth(
-    path: string,
-    init?: RequestInit,
-    overrideToken?: string
-  ) {
-    let res;
-    if (!overrideToken && !token) {
-      res = await fetchWithoutAuth(path, init);
-    } else {
-      res = await fetch(`${API_URL}${path}`, {
-        ...init,
-        headers: {
-          ...(init?.headers || {}),
-          Authorization: `Bearer ${overrideToken ?? token}`,
-        },
-      });
+  const fetchWithAuth = useCallback(
+    async (path: string, init?: RequestInit, overrideToken?: string) => {
+      let res;
+      if (!overrideToken && !token) {
+        res = await fetchWithoutAuth(path, init);
+      } else {
+        res = await fetch(`${API_URL}${path}`, {
+          ...init,
+          headers: {
+            ...(init?.headers || {}),
+            Authorization: `Bearer ${overrideToken ?? token}`,
+          },
+        });
 
-      if (res.status === 401) {
-        // This means the token has expired, so remove it
-        alert("You've been logged out!");
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem("jwt");
-        window.postMessage({ command: "parakeet-removeAuthToken" }, origin);
-        queryClient.setQueryData(["auth", "user"], null);
-        res = fetchWithoutAuth(path, init);
+        if (res.status === 401) {
+          // This means the token has expired, so remove it
+          alert("You've been logged out!");
+          setUser(null);
+          setToken(null);
+          localStorage.removeItem("jwt");
+          window.postMessage({ command: "parakeet-removeAuthToken" }, origin);
+          queryClient.setQueryData(["auth", "user"], null);
+          res = fetchWithoutAuth(path, init);
+        }
       }
-    }
-    return res;
-  }
+      return res;
+    },
+    [token]
+  );
 
   // Get the current user on page load
   const userQuery = useQuery({
@@ -149,11 +148,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     refetchOnWindowFocus: false,
   });
 
-  const login = async (creds: { email: string; password: string }) => {
-    await loginMut.mutateAsync(creds);
-  };
+  const login = useCallback(
+    async (creds: { email: string; password: string }) => {
+      await loginMut.mutateAsync(creds);
+    },
+    [loginMut]
+  );
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     // Enable these when we have tokens that last more than 30 mins
     // setLoading(true);
     // await logoutMut.mutateAsync();
@@ -164,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     window.postMessage({ command: "parakeet-removeAuthToken" }, origin);
     queryClient.setQueryData(["auth", "user"], null);
     window.location.reload();
-  };
+  }, []);
 
   const value: AuthContextValue = {
     user,
