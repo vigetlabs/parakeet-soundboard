@@ -52,6 +52,7 @@ group :development, :test do
   gem "simplecov"
   gem "factory_bot_rails", "~> 6.5"
   gem "faker"
+  gem "shoulda-matchers"
 end
 
 gem "aws-sdk-s3", "~> 1.193"
