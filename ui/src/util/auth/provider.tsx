@@ -43,6 +43,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem("jwt", token);
       window.postMessage({ command: "parakeet-setAuthToken", token }, origin);
 
+      const refreshToken = res.data.status.data.refresh_token;
+      if (refreshToken) {
+        localStorage.setItem("refreshToken", refreshToken);
+      }
+
       setUser(res.data.status.data.user);
       queryClient.setQueryData(
         ["auth", "user"],
@@ -103,7 +108,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         if (res.status === 401) {
-          // This means the token has expired, so remove it
+          // Token has expired
+          const refreshToken = localStorage.getItem("refreshToken");
+          if (refreshToken) {
+            try {
+              const refreshRes = await fetch(`${API_URL}/refresh`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refresh_token: refreshToken }),
+              });
+              
+              if (refreshRes.ok) {
+                const refreshData = await refreshRes.json();
+                const newToken = refreshData.access_token;
+                const newRefreshToken = refreshData.refresh_token;
+                
+                setToken(newToken);
+                localStorage.setItem("jwt", newToken);
+                localStorage.setItem("refreshToken", newRefreshToken);
+                
+                // Retry the original request with new token
+                return fetch(`${API_URL}${path}`, {
+                  ...init,
+                  headers: {
+                    ...(init?.headers || {}),
+                    Authorization: `Bearer ${newToken}`,
+                  },
+                });
+              }
+            } catch (error) {
+              console.log("Token refresh failed:", error);
+            }
+          }
+
+          // If refresh fails - log out
           alert("You've been logged out!");
           setUser(null);
           setToken(null);
@@ -163,6 +201,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setUser(null);
     localStorage.removeItem("jwt");
+    localStorage.removeItem("refreshToken");
     window.postMessage({ command: "parakeet-removeAuthToken" }, origin);
     queryClient.setQueryData(["auth", "user"], null);
   }, []);

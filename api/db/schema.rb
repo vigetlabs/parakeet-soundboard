@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_04_180359) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_25_172306) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -62,6 +62,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_04_180359) do
     t.index ["sound_id"], name: "index_folders_sounds_on_sound_id"
   end
 
+  create_table "refresh_tokens", force: :cascade do |t|
+    t.string "crypted_token"
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["crypted_token"], name: "index_refresh_tokens_on_crypted_token", unique: true
+    t.index ["user_id"], name: "index_refresh_tokens_on_user_id"
+  end
+
   create_table "sounds", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -106,5 +115,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_04_180359) do
   add_foreign_key "folders", "users", on_delete: :cascade
   add_foreign_key "folders_sounds", "folders", on_delete: :cascade
   add_foreign_key "folders_sounds", "sounds", on_delete: :cascade
+  add_foreign_key "refresh_tokens", "users"
   add_foreign_key "sounds", "users", on_delete: :cascade
 end
