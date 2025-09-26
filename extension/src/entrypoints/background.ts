@@ -38,8 +38,10 @@ export default defineBackground(() => {
       audioPlaying = null;
     } else if (msg.type === CrossFunctions.SET_AUTH_TOKEN) {
       storage.setItem("local:jwt", msg.token);
+      storage.setItem("local:refresh", msg.refreshToken);
     } else if (msg.type === CrossFunctions.REMOVE_AUTH_TOKEN) {
       storage.removeItem("local:jwt");
+      storage.removeItem("local:refresh");
     }
   });
 

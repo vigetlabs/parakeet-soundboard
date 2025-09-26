@@ -5,10 +5,14 @@ class Users::SessionsController < Devise::SessionsController
   before_action :authenticate_user!, only: [ :show ]
 
   def respond_with(current_user, _opts = {})
+    refresh_token = current_user.refresh_tokens.create!
     render json: {
       status: {
         code: 200, message: "Logged in successfully.",
-        data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] }
+        data: {
+          user: UserSerializer.new(current_user).serializable_hash[:data][:attributes],
+          refresh_token: refresh_token.token
+        }
       }
     }, status: :ok
   end
@@ -16,6 +20,8 @@ class Users::SessionsController < Devise::SessionsController
     if request.headers["Authorization"].present?
       jwt_payload = JWT.decode(request.headers["Authorization"].split(" ").last, ENV.fetch("DEVISE_JWT_SECRET_KEY")).first
       current_user = User.find_by(id: jwt_payload["sub"], jti: jwt_payload["jti"])
+
+      current_user.refresh_tokens.destroy_all if current_user
     end
 
     if current_user

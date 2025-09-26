@@ -67,7 +67,7 @@ function App() {
       if (token) {
         setUser(await login(token as string));
       }
-      getSounds();
+      fetchSounds();
     }
 
     startLogin();

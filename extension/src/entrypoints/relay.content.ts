@@ -33,6 +33,7 @@ export default defineContentScript({
         await browser.runtime.sendMessage({
           type: CrossFunctions.SET_AUTH_TOKEN,
           token: event.data.token,
+          refreshToken: event.data.refreshToken
         });
       } else if (event.data.command === CrossFunctions.REMOVE_AUTH_TOKEN) {
         if (event.origin !== `${import.meta.env.VITE_WEBSITE_URL}`) return;
