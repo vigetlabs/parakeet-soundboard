@@ -41,12 +41,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!token) throw new Error("No token received");
       setToken(token);
       localStorage.setItem("jwt", token);
-      window.postMessage({ command: "parakeet-setAuthToken", token }, origin);
 
       const refreshToken = res.data.status.data.refresh_token;
       if (refreshToken) {
         localStorage.setItem("refreshToken", refreshToken);
       }
+      
+      window.postMessage({ command: "parakeet-setAuthToken", token, refreshToken }, origin);
 
       setUser(res.data.status.data.user);
       queryClient.setQueryData(
@@ -121,12 +122,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               if (refreshRes.ok) {
                 const refreshData = await refreshRes.json();
                 const newToken = refreshData.access_token;
-                const newRefreshToken = refreshData.refresh_token;
                 
                 setToken(newToken);
                 localStorage.setItem("jwt", newToken);
-                localStorage.setItem("refreshToken", newRefreshToken);
-                
+
                 // Retry the original request with new token
                 return fetch(`${API_URL}${path}`, {
                   ...init,
@@ -146,6 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           setUser(null);
           setToken(null);
           localStorage.removeItem("jwt");
+          localStorage.removeItem("refreshToken");
           window.postMessage({ command: "parakeet-removeAuthToken" }, origin);
           queryClient.setQueryData(["auth", "user"], null);
           res = fetchWithoutAuth(path, init);
@@ -164,8 +164,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!token) {
         return null;
       }
+      const refreshToken = localStorage.getItem("refreshToken")
       setToken(token);
-      window.postMessage({ command: "parakeet-setAuthToken", token }, origin);
+      window.postMessage({ command: "parakeet-setAuthToken", token, refreshToken }, origin);
 
       const res = await fetchWithAuth(
         "/users/show",

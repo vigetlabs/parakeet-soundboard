@@ -24,18 +24,14 @@ RSpec.describe 'Refresh Token Flow', type: :request do
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
       new_access_token = json['access_token']
-      new_refresh_token = json['refresh_token']
+      refresh_token = json['refresh_token']
 
       get '/users/show', headers: {
         'Authorization' => "Bearer #{new_access_token}"
       }
       expect(response).to have_http_status(:ok)
 
-      # Old refresh token should be invalid
       post '/refresh', params: { refresh_token: refresh_token }
-      expect(response).to have_http_status(:unauthorized)
-
-      post '/refresh', params: { refresh_token: new_refresh_token }
       expect(response).to have_http_status(:ok)
     end
   end
