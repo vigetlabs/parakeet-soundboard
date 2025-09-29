@@ -47,7 +47,13 @@ cd extension && pnpm run dev
 - Go to `chrome://extensions/`
 - Enable developer mode in the top right
 - Click Load unpacked in the top left
-- Choose the folder that `pnpm run dev` told you to
+- Choose the folder that `pnpm run dev` told you to (likely `.output/chrome-mv3-dev`)
+
+### Build extension (production)
+
+- Run `pnpm run build -- --mode production`
+- This creates the extension with the `.env.production` variables - connecting it to the production website and api.
+- Load unpacked or upload to Chrome Web Store (folder is likely `.output/chrome-mv3`)
 
 ### Environments
 
