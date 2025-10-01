@@ -16,9 +16,42 @@ async function fetchWithAuth(
   });
 
   if (res.status === 401 && token) {
-    // This means the token has expired, so remove it
+    // This means the token has expired
+
+    const refreshToken = await storage.getItem("local:refresh");
+    if (refreshToken) {
+      try {
+        const refreshRes = await fetch(`${API_URL}/refresh`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+        
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          const newToken = refreshData.access_token;
+          
+          await storage.setItem("local:jwt", newToken);
+          
+          // Retry the original request with new token
+          const new_res = await fetch(`${API_URL}${path}`, {
+            ...init,
+            headers: {
+              ...(init?.headers || {}),
+              Authorization: `Bearer ${newToken}`,
+            },
+          });
+          return new_res
+        }
+      } catch (error) {
+        console.error("Token refresh failed:", error);
+      }
+    }
+
+    // If refresh fails - log out
     alert("You've been logged out!");
     storage.removeItem("local:jwt");
+    storage.removeItem("local:refresh");
     res = await fetchWithAuth(null, path, init);
   }
   return res;

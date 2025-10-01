@@ -11,6 +11,9 @@ Rails.application.routes.draw do
   devise_scope :user do
     get "users/show", to: "users/sessions#show"
   end
+
+  post "/refresh", to: "refresh_tokens#refresh_jwt"
+
   resources :sounds do
     member do
       get "in_folders"
