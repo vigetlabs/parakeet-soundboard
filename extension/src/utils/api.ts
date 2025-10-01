@@ -34,7 +34,7 @@ async function fetchWithAuth(
           await storage.setItem("local:jwt", newToken);
           
           // Retry the original request with new token
-          let new_res = await fetch(`${API_URL}${path}`, {
+          const new_res = await fetch(`${API_URL}${path}`, {
             ...init,
             headers: {
               ...(init?.headers || {}),
@@ -44,7 +44,7 @@ async function fetchWithAuth(
           return new_res
         }
       } catch (error) {
-        console.log("Token refresh failed:", error);
+        console.error("Token refresh failed:", error);
       }
     }
 

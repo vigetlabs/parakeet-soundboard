@@ -42,12 +42,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setToken(token);
       localStorage.setItem("jwt", token);
 
-      const refreshToken = res.data.status.data.refresh_token;
-      if (refreshToken) {
-        localStorage.setItem("refreshToken", refreshToken);
+      try {
+        const refreshToken = res.data.status.data.refresh_token;
+        if (refreshToken) {
+          localStorage.setItem("refreshToken", refreshToken);
+        }
+
+        window.postMessage({ command: "parakeet-setAuthToken", token, refreshToken }, origin);
       }
-      
-      window.postMessage({ command: "parakeet-setAuthToken", token, refreshToken }, origin);
+      catch (e) {
+        console.error('Error obtaining refresh token', e)
+      }
 
       setUser(res.data.status.data.user);
       queryClient.setQueryData(
