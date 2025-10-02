@@ -6,7 +6,7 @@ export default defineConfig({
   srcDir: "src",
   manifest: {
     name: "Parakeet Soundboard",
-    version: "1.0",
+    version: "1.1",
     permissions: ["scripting", "activeTab", "storage", "unlimitedStorage"],
     host_permissions: ["https://meet.google.com/*"],
     web_accessible_resources: [
