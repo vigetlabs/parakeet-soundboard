@@ -1,3 +1,4 @@
+export * from "./addToFolderDialog";
 export * from "./button";
 export * from "./confirmDelete";
 export * from "./editDialog";
