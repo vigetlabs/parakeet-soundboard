@@ -17,6 +17,7 @@ import { useAuth } from "../../util/auth";
 import {
   DeleteDialog,
   EditDialog,
+  AddToFolderDialog,
   EditFolderDialog,
   SoundButton,
   type EditProps,
@@ -41,7 +42,8 @@ const SoundGroup = ({
   const [currentlyEditingFolder, setCurrentlyEditingFolder] = useState(false);
   const [currentlyEditing, setCurrentlyEditing] = useState(false);
   const [editingSound, setEditingSound] = useState<EditProps>();
-
+  const [addingToFolder, setAddingToFolder] = useState(false);
+  const [addToFolderSound, setAddToFolderSound] = useState<EditProps>();
   const [currentlyDeleting, setCurrentlyDeleting] = useState(false);
   const [deletingObject, setDeletingObject] = useState<{
     name: string;
@@ -199,6 +201,17 @@ const SoundGroup = ({
                   });
                   setCurrentlyEditing(true);
                 }}
+                addToFolderFunction={() => {
+                  setAddToFolderSound({
+                    name: sound.name,
+                    id: sound.id,
+                    emoji: sound.emoji,
+                    color: sound.color,
+                    tags: sound.tags,
+                    folders: sound.folders,
+                  });
+                  setAddingToFolder(true);
+                }}
                 deleteFunction={() => {
                   setDeletingObject({ name: sound.name, id: sound.id });
                   setCurrentlyDeleting(true);
@@ -215,6 +228,11 @@ const SoundGroup = ({
             open={currentlyEditing}
             onOpenChange={setCurrentlyEditing}
             sound={editingSound}
+          />
+          <AddToFolderDialog
+            open={addingToFolder}
+            onOpenChange={setAddingToFolder}
+            sound={addToFolderSound}
           />
 
           <EditFolderDialog

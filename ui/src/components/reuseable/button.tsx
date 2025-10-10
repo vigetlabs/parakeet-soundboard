@@ -50,6 +50,7 @@ export interface SoundButtonProps
     emoji: string
   ) => void;
   deleteFunction: (name: string, dbID: number) => void;
+  addToFolderFunction: () => void;
 }
 
 const SoundButton = ({
@@ -64,6 +65,7 @@ const SoundButton = ({
   withinFolder,
   editFunction,
   deleteFunction,
+  addToFolderFunction,
   className = "",
   ...props
 }: SoundButtonProps) => {
@@ -180,6 +182,13 @@ const SoundButton = ({
                 Favorite
               </DropdownMenu.Item>
             )}
+            <DropdownMenu.Item
+              className="soundButtonMenuItem"
+              onSelect={addToFolderFunction}
+            >
+              <ArchiveIcon className="soundButtonMenuItemIcon" />
+              Add to Folder
+            </DropdownMenu.Item>
             {userSound && (
               <DropdownMenu.Item
                 className="soundButtonMenuItem"
