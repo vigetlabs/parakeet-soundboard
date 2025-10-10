@@ -57,12 +57,13 @@ export default defineUnlistedScript(() => {
         // Grab the real mic
         const realStream = await originalGUM({
           audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
           },
           video: false,
         });
+
         const audioCtx = new AudioContext();
         const srcNode = audioCtx.createMediaStreamSource(realStream);
         const destNode = audioCtx.createMediaStreamDestination();
@@ -72,18 +73,18 @@ export default defineUnlistedScript(() => {
         srcNode.connect(micGain).connect(destNode);
 
         async function playSoundEffect(base64: string, volume: number) {
-          // Prepare sound‐effect node (but don’t play yet)
           const buffer = base64ToArrayBuffer(base64);
           const fxBuffer = await loadEffectBuffer(audioCtx, buffer);
-          let fxNode = null;
+
+          const fxNode = new AudioBufferSourceNode(audioCtx, {
+            buffer: fxBuffer,
+          });
           const fxGain = audioCtx.createGain();
           fxGain.gain.value = volume / 100;
 
-          // Attach the sound effect to the source node
-          fxNode = new AudioBufferSourceNode(audioCtx, { buffer: fxBuffer });
           fxNode.connect(fxGain).connect(destNode);
           fxNode.onended = () => {
-            fxGain.gain.value = 0;
+            sendMessage(CrossFunctions.AUDIO_ENDED);
           };
           fxNode.start();
 
