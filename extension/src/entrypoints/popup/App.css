@@ -125,6 +125,13 @@
   border-color: var(--warning);
 }
 
+.topBarSubSettingsMenu {
+  background-color: var(--elevated-background);
+  padding: 8px;
+  border: 2px solid var(--primary-muted);
+  border-radius: 8px;
+}
+
 .infoButtonPopover {
   max-width: 300px;
   text-align: center;

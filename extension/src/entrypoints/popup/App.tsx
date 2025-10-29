@@ -14,6 +14,7 @@ import "./App.css";
 
 import {
   BoxIcon,
+  CheckIcon,
   ChevronRightIcon,
   DotsHorizontalIcon,
   EnterIcon,
@@ -23,6 +24,7 @@ import {
   MagnifyingGlassIcon,
   PersonIcon,
   QuestionMarkCircledIcon,
+  GearIcon,
   SpeakerLoudIcon,
   UpdateIcon,
 } from "@radix-ui/react-icons";
@@ -37,6 +39,7 @@ function App() {
   const [soundButtons, setSoundButtons] = useState<any[]>([]);
   const [folders, setFolders] = useState<{ name: string; slug: string }[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [hideMeetIcon, setHideMeetIcon] = useState(true);
 
   const [folderSelectWidth, setFolderSelectWidth] = useState(0);
 
@@ -295,6 +298,34 @@ function App() {
     }
   }, [folders]);
 
+  useEffect(() => {
+    async function loadSettings() {
+      const value = await storage.getItem("local:hideMeetIcon");
+      if (typeof value === 'boolean') {
+        setHideMeetIcon(value);
+      } else {
+        setHideMeetIcon(false);
+      }
+    }
+    loadSettings();
+  }, []);
+
+  async function handleHideMeetIconChange(checked: boolean) {
+    setHideMeetIcon(checked);
+    await storage.setItem("local:hideMeetIcon", checked);
+
+    const tabs = await browser.tabs.query({ url: "https://meet.google.com/*" });
+    tabs.forEach(tab => {
+      if (tab.id) {
+        browser.tabs.sendMessage(tab.id, {
+          type: CrossFunctions.TOGGLE_MEET_ICON,
+          hide: checked,
+        });
+      }
+    });
+  }
+
+
   return (
     <>
       <div className="wrapper">
@@ -392,8 +423,31 @@ function App() {
                   }
                 >
                   <ExternalLinkIcon className="topBarMenuItemIcon" />
-                  Settings
+                  Website
                 </DropdownMenu.Item>
+                <DropdownMenu.Sub>
+                  <DropdownMenu.SubTrigger className="topBarMenuItem">
+                    <GearIcon className="topBarMenuItemIcon" />
+                    Settings
+                  </DropdownMenu.SubTrigger>
+                  <DropdownMenu.Portal>
+                    <DropdownMenu.SubContent
+                      className="topBarSubSettingsMenu"
+                      sideOffset={8}
+                      alignOffset={-2}
+                    >
+                      <DropdownMenu.CheckboxItem
+                        checked={hideMeetIcon}
+                        onCheckedChange={handleHideMeetIconChange}
+                      >
+                        <DropdownMenu.ItemIndicator className="topBarMenuItemIndicator">
+                          <CheckIcon />
+                        </DropdownMenu.ItemIndicator>
+                        Hide Google Meet Icon
+                      </DropdownMenu.CheckboxItem>
+                    </DropdownMenu.SubContent>
+                  </DropdownMenu.Portal>
+                </DropdownMenu.Sub>
                 <DropdownMenu.Item
                   className="topBarMenuItem"
                   onSelect={() => openInfoPage()}
