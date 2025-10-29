@@ -432,17 +432,18 @@ function App() {
                   </DropdownMenu.SubTrigger>
                   <DropdownMenu.Portal>
                     <DropdownMenu.SubContent
-                      className="topBarSubSettingsMenu"
+                      className="topBarSubSettingsMenu topBarSettingsCheckbox"
                       sideOffset={8}
                       alignOffset={-2}
                     >
                       <DropdownMenu.CheckboxItem
                         checked={hideMeetIcon}
                         onCheckedChange={handleHideMeetIconChange}
+                        onSelect={(e) => e.preventDefault()}
                       >
-                        <DropdownMenu.ItemIndicator className="topBarMenuItemIndicator">
-                          <CheckIcon />
-                        </DropdownMenu.ItemIndicator>
+                        <div className="topBarMenuItemIndicator">
+                          {hideMeetIcon && <CheckIcon />}
+                        </div>
                         Hide Google Meet Icon
                       </DropdownMenu.CheckboxItem>
                     </DropdownMenu.SubContent>
