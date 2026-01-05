@@ -11,6 +11,7 @@ export enum CrossFunctions {
   OPEN_POPUP = "parakeet-openPopup",
   SET_AUTH_TOKEN = "parakeet-setAuthToken",
   REMOVE_AUTH_TOKEN = "parakeet-removeAuthToken",
+  TOGGLE_MEET_ICON = "parakeet-toggleMeetIcon",
 }
 
 export type User = {

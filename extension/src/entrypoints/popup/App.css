@@ -125,6 +125,13 @@
   border-color: var(--warning);
 }
 
+.topBarSubSettingsMenu {
+  background-color: var(--elevated-background);
+  padding: 8px;
+  border: 2px solid var(--primary-muted);
+  border-radius: 8px;
+}
+
 .infoButtonPopover {
   max-width: 300px;
   text-align: center;
@@ -148,6 +155,35 @@
   border-radius: 8px;
   outline: none;
   transition: all 0.2s ease-in-out;
+}
+
+.topBarSettingsCheckbox {
+  position: relative;
+  padding-left: 32px !important; /* space for the checkbox, override existing padding */
+}
+
+[role="menuitemcheckbox"][aria-checked="false"] .topBarMenuItemIndicator {
+  background: transparent;
+  border-color: var(--primary-active);
+  color: var(--elevated-background);
+}
+
+/* Checked checkbox */
+.topBarMenuItemIndicator {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  background: var(--primary-active);
+  color: var(--elevated-background);
+  border: 2px solid var(--primary-active);
+  box-sizing: border-box;
 }
 
 .topBarMenuItem[data-highlighted] {

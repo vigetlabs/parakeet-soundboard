@@ -9,12 +9,21 @@ export default defineContentScript({
     (document.head || document.documentElement).appendChild(s);
     s.onload = () => s.remove();
 
-    function injectButton() {
+    let iconElement: HTMLImageElement | null = null;
+
+    async function injectButton() {
+      const hideIcon = await storage.getItem("local:hideMeetIcon") ?? false;
+
+      if (hideIcon) {
+        return;
+      }
+
       const img = document.createElement("img");
       img.src = browser.runtime.getURL("/images/parakeetLogo.png");
       img.alt = "Open Parakeet Soundboard";
       img.classList.add("parakeetIconButton");
       document.body.appendChild(img);
+      iconElement = img;
 
       const style = document.createElement("style");
       style.textContent = `
@@ -41,6 +50,23 @@ export default defineContentScript({
         browser.runtime.sendMessage({ type: CrossFunctions.OPEN_POPUP })
       );
     }
+
+    function removeButton() {
+      if (iconElement) {
+        iconElement.remove();
+        iconElement = null;
+      }
+    }
+
+    browser.runtime.onMessage.addListener((message) => {
+      if (message.type === CrossFunctions.TOGGLE_MEET_ICON) {
+        if (message.hide) {
+          removeButton();
+        } else {
+          injectButton();
+        }
+      }
+    });
 
     if (document.readyState === "loading") {
       window.addEventListener("DOMContentLoaded", injectButton);
