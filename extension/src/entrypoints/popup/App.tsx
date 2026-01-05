@@ -39,7 +39,7 @@ function App() {
   const [soundButtons, setSoundButtons] = useState<any[]>([]);
   const [folders, setFolders] = useState<{ name: string; slug: string }[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [hideMeetIcon, setHideMeetIcon] = useState(true);
+  const [hideMeetIcon, setHideMeetIcon] = useState(false);
 
   const [folderSelectWidth, setFolderSelectWidth] = useState(0);
 
