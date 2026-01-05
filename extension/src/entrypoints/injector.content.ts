@@ -138,6 +138,17 @@ export default defineContentScript({
           injectMuteButton();
         }
       }
+      if (message.type === CrossFunctions.MUTE_MICROPHONE) {
+        if (muteButtonElement) {
+          muteButtonElement.src = browser.runtime.getURL("/images/TempMuted.png");
+        }
+      }
+
+      if (message.type === CrossFunctions.UNMUTE_MICROPHONE) {
+        if (muteButtonElement) {
+          muteButtonElement.src = browser.runtime.getURL("/images/TempUnmuted.png");
+        }
+      }
     });
 
     if (document.readyState === "loading") {

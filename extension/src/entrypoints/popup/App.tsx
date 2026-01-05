@@ -176,9 +176,23 @@ function App() {
     setMicMuted(muteMic);
     if (isMeet) {
       if (muteMic) {
-        postMessage(CrossFunctions.MUTE_MICROPHONE);
+        const tabs = await browser.tabs.query({ url: "https://meet.google.com/*" });
+        tabs.forEach(tab => {
+          if (tab.id) {
+            browser.tabs.sendMessage(tab.id, {
+              type: CrossFunctions.MUTE_MICROPHONE
+            });
+          }
+        });
       } else {
-        postMessage(CrossFunctions.UNMUTE_MICROPHONE);
+        const tabs = await browser.tabs.query({ url: "https://meet.google.com/*" });
+        tabs.forEach(tab => {
+          if (tab.id) {
+            browser.tabs.sendMessage(tab.id, {
+              type: CrossFunctions.UNMUTE_MICROPHONE
+            });
+          }
+        });
       }
     }
   }
