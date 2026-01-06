@@ -321,6 +321,12 @@ function App() {
       } else {
         setHideMeetIcon(false);
       }
+      const muteValue = await storage.getItem("local:hideMuteButton");
+      if (typeof muteValue === 'boolean') {
+        setHideMuteButton(muteValue);
+      } else {
+        setHideMuteButton(false);
+      }
     }
     loadSettings();
   }, []);
