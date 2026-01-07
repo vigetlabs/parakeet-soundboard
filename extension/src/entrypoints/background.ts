@@ -1,7 +1,6 @@
 import { CrossFunctions } from "@/utils/constants";
 
 export default defineBackground(() => {
-  console.log("Background loaded!", { id: browser.runtime.id });
 
   let audioPlaying: number | null = null;
 
@@ -12,12 +11,9 @@ export default defineBackground(() => {
   });
 
   browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    console.log("Background received message:", msg.type);
     if (msg.type === CrossFunctions.GET_MIC_MUTED) {
-      console.log("Processing GET_MIC_MUTED");
       storage.getItem("session:micMuted")
         .then(val => {
-          console.log("Sending mic muted response:", val ?? false);
           sendResponse(val ?? false);
         })
         .catch(err => {
@@ -45,7 +41,6 @@ export default defineBackground(() => {
       storage.removeItem("local:jwt");
       storage.removeItem("local:refresh");
     } else if (msg.type === CrossFunctions.MUTE_MICROPHONE) {
-      console.log("Processing MUTE_MICROPHONE");
       storage.setItem("session:micMuted", true)
         .then(() => browser.tabs.query({ url: "https://meet.google.com/*" }))
         .then(tabs => {
@@ -58,7 +53,6 @@ export default defineBackground(() => {
           });
         });
     } else if (msg.type === CrossFunctions.UNMUTE_MICROPHONE) {
-      console.log("Processing UNMUTE_MICROPHONE");
       storage.setItem("session:micMuted", false)
         .then(() => browser.tabs.query({ url: "https://meet.google.com/*" }))
         .then(tabs => {
