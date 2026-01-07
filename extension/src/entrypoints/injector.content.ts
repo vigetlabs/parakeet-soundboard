@@ -66,54 +66,94 @@ export default defineContentScript({
         return;
       }
 
-      const img = document.createElement("img");
-      const currentlyMuted = await browser.runtime.sendMessage({
-        type: CrossFunctions.GET_MIC_MUTED
-      });
-      if (currentlyMuted) {
-        img.src = browser.runtime.getURL("/images/TempMuted.png");
-      } else {
-        img.src = browser.runtime.getURL("/images/TempUnmuted.png");
-      }
-      img.alt = "Mute/Unmute Microphone through Parakeet";
-      img.classList.add("parakeetMuteButton");
-      document.body.appendChild(img);
-      muteButtonElement = img;
+      let buttonInjected = false;
 
-      const style = document.createElement("style");
-      style.textContent = `
-        .parakeetMuteButton {
-          position: fixed;
-          bottom: 80px;
-          left: 20px;
-          width: 64px;
-          height: 64px;
-          z-index: 9999;
-          cursor: pointer;
-          border: 2px solid #faf9f2;
-          border-radius: 16px;
-          transition: border-color 0.2s ease-in-out;
-          transform: scale(1.1);
+      // Add the Parakeet mute button next to Google Meet controls when DOM changes and control bar is present
+      // and update its position on resize to stay next to controls
+        function tryInjectButton() {
+          // Don't inject if already done
+          if (buttonInjected) return;
+
+          const controlBar = document.querySelector('[jsname="vNB5le"][role="region"]');
+
+          if (!controlBar) return;
+
+          buttonInjected = true;
+
+          (async () => {
+
+            const img = document.createElement("img");
+            const currentlyMuted = await browser.runtime.sendMessage({
+              type: CrossFunctions.GET_MIC_MUTED
+            });
+
+            const micOnUrl = browser.runtime.getURL("/images/parakeet-mic-on.svg");
+            const micOffUrl = browser.runtime.getURL("/images/parakeet-mic-off.svg");
+
+            img.src = currentlyMuted ? micOffUrl : micOnUrl;
+            img.alt = "Mute/Unmute Microphone through Parakeet";
+            img.classList.add("parakeetMuteButton");
+
+            const style = document.createElement("style");
+            style.textContent = `
+              .parakeetMuteButton {
+                position: fixed;
+                width: 47px;
+                height: 47px;
+                cursor: pointer;
+                z-index: 9999;
+              }
+            `;
+            document.head.appendChild(style);
+
+            document.body.appendChild(img);
+            muteButtonElement = img;
+
+            // update position based on control bar
+            function updatePosition() {
+              if (!controlBar) return;
+              const controlBarRect = controlBar.getBoundingClientRect();
+              // Position to the left of the control bar
+              img.style.left = Math.max(controlBarRect.left - 50, 10) + "px";
+              img.style.bottom = `${window.innerHeight - controlBarRect.bottom}px`;
+            }
+
+            // Update position initially and on changes
+            updatePosition();
+            window.addEventListener('resize', updatePosition);
+
+            // Watch for control bar position changes
+            const observer = new ResizeObserver(updatePosition);
+            observer.observe(controlBar);
+
+            img.addEventListener("click", async () => {
+              const currentlyMuted = await browser.runtime.sendMessage({
+                type: CrossFunctions.GET_MIC_MUTED
+              });
+
+              if (currentlyMuted) {
+                browser.runtime.sendMessage({ type: CrossFunctions.UNMUTE_MICROPHONE });
+                img.src = micOnUrl;
+              } else {
+                browser.runtime.sendMessage({ type: CrossFunctions.MUTE_MICROPHONE });
+                img.src = micOffUrl;
+              }
+            });
+          })();
         }
-        .parakeetMuteButton:hover {
-          border-color: #008573;
-        }
-      `;
-      document.head.appendChild(style);
-      img.addEventListener("click", async () => {
-        console.log("Button clicked, sending GET_MIC_MUTED");
-        const currentlyMuted = await browser.runtime.sendMessage({
-          type: CrossFunctions.GET_MIC_MUTED
-        });
-        console.log("Current mic muted state:", currentlyMuted);
-        if (currentlyMuted) {
-          browser.runtime.sendMessage({ type: CrossFunctions.UNMUTE_MICROPHONE });
-          img.src = browser.runtime.getURL("/images/TempUnmuted.png");
-        } else {
-          browser.runtime.sendMessage({ type: CrossFunctions.MUTE_MICROPHONE });
-          img.src = browser.runtime.getURL("/images/TempMuted.png");
-        }
+      // Use MutationObserver to watch for control bar appearing in DOM
+      const observer = new MutationObserver(() => {
+        tryInjectButton();
       });
+
+      // Start observing the document for changes
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+
+      // Initial try
+      tryInjectButton();
     }
 
     function removeMuteButton() {
@@ -140,13 +180,13 @@ export default defineContentScript({
       }
       if (message.type === CrossFunctions.MUTE_MICROPHONE) {
         if (muteButtonElement) {
-          muteButtonElement.src = browser.runtime.getURL("/images/TempMuted.png");
+          muteButtonElement.src = browser.runtime.getURL("/images/parakeet-mic-off.svg");
         }
       }
 
       if (message.type === CrossFunctions.UNMUTE_MICROPHONE) {
         if (muteButtonElement) {
-          muteButtonElement.src = browser.runtime.getURL("/images/TempUnmuted.png");
+          muteButtonElement.src = browser.runtime.getURL("/images/parakeet-mic-on.svg");
         }
       }
     });
