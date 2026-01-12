@@ -1,7 +1,6 @@
 import { CrossFunctions } from "@/utils/constants";
 
 export default defineBackground(() => {
-  console.log("Background loaded!", { id: browser.runtime.id });
 
   let audioPlaying: number | null = null;
 
@@ -11,21 +10,20 @@ export default defineBackground(() => {
     }
   });
 
-  browser.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
+  browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === CrossFunctions.GET_MIC_MUTED) {
-      storage
-        .getItem("session:micMuted", { defaultValue: false })
-        .then((val) => {
-          sendResponse(val);
+      storage.getItem("session:micMuted")
+        .then(val => {
+          sendResponse(val ?? false);
         })
-        .catch((err) => {
+        .catch(err => {
           console.error("Error fetching mic muted status", err);
           sendResponse(false);
         });
       return true; // tells the caller that there will be a response
     } else if (msg.type === CrossFunctions.OPEN_POPUP) {
       try {
-        await browser.action.openPopup();
+        browser.action.openPopup();
       } catch (e) {
         console.warn("openPopup failed:", e);
       }
@@ -42,6 +40,30 @@ export default defineBackground(() => {
     } else if (msg.type === CrossFunctions.REMOVE_AUTH_TOKEN) {
       storage.removeItem("local:jwt");
       storage.removeItem("local:refresh");
+    } else if (msg.type === CrossFunctions.MUTE_MICROPHONE) {
+      storage.setItem("session:micMuted", true)
+        .then(() => browser.tabs.query({ url: "https://meet.google.com/*" }))
+        .then(tabs => {
+          tabs.forEach(tab => {
+            if (tab.id) {
+              browser.tabs.sendMessage(tab.id, {
+                type: CrossFunctions.MUTE_MICROPHONE
+              });
+            }
+          });
+        });
+    } else if (msg.type === CrossFunctions.UNMUTE_MICROPHONE) {
+      storage.setItem("session:micMuted", false)
+        .then(() => browser.tabs.query({ url: "https://meet.google.com/*" }))
+        .then(tabs => {
+          tabs.forEach(tab => {
+            if (tab.id) {
+              browser.tabs.sendMessage(tab.id, {
+                type: CrossFunctions.UNMUTE_MICROPHONE
+              });
+            }
+          });
+        });
     }
   });
 

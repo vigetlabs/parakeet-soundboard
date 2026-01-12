@@ -42,5 +42,16 @@ export default defineContentScript({
         });
       }
     });
+    browser.runtime.onMessage.addListener((message) => {
+      if (message.type === CrossFunctions.MUTE_MICROPHONE) {
+        window.postMessage({
+          command: CrossFunctions.MUTE_MICROPHONE
+        }, "*");
+      } else if (message.type === CrossFunctions.UNMUTE_MICROPHONE) {
+        window.postMessage({
+          command: CrossFunctions.UNMUTE_MICROPHONE
+        }, "*");
+      }
+    });
   },
 });

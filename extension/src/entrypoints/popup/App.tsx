@@ -40,6 +40,7 @@ function App() {
   const [folders, setFolders] = useState<{ name: string; slug: string }[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hideMeetIcon, setHideMeetIcon] = useState(false);
+  const [hideMuteButton, setHideMuteButton] = useState(false);
 
   const [folderSelectWidth, setFolderSelectWidth] = useState(0);
 
@@ -174,11 +175,15 @@ function App() {
     micMutedStorage.setValue(muteMic);
     setMicMuted(muteMic);
     if (isMeet) {
-      if (muteMic) {
-        postMessage(CrossFunctions.MUTE_MICROPHONE);
-      } else {
-        postMessage(CrossFunctions.UNMUTE_MICROPHONE);
-      }
+      let message = muteMic ? CrossFunctions.MUTE_MICROPHONE : CrossFunctions.UNMUTE_MICROPHONE;
+      const tabs = await browser.tabs.query({ url: "https://meet.google.com/*" });
+      tabs.forEach(tab => {
+        if (tab.id) {
+          browser.tabs.sendMessage(tab.id, {
+            type: message
+          });
+        }
+      });
     }
   }
 
@@ -306,6 +311,12 @@ function App() {
       } else {
         setHideMeetIcon(false);
       }
+      const muteValue = await storage.getItem("local:hideMuteButton");
+      if (typeof muteValue === 'boolean') {
+        setHideMuteButton(muteValue);
+      } else {
+        setHideMuteButton(false);
+      }
     }
     loadSettings();
   }, []);
@@ -325,6 +336,20 @@ function App() {
     });
   }
 
+  async function handleHideMuteButtonChange(checked: boolean) {
+    setHideMuteButton(checked);
+    await storage.setItem("local:hideMuteButton", checked);
+
+    const tabs = await browser.tabs.query({ url: "https://meet.google.com/*" });
+    tabs.forEach(tab => {
+      if (tab.id) {
+        browser.tabs.sendMessage(tab.id, {
+          type: CrossFunctions.TOGGLE_MUTE_BUTTON,
+          hide: checked,
+        });
+      }
+    });
+  }
 
   return (
     <>
@@ -432,11 +457,12 @@ function App() {
                   </DropdownMenu.SubTrigger>
                   <DropdownMenu.Portal>
                     <DropdownMenu.SubContent
-                      className="topBarSubSettingsMenu topBarSettingsCheckbox"
+                      className="topBarSubSettingsMenu"
                       sideOffset={8}
                       alignOffset={-2}
                     >
                       <DropdownMenu.CheckboxItem
+                        className="topBarSettingsCheckbox"
                         checked={hideMeetIcon}
                         onCheckedChange={handleHideMeetIconChange}
                         onSelect={(e) => e.preventDefault()}
@@ -445,6 +471,17 @@ function App() {
                           {hideMeetIcon && <CheckIcon />}
                         </div>
                         Hide Google Meet Icon
+                      </DropdownMenu.CheckboxItem>
+                      <DropdownMenu.CheckboxItem
+                        className="topBarSettingsCheckbox"
+                        checked={hideMuteButton}
+                        onCheckedChange={handleHideMuteButtonChange}
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        <div className="topBarMenuItemIndicator">
+                          {hideMuteButton && <CheckIcon />}
+                        </div>
+                        Hide Mute Button
                       </DropdownMenu.CheckboxItem>
                     </DropdownMenu.SubContent>
                   </DropdownMenu.Portal>
