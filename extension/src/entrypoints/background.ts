@@ -64,7 +64,7 @@ export default defineBackground(() => {
             }
           });
         });
-    };
+    }
   });
 
   // If we want to disable to chrome extension outside google meet:

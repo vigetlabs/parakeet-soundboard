@@ -12,21 +12,9 @@ export default defineContentScript({
     let iconElement: HTMLImageElement | null = null;
     let muteButtonElement: HTMLImageElement | null = null;
 
-    async function injectButton() {
-      const hideIcon = await storage.getItem("local:hideMeetIcon") ?? false;
-
-      if (hideIcon) {
-        return;
-      }
-
-      const img = document.createElement("img");
-      img.src = browser.runtime.getURL("/images/parakeetLogo.png");
-      img.alt = "Open Parakeet Soundboard";
-      img.classList.add("parakeetIconButton");
-      document.body.appendChild(img);
-      iconElement = img;
-
+    if (!document.getElementById('parakeet-styles')) {
       const style = document.createElement("style");
+      style.id = 'parakeet-styles';
       style.textContent = `
         .parakeetIconButton {
           position: fixed;
@@ -44,8 +32,30 @@ export default defineContentScript({
         .parakeetIconButton:hover {
           border-color: #008573;
         }
-      `;
-      document.head.appendChild(style);
+        .parakeetMuteButton {
+          position: fixed;
+          width: 47px;
+          height: 47px;
+          cursor: pointer;
+          z-index: 9999;
+        }
+        `;
+      document.documentElement.appendChild(style);
+    }
+
+    async function injectButton() {
+      const hideIcon = await storage.getItem("local:hideMeetIcon") ?? false;
+
+      if (hideIcon) {
+        return;
+      }
+
+      const img = document.createElement("img");
+      img.src = browser.runtime.getURL("/images/parakeetLogo.png");
+      img.alt = "Open Parakeet Soundboard";
+      img.classList.add("parakeetIconButton");
+      document.body.appendChild(img);
+      iconElement = img;
 
       img.addEventListener("click", () =>
         browser.runtime.sendMessage({ type: CrossFunctions.OPEN_POPUP })
@@ -93,18 +103,6 @@ export default defineContentScript({
             img.src = currentlyMuted ? micOffUrl : micOnUrl;
             img.alt = "Mute/Unmute Microphone through Parakeet";
             img.classList.add("parakeetMuteButton");
-
-            const style = document.createElement("style");
-            style.textContent = `
-              .parakeetMuteButton {
-                position: fixed;
-                width: 47px;
-                height: 47px;
-                cursor: pointer;
-                z-index: 9999;
-              }
-            `;
-            document.head.appendChild(style);
 
             document.body.appendChild(img);
             muteButtonElement = img;
