@@ -539,7 +539,7 @@ function App() {
           />
           <div className="controlPanelContainer">
             <h2 className="voiceLabel">
-              Voice{" "}
+              Mute{" "}
               <Tooltip.Provider delayDuration={200}>
                 <Tooltip.Root>
                   <Tooltip.Trigger
@@ -559,9 +559,7 @@ function App() {
                       onClick={(event) => event.preventDefault()}
                     >
                       <p>
-                        This extension can only inject audio when your Google
-                        Meet microphone is unmuted. To play sound effects but
-                        mute your microphone, use this button!
+                        Parakeet can only play sound effects when your Google Meet microphone is unmuted. To mute your voice, use this button!
                       </p>
                       <Tooltip.Arrow className="infoButtonArrow" />
                     </Tooltip.Content>
