@@ -89,7 +89,21 @@ const SoundGroup = ({
   }
 
   function sortAndFilter() {
-    const allSounds = data?.sounds.sort((a: any, b: any) => a.id - b.id) ?? [];
+    const allSounds = data?.sounds.sort((a: any, b: any) => {
+      // Sort by default vs user-uploaded, then alphabetically or by ID
+      const aIsDefault = a.user_id === null;
+      const bIsDefault = b.user_id === null;
+
+      if (aIsDefault && bIsDefault) {
+        return a.name.localeCompare(b.name);
+      }
+
+      if (!aIsDefault && !bIsDefault) {
+        return a.id - b.id;
+      }
+
+      return aIsDefault ? -1 : 1;
+    }) ?? [];
     let outputSounds;
 
     const filters = searchParams.getAll("filter");

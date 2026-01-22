@@ -84,7 +84,7 @@ function App() {
       const sounds = await Promise.all(
         response.data.map(async (sound: any) => {
           const id = sound.id;
-          const { name, color, emoji, folders, audio_file_url } =
+          const { name, color, emoji, folders, audio_file_url, user_id } =
             sound.attributes;
           const fullUrl = `${API_URL}${audio_file_url}`;
 
@@ -102,6 +102,7 @@ function App() {
             color: color || "gray",
             emoji: emoji || "🎵",
             folders: folders || [],
+            user_id: user_id,
           };
         })
       );
@@ -188,7 +189,21 @@ function App() {
   }
 
   function sortAndFilter() {
-    let outputSounds = soundButtons.sort((a: any, b: any) => a.id - b.id);
+    let outputSounds = soundButtons.sort((a: any, b: any) => {
+      // Sort by default vs user-uploaded, then alphabetically or by ID
+      const aIsDefault = a.user_id === null;
+      const bIsDefault = b.user_id === null;
+
+      if (aIsDefault && bIsDefault) {
+        return a.label.localeCompare(b.label);
+      }
+
+      if (!aIsDefault && !bIsDefault) {
+        return a.id - b.id;
+      }
+
+      return aIsDefault ? -1 : 1;
+    }) ?? [];
 
     if (selectedFolder !== "") {
       outputSounds = soundButtons.filter((sound) =>
