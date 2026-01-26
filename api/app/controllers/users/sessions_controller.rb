@@ -42,7 +42,8 @@ class Users::SessionsController < Devise::SessionsController
       render json: {
         email: current_user.email,
         username: current_user.username,
-        id: current_user.id
+        id: current_user.id,
+        sounds_count: current_user.sounds.count
       }, status: :ok
     else
       render json: { status: 401, message: "Invalid or expired token." }, status: :unauthorized
