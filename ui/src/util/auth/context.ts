@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-export type User = { id: string; email: string; username: string };
+export type User = { id: string; email: string; username: string, sounds_count: number };
 
 export type AuthContextValue = {
   user: User | null;
