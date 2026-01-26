@@ -1,4 +1,6 @@
 class SoundsController < ApplicationController
+  MAX_SOUNDS_PER_USER = 50
+
   before_action :authenticate_user!, only: [ :create, :update, :destroy, :set_folders ]
   before_action :authorize_user!, only: [ :update, :destroy, :set_folders ]
 
@@ -35,6 +37,9 @@ class SoundsController < ApplicationController
   end
 
   def create
+    if current_user.sounds.count >= MAX_SOUNDS_PER_USER
+      return render json: { error: "Sound limit reached. You can have up to #{MAX_SOUNDS_PER_USER} sounds." }, status: :forbidden
+    end
     sound = Sound.new(sound_params.except(:folder_slugs))
     sound.user = current_user if user_signed_in?
     sound.folders = Folder.where(slug: sound_params[:folder_slugs], user: current_user) if sound_params[:folder_slugs].present?

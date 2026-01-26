@@ -70,6 +70,18 @@ RSpec.describe "Sounds API", type: :request do
       expect(JSON.parse(response.body)["errors"]).to be_present
       expect(JSON.parse(response.body)["errors"]["audio_file"]).to include("must be attached")
     end
+
+    it "returns forbidden if user has reached the sound limit" do
+      MAX_SOUNDS_PER_USER = 50
+      MAX_SOUNDS_PER_USER.times do |i|
+        post "/sounds", params: { sound: { name: "Sound #{i}", audio_file: audio } }, headers: auth_headers
+        expect(response).to have_http_status(:created)
+      end
+      post "/sounds", params: { sound: { name: "Extra Sound", audio_file: audio } }, headers: auth_headers
+      expect(response).to have_http_status(:forbidden)
+      expect(JSON.parse(response.body)["error"]).to eq("Sound limit reached. You can have up to #{MAX_SOUNDS_PER_USER} sounds.")
+      expect(Sound.where(user: user).count).to eq(MAX_SOUNDS_PER_USER)
+    end
   end
 
   describe "PATCH /sounds/:id" do
