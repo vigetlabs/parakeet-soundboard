@@ -65,6 +65,13 @@
   align-items: center;
 }
 
+.uploadTooltip {
+  background-color: var(--elevated-background);
+  padding: 8px;
+  border: 2px solid var(--primary-muted);
+  border-radius: 8px;
+}
+
 .controlBar {
   background-color: var(--primary-foreground);
   color: var(--elevated-background);

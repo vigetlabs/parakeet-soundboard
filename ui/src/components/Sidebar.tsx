@@ -1,6 +1,6 @@
 import { SpeakerLoudIcon, StopIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { Slider } from "radix-ui";
+import { Slider, Tooltip } from "radix-ui";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { AudioPlayer, useAudioPlaying } from "../util/audio";
@@ -39,6 +39,9 @@ const Sidebar = ({ children }: Props) => {
 
   const onUserOnlyPage =
     !userLoading && location.pathname.startsWith("/folders");
+
+  const MAX_SOUNDS_PER_USER = 50;
+  const userAtSoundLimit = user && (user.sounds_count ?? 0) >= MAX_SOUNDS_PER_USER;
 
   const { data: currentFolder = undefined } = useQuery({
     queryKey: ["folders", currentFolderSlug],
@@ -113,6 +116,23 @@ const Sidebar = ({ children }: Props) => {
             onChange={(e) => setSearch(e.target.value)}
           />
           {user ? (
+            userAtSoundLimit ? (
+              <Tooltip.Provider>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <span>
+                      <Button icon="plus" disabled>Upload</Button>
+                    </span>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content className="uploadTooltip" side="bottom">
+                      Sound limit reached: {MAX_SOUNDS_PER_USER}. Delete some sounds to upload more.
+                      <Tooltip.Arrow className="tooltipArrow" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              </Tooltip.Provider>
+            ) : (
             <EditDialog
               uploadFirst
               open={uploadOpen}
@@ -121,7 +141,7 @@ const Sidebar = ({ children }: Props) => {
             >
               <Button icon="plus">Upload</Button>
             </EditDialog>
-          ) : (
+          )) : (
             <Button icon="plus" onClick={() => setAccountOpen(true)}>
               Upload
             </Button>
