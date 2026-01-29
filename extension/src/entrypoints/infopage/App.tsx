@@ -14,22 +14,26 @@ function App() {
         </a>
         <h1>Thanks for downloading Parakeet!</h1>
         <p className="subtitle">
-          Play sound effects in Google Meet!
+          Follow these tips to start playing sound effects in Google Meet:
         </p>
       </header>
 
       <section className="warning-section">
-        <h2>Important: Studio Sound</h2>
+        <h2>Turn Off Studio Sound</h2>
         <p>
           Make sure <strong>"Studio Sound"</strong> is turned <strong>OFF</strong> in
           Google Meet so sound effect audio isn't filtered out.
         </p>
-        <div className="instruction-box">
-          <p>
-            During a meeting, click <DotsVerticalIcon className="inlineIcon" /> (next
-            to "Leave call") → Settings → Audio → Studio Sound
-          </p>
-        </div>
+        <img
+          src={browser.runtime.getURL("/images/studio-sound-1.png")}
+          alt="Settings in Google Meet"
+          className="screenshot screenshot-medium"
+        />
+        <img
+          src={browser.runtime.getURL("/images/studio-sound-2.png")}
+          alt="Studio sound setting in Google Meet"
+          className="screenshot screenshot-medium"
+        />
         <p className="footnote">
           Note: Most accounts don't have Studio Sound. If you don't see it, you're
           good to go!
@@ -37,55 +41,59 @@ function App() {
       </section>
 
       <section className="section">
-        <h2>How Muting Works</h2>
+        <h2>Use Parakeet to Mute</h2>
         <p>
           Parakeet can <strong>only play sound effects when your Google Meet
           microphone is unmuted</strong>. To mute your voice while keeping sound
           effects working, use the Parakeet mute buttons:
         </p>
 
-        <div className="mute-buttons-grid">
-          <div className="mute-option">
-            <img
-              src={browser.runtime.getURL("/images/info-mute-button-popup.png")}
-              alt="Mute button in extension popup"
-              className="screenshot screenshot-small"
-            />
-            <p className="caption">In the extension popup</p>
-          </div>
+        <div className="mute-option">
+          <img
+            src={browser.runtime.getURL("/images/info-mute-button-popup.png")}
+            alt="Mute button in chrome extension popup"
+            className="screenshot screenshot-medium"
+          />
+          <p className="caption">Chrome Extension Pop-Up</p>
+        </div>
 
-          <div className="mute-option">
-            <img
-              src={browser.runtime.getURL("/images/info-mute-button-googlemeet.png")}
-              alt="Parakeet mute button in Google Meet"
-              className="screenshot screenshot-small"
-            />
-            <p className="caption">Next to Meet's control bar</p>
-          </div>
+        <div className="mute-option">
+          <img
+            src={browser.runtime.getURL("/images/info-mute-button-googlemeet.png")}
+            alt="Parakeet mute button in Google Meet"
+            className="screenshot screenshot-large"
+          />
+          <p className="caption">Google Meet Control Bar</p>
         </div>
       </section>
 
       <section className="section">
-        <h2>Meeting Usage Tips</h2>
+        <h2>Other Tips</h2>
         <ul className="tips-list">
           <li>
-            <strong>Keep Google Meet mic unmuted</strong> - Control your voice with
-            Parakeet's mute button instead
+            <strong>Keep Google Meet mic unmuted.</strong> Control your voice with
+            Parakeet's mute button instead.
           </li>
           <li>
-            <strong>Keep extension popup open</strong> - The popup must be open on
-            the Meet tab to play sounds
+            <strong>Keep extension popup open.</strong> The popup must be open on
+            the Meet tab to play sounds in a meeting.
           </li>
           <li>
-            <strong>Pro tip for presenting</strong> - Open Meet in a separate
-            window/screen so you can access the extension while presenting
+            <strong>Open Meet in a separate window.</strong> This will keep Parakeet easily accessible,
+            even if you’re presenting and need to screen share.
           </li>
           <li>
             <strong>Use the Parakeet logo button</strong> in the bottom right corner to open the extension.
           </li>
           <li>
-            <strong>Don't want the Parakeet buttons to show in Meet?</strong> You can hide them in settings on the extension pop-up.
+            <strong>Adjust the settings to hide the Parakeet buttons in Meet.</strong> You’ll find this option
+             under Settings in the extension pop-up.
           </li>
+          <img
+            src={browser.runtime.getURL("/images/settings.png")}
+            alt="Hide Parakeet buttons in Google Meet"
+            className="screenshot screenshot-small"
+          />
         </ul>
       </section>
 
@@ -123,7 +131,7 @@ function App() {
       <footer className="footer">
         <p className="credits">
           Parakeet is always improving! Report issues or share feedback at{" "}
-          <a href="mailto:apps@viget.com">apps@viget.com</a>
+          <a href="mailto:apps@viget.com">apps@viget.com</a>.
         </p>
         <p className="credits">
           Created by <a href="https://viget.com" target="_blank">Viget</a> - 2025 Internship Cohort
