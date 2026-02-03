@@ -51,6 +51,7 @@ cd extension && pnpm run dev
 
 ### Build extension (production)
 
+- Make sure to update the version in `wxt.config.ts`, roughly following Major.Minor.Patch. The newly uploaded package must be a higher version than the last.
 - Run `pnpm run build -- --mode production`
 - This creates the extension with the `.env.production` variables - connecting it to the production website and api.
 - Load unpacked or upload to Chrome Web Store (folder is likely `.output/chrome-mv3`)
