@@ -163,10 +163,22 @@ const Sidebar = ({ children }: Props) => {
                 <IconButton
                   icon="archive"
                   label="Folders"
+                  style={{ marginBottom: "24px" }}
                   selected={location.pathname
                     .toLowerCase()
                     .startsWith("/folders")}
                   tabIndex={-1}
+                />
+              </Link>
+              <Link
+                to="https://chromewebstore.google.com/detail/parakeet-soundboard/nhcgnligmhnekeeboamblkkbclapnmgd"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconButton
+                  icon="puzzle"
+                  label="Extension"
+                  style={{ marginBottom: "24px", paddingRight: "0px" }}
                 />
               </Link>
             </div>
