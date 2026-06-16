@@ -26,26 +26,26 @@ repos:
         name: Run UI linter
         entry: bash -lc 'cd ui && pnpm run lint'
         language: system
-        pass_filesnames: false
+        pass_filenames: false
         files: ^ui/
 
       - id: ui-typecheck
         name: Run UI typecheck
         entry: bash -lc 'cd ui && pnpm run typecheck'
         language: system
-        pass_filesnames: false
+        pass_filenames: false
         files: ^ui/
 
       - id: extension-lint
         name: Run extension linter
         entry: bash -lc 'cd extension && pnpm run lint'
         language: system
-        pass_filesnames: false
+        pass_filenames: false
         files: ^extension/
 
       - id: extension-typecheck
         name: Run extension typecheck
         entry: bash -lc 'cd extension && pnpm run compile'
         language: system
-        pass_filesnames: false
+        pass_filenames: false
         files: ^extension/
