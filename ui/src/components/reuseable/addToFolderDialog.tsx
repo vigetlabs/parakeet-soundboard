@@ -117,7 +117,7 @@ export const AddToFolderDialog = ({
                   value={
                     editingFolders.length > 0
                       ? editingFolders
-                          .map((folder: any) => folder.name)
+                          .map((folder) => folder.name)
                           .join(", ")
                       : "Select Folders"
                   }
