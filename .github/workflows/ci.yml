@@ -37,7 +37,7 @@ jobs:
       - name: Set up database
         run: |
           cd api
-          bundle exec rails db:prepare
+          bundle exec rails db:create db:schema:load
       - name: Run tests
         run: |
           cd api
