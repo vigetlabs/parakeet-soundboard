@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Checking unstaged and untracked files..."
+changed_files="$(
+    {
+      git diff --name-only --diff-filter=ACMRD
+      git ls-files --others --exclude-standard
+    } | sort -u
+  )"
+
+changed_matching() {
+  echo "$changed_files" | grep -Eq "$1"
+}
+
+if [ -z "$changed_files" ]; then
+  echo "No matching changed files found. Skipping checks."
+  exit 0
+fi
+
+echo
+echo "======Changed files ======"
+echo "$changed_files"
+echo
+echo "=========================="
+
+if changed_matching '(^api/|^docker-compose\.dev\.yml$|^Gemfile|^Gemfile\.lock$)'; then
+  echo "API files changed. Running RSpec..."
+  docker compose -f docker-compose.dev.yml exec -T api bundle exec rspec
+
+  echo "Running Rubocop..."
+  docker compose -f docker-compose.dev.yml exec -T api bundle exec rubocop
+
+  echo "Running Brakeman..."
+  docker compose -f docker-compose.dev.yml exec -T api bundle exec brakeman -z
+else
+  echo "No API files changed. Skipping API checks."
+fi
+
+if changed_matching '^ui/'; then
+  echo "UI files changed. Running ui lint..."
+  pnpm --dir ui run lint
+  echo "Running ui typecheck..."
+  pnpm --dir ui run typecheck
+else
+  echo "No ui files changed. Skipping client lint."
+fi
+
+if changed_matching '^extension/'; then
+  echo "Running extension compile (typecheck)..."
+  pnpm --dir extension run compile
+else
+  echo "No extension files changed. Skipping extension compile."
+fi
+
+echo "Checks passed."

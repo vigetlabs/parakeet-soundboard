@@ -12,7 +12,7 @@
 
 - Ruby 3.4.4 (asdf)
 - Node.js
-- PostgreSQL
+- Docker
 
 ### Set up
 
@@ -24,20 +24,34 @@ cd extension && pnpm install
 
 ### Environment Variables
 
-- There should be environment variables at the top of each repository (`api/.env`, `ui/.env`, and `extension/.env`)
+- There should be environment variables at the top of each repository (`api/.env`, `ui/.env`, `services/.env` and `extension/.env`)
 - There are `.env.example` files in each of the directories to copy. For `api/.env`, contents are in 1Password.
 
-### Database
+### Set up
 
+#### Pre-commit hooks
+Check if you have the [pre-commit package](https://pre-commit.com/) installed on your machine with `pre-commit --version`. If the package is not installed, run the following commands:
 ```bash
-cd api
-bundle exec rails db:create db:migrate db:seed
+brew install pre-commit
+pre-commit --version
 ```
 
-### Run servers
+Once the package is installed, install the `.pre-commit-config.yaml` hook into the `.git/hooks` directory by running `pre-commit install`
 
+#### API
+To set up the API and the database, first ensure you have Docker installed on your machine by referring to the following documentation depending on operating system:
+- [Install Docker on Ubuntu](https://docs.docker.com/engine/install/ubuntu/) 
+- [Install Docker Desktop on Mac](https://docs.docker.com/desktop/setup/install/mac-install/) 
+- [Install Docker Desktop on Windows](https://docs.docker.com/desktop/setup/install/windows-install/) 
+
+Once Docker is installed run the following Makefile commands to set up and start the local development environment:
 ```bash
-cd api && bundle exec rails server
+make dev-build
+make start-api
+```
+
+#### UI & Extension
+```bash
 cd ui && pnpm run dev
 cd extension && pnpm run dev
 ```
