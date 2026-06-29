@@ -78,6 +78,25 @@
   border-radius: 8px;
 }
 
+.extensionLink {
+  margin-top: -8px;
+}
+
+.extensionLink .iconButton {
+  width: 36px;
+  height: 36px;
+}
+
+.extensionLink .innerIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.extensionLink .iconButtonLabel {
+  margin-top: 0;
+  font-size: 0.625rem;
+}
+
 .controlBar {
   background-color: var(--primary-foreground);
   color: var(--elevated-background);

@@ -8,6 +8,7 @@ import {
 import "./App.css";
 import Folders from "./components/Folders";
 import FolderView from "./components/FolderView";
+import Groups from "./components/Groups";
 import Home from "./components/Home";
 import LoginPage from "./components/LoginPage";
 import LogoutPage from "./components/LogoutPage";
@@ -30,6 +31,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/folders" element={<Folders />} />
           <Route path="/folders/:folder" element={<FolderView />} />
+          <Route path="/groups" element={<Groups />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/logout" element={<LogoutPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

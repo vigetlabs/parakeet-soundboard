@@ -1,0 +1,111 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { UpdateIcon } from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
+import fuzzysort from "fuzzysort";
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useAuth } from "../util/auth";
+import {
+  DeleteDialog,
+  EditFolderDialog,
+  FolderButton,
+  NewFolderButton,
+} from "./reuseable";
+
+const Groups = () => {
+  const [searchParams] = useSearchParams();
+  const [currentlyEditing, setCurrentlyEditing] = useState(false);
+  const [currentlyDeleting, setCurrentlyDeleting] = useState(false);
+  const [editingName, setEditingName] = useState("");
+  const [editingSlug, setEditingSlug] = useState("");
+  const { userLoading, fetchWithAuth } = useAuth();
+
+  const { data: folders = [], isLoading } = useQuery({
+    queryKey: ["folders", "allFolders"],
+    queryFn: () =>
+      fetchWithAuth("/folders").then(async (res) => {
+        if (!res.ok) throw new Error("Failed to fetch folders");
+        return (await res.json()).data;
+      }),
+    enabled: !userLoading,
+  });
+
+  function handleEditClicked(name: string, slug: string) {
+    setEditingName(name);
+    setEditingSlug(slug);
+    setCurrentlyEditing(true);
+  }
+
+  function handleDeleteClicked(name: string, slug: string) {
+    setEditingName(name);
+    setEditingSlug(slug);
+    setCurrentlyDeleting(true);
+  }
+
+  function sortAndFilter() {
+    const allFolders =
+      folders?.sort((a: any, b: any) => parseInt(a.id) - parseInt(b.id)) ?? [];
+    let outputFolders;
+
+    const searchInput = searchParams.get("search") ?? "";
+    if (searchInput) {
+      outputFolders = fuzzysort
+        .go(searchInput, allFolders, {
+          key: "attributes.name",
+        })
+        .map((result) => result.obj);
+    } else {
+      outputFolders = allFolders;
+    }
+
+    return outputFolders;
+  }
+
+  return (
+    <>
+      <h1>Your Groups</h1>
+      <p>Organize your sounds!</p>
+      {isLoading ? (
+        <UpdateIcon className="spinIcon spinIconLarge" />
+      ) : (
+        <div className="folderButtonContainer">
+          {sortAndFilter().map((folder: any) => (
+            <FolderButton
+              key={folder.attributes.name}
+              name={folder.attributes.name}
+              slug={folder.attributes.slug}
+              editFunction={handleEditClicked}
+              deleteFunction={handleDeleteClicked}
+              numSounds={folder.attributes.sounds.length}
+              firstSounds={folder.attributes.sounds
+                .sort((a: any, b: any) => a.id - b.id)
+                .slice(0, 4)}
+            />
+          ))}
+          <EditFolderDialog
+            open={currentlyEditing}
+            onOpenChange={setCurrentlyEditing}
+            previousName={editingName}
+            slug={editingSlug}
+          >
+            <NewFolderButton
+              onClick={() => {
+                setEditingName("");
+                setEditingSlug("");
+              }}
+            />
+          </EditFolderDialog>
+
+          <DeleteDialog
+            open={currentlyDeleting}
+            setClose={() => setCurrentlyDeleting(false)}
+            name={editingName}
+            slug={editingSlug}
+          />
+        </div>
+      )}
+    </>
+  );
+};
+
+export default Groups;

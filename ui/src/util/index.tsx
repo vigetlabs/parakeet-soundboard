@@ -14,6 +14,7 @@ import {
 } from "@radix-ui/react-icons";
 import type { IconProps } from "@radix-ui/react-icons/dist/types";
 import { PuzzleIcon } from "../icons/PuzzleIcon.tsx";
+import { GroupsIcon } from "../icons/GroupsIcon.tsx";
 
 export type AvaliableIcons =
   | "home"
@@ -28,7 +29,8 @@ export type AvaliableIcons =
   | "cross"
   | "idCard"
   | "chevronRight"
-  | "puzzle";
+  | "puzzle"
+  | "groups";
 
 export function chooseIcon(
   icon: AvaliableIcons,
@@ -67,6 +69,8 @@ export function chooseIcon(
       return <ChevronRightIcon {...propsWithStyle} />;
     case "puzzle":
       return <PuzzleIcon {...propsWithStyle} />;
+    case "groups":
+      return <GroupsIcon {...propsWithStyle} />;
     default:
       console.error("Invalid icon provided");
       return;
