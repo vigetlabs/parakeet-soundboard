@@ -2,10 +2,10 @@ import { Cross2Icon, UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
 import { Dialog, Form } from "radix-ui";
 import { useState, useEffect } from "react";
-import { Button, FolderPicker, TextInput } from ".";
-import { useAuth } from "../../util/auth";
-import { queryClient } from "../../util/db";
-import type { Folder, Tag } from "../../util/types";
+import { Button, FolderPicker, TextInput } from "..";
+import { useAuth } from "../../../util/auth";
+import { queryClient } from "../../../util/db";
+import type { Folder, Tag } from "../../../util/types";
 
 interface AddToFolderDialogProps {
   open: boolean;

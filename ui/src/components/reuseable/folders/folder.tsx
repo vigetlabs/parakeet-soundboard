@@ -13,11 +13,11 @@ import { Dialog, DropdownMenu, Form } from "radix-ui";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, TextInput } from ".";
-import { useAuth } from "../../util/auth";
-import { queryClient } from "../../util/db";
-import type { SoundType } from "../../util/placeholderData";
-import type { Folder } from "../../util/types";
+import { Button, TextInput } from "..";
+import { useAuth } from "../../../util/auth";
+import { queryClient } from "../../../util/db";
+import type { SoundType } from "../../../util/placeholderData";
+import type { Folder } from "../../../util/types";
 import "./folder.css";
 
 export interface SoundButtonDisplayProps

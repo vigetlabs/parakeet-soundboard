@@ -1,3 +1,5 @@
+import type { Group } from "./types";
+
 export type SoundType = Array<{
   name: string;
   color: string;
@@ -88,6 +90,33 @@ export const placeholderFolders = [
   { name: "Jokes", slug: "jokes" },
   { name: "Dungeons & Dragons", slug: "dungeons-and-dragons" },
   { name: "Misc", slug: "misc" },
+];
+
+export const placeholderGroups: Group[] = [
+  {
+    name: "Game Night",
+    slug: "game-night",
+    emoji: "🎲",
+    color: "#BB27FF",
+    code: "GAME42",
+    numMembers: 5,
+  },
+  {
+    name: "Office",
+    slug: "office",
+    emoji: "💼",
+    color: "#5373F2",
+    code: "WORK11",
+    numMembers: 12,
+  },
+  {
+    name: "Family",
+    slug: "family",
+    emoji: "🏡",
+    color: "#00D5B8",
+    code: "FAM777",
+    numMembers: 4,
+  },
 ];
 
 export const placeholderTags = [

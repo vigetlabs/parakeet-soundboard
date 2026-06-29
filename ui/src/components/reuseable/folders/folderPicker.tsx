@@ -10,8 +10,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Checkbox, Label, Popover } from "radix-ui";
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { useAuth } from "../../util/auth";
-import type { Folder } from "../../util/types";
+import { useAuth } from "../../../util/auth";
+import type { Folder } from "../../../util/types";
 import { EditFolderDialog } from "./folder";
 import "./folderPicker.css";
 

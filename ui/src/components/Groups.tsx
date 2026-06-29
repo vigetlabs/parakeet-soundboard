@@ -1,34 +1,26 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { UpdateIcon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
 import fuzzysort from "fuzzysort";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useAuth } from "../util/auth";
+import { useGroups } from "../util/groups";
+import type { Group } from "../util/types";
 import {
   DeleteDialog,
-  EditFolderDialog,
-  FolderButton,
-  NewFolderButton,
+  EditGroupDialog,
+  GroupButton,
+  JoinGroupButton,
+  NewGroupButton,
 } from "./reuseable";
 
 const Groups = () => {
   const [searchParams] = useSearchParams();
   const [currentlyEditing, setCurrentlyEditing] = useState(false);
+  const [currentlyJoining, setCurrentlyJoining] = useState(false);
   const [currentlyDeleting, setCurrentlyDeleting] = useState(false);
   const [editingName, setEditingName] = useState("");
   const [editingSlug, setEditingSlug] = useState("");
-  const { userLoading, fetchWithAuth } = useAuth();
 
-  const { data: folders = [], isLoading } = useQuery({
-    queryKey: ["folders", "allFolders"],
-    queryFn: () =>
-      fetchWithAuth("/folders").then(async (res) => {
-        if (!res.ok) throw new Error("Failed to fetch folders");
-        return (await res.json()).data;
-      }),
-    enabled: !userLoading,
-  });
+  const { data: groups = [], isLoading } = useGroups();
 
   function handleEditClicked(name: string, slug: string) {
     setEditingName(name);
@@ -43,58 +35,56 @@ const Groups = () => {
   }
 
   function sortAndFilter() {
-    const allFolders =
-      folders?.sort((a: any, b: any) => parseInt(a.id) - parseInt(b.id)) ?? [];
-    let outputFolders;
-
     const searchInput = searchParams.get("search") ?? "";
     if (searchInput) {
-      outputFolders = fuzzysort
-        .go(searchInput, allFolders, {
-          key: "attributes.name",
-        })
+      return fuzzysort
+        .go(searchInput, groups, { key: "name" })
         .map((result) => result.obj);
-    } else {
-      outputFolders = allFolders;
     }
-
-    return outputFolders;
+    return groups;
   }
 
   return (
     <>
       <h1>Your Groups</h1>
-      <p>Organize your sounds!</p>
+      <p>Share sounds with others!</p>
       {isLoading ? (
         <UpdateIcon className="spinIcon spinIconLarge" />
       ) : (
-        <div className="folderButtonContainer">
-          {sortAndFilter().map((folder: any) => (
-            <FolderButton
-              key={folder.attributes.name}
-              name={folder.attributes.name}
-              slug={folder.attributes.slug}
+        <div className="groupButtonContainer">
+          {sortAndFilter().map((group: Group) => (
+            <GroupButton
+              key={group.slug}
+              name={group.name}
+              slug={group.slug}
+              emoji={group.emoji}
+              color={group.color}
+              code={group.code}
+              numMembers={group.numMembers}
               editFunction={handleEditClicked}
               deleteFunction={handleDeleteClicked}
-              numSounds={folder.attributes.sounds.length}
-              firstSounds={folder.attributes.sounds
-                .sort((a: any, b: any) => a.id - b.id)
-                .slice(0, 4)}
             />
           ))}
-          <EditFolderDialog
+          <EditGroupDialog
             open={currentlyEditing}
             onOpenChange={setCurrentlyEditing}
             previousName={editingName}
             slug={editingSlug}
           >
-            <NewFolderButton
+            <NewGroupButton
               onClick={() => {
                 setEditingName("");
                 setEditingSlug("");
               }}
             />
-          </EditFolderDialog>
+          </EditGroupDialog>
+
+          <EditGroupDialog
+            open={currentlyJoining}
+            onOpenChange={setCurrentlyJoining}
+          >
+            <JoinGroupButton />
+          </EditGroupDialog>
 
           <DeleteDialog
             open={currentlyDeleting}
