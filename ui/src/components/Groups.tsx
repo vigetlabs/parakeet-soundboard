@@ -47,24 +47,17 @@ const Groups = () => {
   return (
     <>
       <h1>Your Groups</h1>
-      <p>Share sounds with others!</p>
+      <p>Add and manage existing groups.</p>
       {isLoading ? (
         <UpdateIcon className="spinIcon spinIconLarge" />
       ) : (
         <div className="groupButtonContainer">
-          {sortAndFilter().map((group: Group) => (
-            <GroupButton
-              key={group.slug}
-              name={group.name}
-              slug={group.slug}
-              emoji={group.emoji}
-              color={group.color}
-              code={group.code}
-              numMembers={group.numMembers}
-              editFunction={handleEditClicked}
-              deleteFunction={handleDeleteClicked}
-            />
-          ))}
+          <EditGroupDialog
+            open={currentlyJoining}
+            onOpenChange={setCurrentlyJoining}
+          >
+            <JoinGroupButton />
+          </EditGroupDialog>
           <EditGroupDialog
             open={currentlyEditing}
             onOpenChange={setCurrentlyEditing}
@@ -78,13 +71,19 @@ const Groups = () => {
               }}
             />
           </EditGroupDialog>
+          {sortAndFilter().map((group: Group) => (
+            <GroupButton
+              key={group.slug}
+              name={group.name}
+              slug={group.slug}
+              emoji={group.emoji}
+              color={group.color}
+              code={group.code}
+              editFunction={handleEditClicked}
+              deleteFunction={handleDeleteClicked}
+            />
+          ))}
 
-          <EditGroupDialog
-            open={currentlyJoining}
-            onOpenChange={setCurrentlyJoining}
-          >
-            <JoinGroupButton />
-          </EditGroupDialog>
 
           <DeleteDialog
             open={currentlyDeleting}
