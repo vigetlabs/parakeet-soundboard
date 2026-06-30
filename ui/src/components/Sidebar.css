@@ -61,14 +61,48 @@
   width: 64px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: center;
+  min-height: 0;
 }
 
 .sidebarTopButtons {
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex-shrink: 0;
+}
+
+.sidebarGroupList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  margin: 24px 0;
+  padding: 4px 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.sidebarGroupList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebarGroupList::-webkit-scrollbar-thumb {
+  background-color: var(--primary-muted-dark);
+  border-radius: 9999px;
+}
+
+.groupMiniButton {
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.groupMiniButtonEmoji {
+  font-size: 1.75rem;
+  line-height: 1;
 }
 
 .uploadTooltip {

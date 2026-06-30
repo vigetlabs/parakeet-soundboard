@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { AudioPlayer, useAudioPlaying } from "../util/audio";
 import { useAuth } from "../util/auth";
-import type { Tag } from "../util/types";
+import { useGroups } from "../util/groups";
+import type { Group, Tag } from "../util/types";
 import {
   Button,
   EditDialog,
+  GroupMiniButton,
   IconButton,
   LoginDialog,
   LogoutPopover,
@@ -30,6 +32,7 @@ const Sidebar = ({ children }: Props) => {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const { user, userLoading, fetchWithAuth } = useAuth();
+  const { data: groups = [] } = useGroups();
 
   const currentFolderSlug = location.pathname.startsWith("/folders/")
     ? location.pathname.substring(9) !== ""
@@ -182,13 +185,23 @@ const Sidebar = ({ children }: Props) => {
                 <IconButton
                   icon="groups"
                   label="Groups"
-                  style={{ marginBottom: "24px" }}
                   selected={location.pathname
                     .toLowerCase()
                     .startsWith("/groups")}
                   tabIndex={-1}
                 />
               </Link>
+            </div>
+            <div className="sidebarGroupList">
+              {groups.map((group: Group) => (
+                <Link key={group.slug} to="/groups">
+                  <GroupMiniButton
+                    name={group.name}
+                    emoji={group.emoji}
+                    color={group.color}
+                  />
+                </Link>
+              ))}
             </div>
             {user ? (
               <LogoutPopover>

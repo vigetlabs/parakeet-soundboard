@@ -9,6 +9,8 @@ export type Group = {
   slug: string;
   emoji?: string;
   color?: string;
-  code?: string; // invite/join code
+  textColor?: string;
+  code?: string;
   numMembers?: number;
+  isPublic?: boolean;
 };

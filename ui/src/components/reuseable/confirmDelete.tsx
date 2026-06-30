@@ -14,6 +14,7 @@ export interface DeleteDialogProps
   slug?: string; // for folders
   dbID?: number; // for sounds
   name: string;
+  entity?: "folder" | "group" | "sound";
 }
 
 const DeleteDialog = ({
@@ -22,10 +23,12 @@ const DeleteDialog = ({
   slug,
   dbID,
   name,
+  entity,
   className = "",
   ...props
 }: DeleteDialogProps) => {
   const classes = `confirmDeleteModal ${className}`.trim();
+  const entityLabel = entity ?? (slug ? "folder" : "sound");
   const [isDeleting, setIsDeleting] = React.useState(false);
   const { fetchWithAuth } = useAuth();
 
@@ -77,7 +80,11 @@ const DeleteDialog = ({
 
   function submitDelete() {
     setIsDeleting(true);
-    if (slug) {
+    if (entityLabel === "group") {
+      // placeholder: groups aren't wired to a backend yet
+      setIsDeleting(false);
+      setClose();
+    } else if (slug) {
       deleteFolderMutation.mutate();
     } else {
       deleteSoundMutation.mutate();
@@ -94,8 +101,7 @@ const DeleteDialog = ({
           </Dialog.Title>
           <Dialog.Description asChild>
             <p>
-              This will permanently delete the {slug ? "folder" : "sound"} "
-              {name}"
+              This will permanently delete the {entityLabel} "{name}"
             </p>
           </Dialog.Description>
           <div className="confirmDeleteButtons">

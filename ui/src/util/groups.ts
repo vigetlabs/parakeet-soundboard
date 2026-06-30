@@ -32,9 +32,8 @@ export function useGroups() {
 
 /**
  * Adapter from the (not-yet-finalized) API shape to the internal `Group` type.
- * This is the one place that knows about the wire format — fill it in once the
- * endpoint exists. The `Group` return type makes the compiler flag any field
- * the UI relies on that the API doesn't yet provide.
+ * This is the one place that knows about the wire format, it will be filled
+ * in once endpoint exists.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function normalizeGroup(apiGroup: any): Group {
@@ -45,5 +44,6 @@ export function normalizeGroup(apiGroup: any): Group {
     color: apiGroup.attributes.color,
     code: apiGroup.attributes.code,
     numMembers: apiGroup.attributes.members?.length,
+    isPublic: apiGroup.attributes.is_public,
   };
 }

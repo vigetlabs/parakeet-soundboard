@@ -5,7 +5,6 @@ import {
   DotsHorizontalIcon,
   EnterIcon,
   FaceIcon,
-  Pencil1Icon,
   PlusCircledIcon,
   TrashIcon,
   UpdateIcon,
@@ -13,9 +12,12 @@ import {
 import { Dialog, DropdownMenu, Form } from "radix-ui";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { Button, EmojiPicker, TextInput } from "..";
-import { defaultColors, placeholderAdmins } from "../../../util/placeholderData";
+import {
+  defaultColors,
+  placeholderAdmins,
+  placeholderGroups,
+} from "../../../util/placeholderData";
 import "./group.css";
 
 export interface GroupButtonProps
@@ -24,6 +26,7 @@ export interface GroupButtonProps
   slug: string;
   emoji?: string; // placeholder until wired up
   color?: string; // placeholder until wired up
+  textColor?: string; // placeholder until wired up
   code?: string; // placeholder until wired up
   editFunction?: (name: string, slug: string) => void;
   deleteFunction?: (name: string, slug: string) => void;
@@ -34,6 +37,7 @@ const GroupButton = ({
   slug,
   emoji = "",
   color,
+  textColor,
   code = "",
   editFunction = () => {}, // placeholder until wired up
   deleteFunction = () => {}, // placeholder until wired up
@@ -89,13 +93,6 @@ const GroupButton = ({
             onClick={() => setDisplayMenu(false)}
           >
             <DropdownMenu.Item
-              className="soundButtonMenuItem"
-              onSelect={() => editFunction(name, slug)}
-            >
-              <Pencil1Icon className="soundButtonMenuItemIcon" />
-              Edit
-            </DropdownMenu.Item>
-            <DropdownMenu.Item
               className="soundButtonMenuItem soundButtonMenuItemDanger"
               onSelect={() => deleteFunction(name, slug)}
             >
@@ -107,39 +104,74 @@ const GroupButton = ({
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
-      <Link to={`/groups/${slug}`}>
-        <div className={classes} style={{ backgroundColor: color }} {...props}>
-          <div className="visually-hidden">Open group: {name}</div>
-          <div className="emojiIcon">{emoji}</div>
-          <div aria-hidden className="groupButtonLabel">
-            <span className="groupButtonName">{name}</span>
-            {/* placeholder: join code for sharing this group */}
-            <span className="groupButtonCode">
-              <span className="groupButtonCodeLabel">Code:</span>
-              <span className="groupButtonCodeValueRow">
-                <span className="groupButtonCodeValue">{code}</span>
-                <button
-                  type="button"
-                  className="groupButtonCopyButton"
-                  aria-label={copied ? "Code copied" : "Copy code"}
-                  onClick={handleCopyCode}
-                >
-                  {copied ? (
-                    <CheckIcon className="groupButtonCopyIcon" />
-                  ) : (
-                    <CopyIcon className="groupButtonCopyIcon" />
-                  )}
-                </button>
-                {copied && (
-                  <span aria-live="polite" className="groupButtonCopied">
-                    Copied!
-                  </span>
-                )}
-              </span>
-            </span>
-          </div>
+      <div
+        className={classes}
+        style={{ backgroundColor: color }}
+        role="button"
+        tabIndex={0}
+        onClick={() => editFunction(name, slug)}
+        {...props}
+      >
+        <div className="visually-hidden">Edit group: {name}</div>
+        <div className="emojiIcon">{emoji}</div>
+        <div aria-hidden className="groupButtonLabel" style={{ color: textColor }}>
+          <span className="groupButtonName">{name}</span>
         </div>
-      </Link>
+      </div>
+      {/* placeholder: join code for sharing this group — sits below the box */}
+      <span aria-hidden className="groupButtonCode">
+        <span className="groupButtonCodeLabel">Code:</span>
+        <span className="groupButtonCodeValueRow">
+          <span className="groupButtonCodeValue">{code}</span>
+          <button
+            type="button"
+            className="groupButtonCopyButton"
+            aria-label={copied ? "Code copied" : "Copy code"}
+            onClick={handleCopyCode}
+          >
+            {copied ? (
+              <CheckIcon className="groupButtonCopyIcon" />
+            ) : (
+              <CopyIcon className="groupButtonCopyIcon" />
+            )}
+          </button>
+          {copied && (
+            <span aria-live="polite" className="groupButtonCopied">
+              Copied!
+            </span>
+          )}
+        </span>
+      </span>
+    </div>
+  );
+};
+
+export interface GroupMiniButtonProps
+  extends React.HTMLAttributes<HTMLDivElement> {
+  name: string;
+  emoji?: string; // placeholder until wired up
+  color?: string; // placeholder until wired up
+}
+
+const GroupMiniButton = ({
+  name,
+  emoji = "",
+  color,
+  className = "",
+  ...props
+}: GroupMiniButtonProps) => {
+  // mirror the sidebar IconButton (Home/Folders/Groups) markup so group icons
+  // look identical — just a custom color, caption (name), and emoji icon
+  const classes = `iconButtonWrapper groupMiniButton ${className}`.trim();
+
+  return (
+    <div className={classes} title={name} {...props}>
+      <div className="iconButton" style={{ backgroundColor: color }}>
+        <span aria-hidden className="groupMiniButtonEmoji">
+          {emoji}
+        </span>
+      </div>
+      <div className="iconButtonLabel">{name}</div>
     </div>
   );
 };
@@ -148,8 +180,7 @@ const NewGroupButton = ({
   className = "",
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
-  const classes =
-    `groupButtonWrapper createGroupButtonWrapper ${className}`.trim();
+  const classes = `groupButtonWrapper createGroupButtonWrapper ${className}`.trim();
 
   return (
     <button className={classes} {...props}>
@@ -162,26 +193,85 @@ const NewGroupButton = ({
   );
 };
 
+type JoinFeedback = {
+  status: "success" | "error" | "pending";
+  message: string;
+};
+
 const JoinGroupButton = ({
   className = "",
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+}: React.HTMLAttributes<HTMLDivElement>) => {
   const classes =
     `groupButtonWrapper newGroupButtonWrapper joinGroupButtonWrapper ${className}`.trim();
+  const [code, setCode] = useState("");
+  const [feedback, setFeedback] = useState<JoinFeedback | null>(null);
+
+  function attemptJoin() {
+    // placeholder: match the code against known groups until the backend exists
+    const match = placeholderGroups.find(
+      (group) => group.code?.toLowerCase() === code.trim().toLowerCase(),
+    );
+
+    if (!code.trim() || !match) {
+      setFeedback({ status: "error", message: "Invalid code" });
+    } else if (match.isPublic) {
+      setFeedback({ status: "success", message: "Group joined!" });
+    } else {
+      setFeedback({
+        status: "pending",
+        message: "Awaiting approval from group admin",
+      });
+    }
+  }
 
   return (
-    <button className={classes} {...props}>
-      <div className="visually-hidden">Join a group</div>
-      {/* placeholder: code entry box, not yet wired up */}
-      <div aria-hidden className="joinGroupCodeBox">
-        Enter Code
-      </div>
+    <div className="joinGroupButtonContainer">
+      <div
+        className={classes}
+        role="button"
+        tabIndex={0}
+        onClick={attemptJoin}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            attemptJoin();
+          }
+        }}
+        {...props}
+      >
+        <div className="visually-hidden">Join a group</div>
+        {/* clicking inside the code box edits text — it must not trigger a join */}
+        <input
+          className="joinGroupCodeBox"
+          placeholder="Enter Code"
+          aria-label="Group join code"
+          value={code}
+          onChange={(event) => setCode(event.target.value)}
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => {
+            event.stopPropagation();
+            if (event.key === "Enter") {
+              event.preventDefault();
+              attemptJoin();
+            }
+          }}
+        />
 
-      <div aria-hidden className="groupButtonLabel newGroupButtonLabel">
-        <EnterIcon className="newGroupIcon" />
-        Join Group
+        <div aria-hidden className="groupButtonLabel newGroupButtonLabel">
+          <EnterIcon className="newGroupIcon" />
+          Join Group
+        </div>
       </div>
-    </button>
+      {feedback && (
+        <span
+          role="status"
+          className={`joinGroupFeedback joinGroupFeedback-${feedback.status}`}
+        >
+          {feedback.message}
+        </span>
+      )}
+    </div>
   );
 };
 
@@ -192,6 +282,12 @@ export interface EditGroupProps
   className?: string;
   open: boolean;
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+  onDraftChange?: (draft: {
+    name: string;
+    emoji: string;
+    color?: string;
+    textColor: string;
+  }) => void;
 }
 
 const EditGroupDialog = ({
@@ -199,6 +295,7 @@ const EditGroupDialog = ({
   slug = "",
   open,
   onOpenChange,
+  onDraftChange,
   children,
   ...props
 }: EditGroupProps) => {
@@ -243,6 +340,12 @@ const EditGroupDialog = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // keep the background tile in sync with whatever is being previewed
+  useEffect(() => {
+    onDraftChange?.({ name, emoji, color, textColor });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name, emoji, color, textColor]);
+
   return (
     <Dialog.Root
       open={open}
@@ -261,7 +364,7 @@ const EditGroupDialog = ({
               {slug ? "Edit" : "Create"} Group
             </Dialog.Title>
             <Dialog.Description className="groupDialogSubtitle">
-              Set up your group name and icon
+              {slug ? "Modify" : "Set up"} your group name and icon
             </Dialog.Description>
 
             <Form.Field name="name" className="groupDialogNameField">
@@ -285,6 +388,17 @@ const EditGroupDialog = ({
                   className="groupDialogPreview"
                   style={{ backgroundColor: color }}
                 >
+                  <Form.Field
+                    name="emoji"
+                    className="groupDialogEmojiPickerField"
+                  >
+                    <EmojiPicker setSelectedEmoji={setEmoji} side="right">
+                      <FaceIcon className="buttonDisplayPickerIcon" />
+                    </EmojiPicker>
+                    <Form.Control asChild>
+                      <input type="hidden" value={emoji} />
+                    </Form.Control>
+                  </Form.Field>
                   <span className="groupDialogPreviewEmoji">{emoji}</span>
                   <span
                     className="groupDialogPreviewName"
@@ -293,14 +407,6 @@ const EditGroupDialog = ({
                     {name || "Group Name"}
                   </span>
                 </div>
-                <Form.Field name="emoji" className="groupDialogEmojiPickerField">
-                  <EmojiPicker setSelectedEmoji={setEmoji} side="right">
-                    <FaceIcon className="buttonDisplayPickerIcon" />
-                  </EmojiPicker>
-                  <Form.Control asChild>
-                    <input type="hidden" value={emoji} />
-                  </Form.Control>
-                </Form.Field>
               </div>
 
               {/* 2. Color swatches */}
@@ -348,37 +454,50 @@ const EditGroupDialog = ({
                   </Form.Control>
                 </div>
               </Form.Field>
+            </div>
 
-              {/* 3. Text font color */}
-              <div className="groupDialogFontColorSection">
-                <span className="groupDialogFontColorLabel">
-                  Text Font Color
-                </span>
-                <div className="groupDialogFontColorButtons">
-                  <button
-                    type="button"
-                    aria-label="Black text"
-                    className={`groupDialogFontColorBtn groupDialogFontColorBtnBlack${textColor === "#000000" ? " groupDialogFontColorBtnSelected" : ""}`}
-                    onClick={() => setTextColor("#000000")}
+            {/* Text font color — below the emoji + color picker row */}
+            <div className="groupDialogFontColorSection">
+              <span className="groupDialogFontColorLabel">Text Font Color</span>
+              <div className="groupDialogFontColorButtons">
+                <button
+                  type="button"
+                  aria-label="Black text"
+                  aria-pressed={textColor === "#000000"}
+                  className="groupDialogFontColorOption"
+                  onClick={() => setTextColor("#000000")}
+                >
+                  <span
+                    aria-hidden
+                    className="groupDialogFontColorBtn groupDialogFontColorBtnBlack"
                   />
-                  <button
-                    type="button"
-                    aria-label="White text"
-                    className={`groupDialogFontColorBtn groupDialogFontColorBtnWhite${textColor === "#ffffff" ? " groupDialogFontColorBtnSelected" : ""}`}
-                    onClick={() => setTextColor("#ffffff")}
+                  <span className="groupDialogFontColorName">Black</span>
+                </button>
+                <button
+                  type="button"
+                  aria-label="White text"
+                  aria-pressed={textColor === "#ffffff"}
+                  className="groupDialogFontColorOption"
+                  onClick={() => setTextColor("#ffffff")}
+                >
+                  <span
+                    aria-hidden
+                    className="groupDialogFontColorBtn groupDialogFontColorBtnWhite"
                   />
-                </div>
+                  <span className="groupDialogFontColorName">White</span>
+                </button>
               </div>
             </div>
 
-            {/* Admin list — scrollable when content pushes past 75vh */}
+            {/* Admin list — scrollable when the dialog reaches 85vh */}
             <div className="groupDialogAdminSection">
-              <h4 className="groupDialogAdminHeader">Admins</h4>
               <div className="groupDialogAdminList">
                 {admins.map((admin, i) => (
                   <div key={i} className="groupDialogAdminItem">
-                    <span className="groupDialogAdminName">{admin.name}</span>
-                    <span className="groupDialogAdminEmail">{admin.email}</span>
+                    <span className="groupDialogAdminEmail">
+                      <span className="groupDialogAdminLabel">Admin:</span>{" "}
+                      {admin.email}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -395,7 +514,7 @@ const EditGroupDialog = ({
                     handleAddAdmin();
                   }
                 }}
-                placeholder="Email address"
+                placeholder="Enter email to add admins"
                 className="groupDialogEmailInput"
               />
               <Button
@@ -425,4 +544,10 @@ const EditGroupDialog = ({
   );
 };
 
-export { EditGroupDialog, GroupButton, JoinGroupButton, NewGroupButton };
+export {
+  EditGroupDialog,
+  GroupButton,
+  GroupMiniButton,
+  JoinGroupButton,
+  NewGroupButton,
+};

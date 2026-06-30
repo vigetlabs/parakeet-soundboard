@@ -15,10 +15,15 @@ import {
 const Groups = () => {
   const [searchParams] = useSearchParams();
   const [currentlyEditing, setCurrentlyEditing] = useState(false);
-  const [currentlyJoining, setCurrentlyJoining] = useState(false);
   const [currentlyDeleting, setCurrentlyDeleting] = useState(false);
   const [editingName, setEditingName] = useState("");
   const [editingSlug, setEditingSlug] = useState("");
+  const [draft, setDraft] = useState<{
+    name: string;
+    emoji: string;
+    color?: string;
+    textColor: string;
+  }>({ name: "", emoji: "", color: undefined, textColor: "#ffffff" });
 
   const { data: groups = [], isLoading } = useGroups();
 
@@ -52,17 +57,13 @@ const Groups = () => {
         <UpdateIcon className="spinIcon spinIconLarge" />
       ) : (
         <div className="groupButtonContainer">
-          <EditGroupDialog
-            open={currentlyJoining}
-            onOpenChange={setCurrentlyJoining}
-          >
-            <JoinGroupButton />
-          </EditGroupDialog>
+          <JoinGroupButton />
           <EditGroupDialog
             open={currentlyEditing}
             onOpenChange={setCurrentlyEditing}
             previousName={editingName}
             slug={editingSlug}
+            onDraftChange={setDraft}
           >
             <NewGroupButton
               onClick={() => {
@@ -71,18 +72,25 @@ const Groups = () => {
               }}
             />
           </EditGroupDialog>
-          {sortAndFilter().map((group: Group) => (
-            <GroupButton
-              key={group.slug}
-              name={group.name}
-              slug={group.slug}
-              emoji={group.emoji}
-              color={group.color}
-              code={group.code}
-              editFunction={handleEditClicked}
-              deleteFunction={handleDeleteClicked}
-            />
-          ))}
+          {sortAndFilter().map((group: Group) => {
+            const isEditingThis =
+              currentlyEditing && !!editingSlug && editingSlug === group.slug;
+            return (
+              <GroupButton
+                key={group.slug}
+                name={
+                  isEditingThis ? draft.name || "Group Name" : group.name
+                }
+                slug={group.slug}
+                emoji={isEditingThis ? draft.emoji : group.emoji}
+                color={isEditingThis ? draft.color : group.color}
+                textColor={isEditingThis ? draft.textColor : undefined}
+                code={group.code}
+                editFunction={handleEditClicked}
+                deleteFunction={handleDeleteClicked}
+              />
+            );
+          })}
 
 
           <DeleteDialog
@@ -90,6 +98,7 @@ const Groups = () => {
             setClose={() => setCurrentlyDeleting(false)}
             name={editingName}
             slug={editingSlug}
+            entity="group"
           />
         </div>
       )}

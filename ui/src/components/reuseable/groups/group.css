@@ -3,17 +3,25 @@
   grid-template-columns: repeat(auto-fill, 140px);
   gap: 24px;
   margin-top: 24px;
+  /* keep the code line below group boxes from stretching the Join/Create boxes */
+  align-items: start;
 }
 
 .groupButtonWrapper {
   padding: 12px 16px;
   background-color: var(--elevated-background);
   width: 144px;
+  height: 168px;
   border: 2px solid var(--primary-muted);
   border-radius: 16px;
   text-align: center;
   transition: all 0.2s ease-in-out;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .groupButtonWrapper:hover {
@@ -30,9 +38,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 92px;
-  margin: 8px auto 16px;
-  font-size: 3rem;
+  height: 64px;
+  margin: 4px auto 12px;
+  font-size: 3.75rem;
   line-height: 1;
   box-sizing: border-box;
 }
@@ -60,18 +68,55 @@
   color: var(--primary-active);
 }
 
-.joinGroupCodeBox {
+.joinGroupButtonContainer {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  width: 144px;
+}
+
+.joinGroupCodeBox {
+  width: 100%;
+  text-align: center;
   padding: 8px 12px;
   margin: 8px 0 16px;
   border-radius: 8px;
   border: 2px solid var(--primary-muted-dark);
   background-color: var(--elevated-background);
-  color: var(--primary-muted-dark);
+  color: var(--primary-foreground);
   font-size: 0.9rem;
+  font-family: inherit;
   box-sizing: border-box;
+  cursor: text;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.joinGroupCodeBox::placeholder {
+  color: var(--primary-muted-dark);
+}
+
+.joinGroupCodeBox:focus {
+  border-color: var(--primary-active);
+}
+
+.joinGroupFeedback {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.joinGroupFeedback-success {
+  color: var(--primary-active);
+}
+
+.joinGroupFeedback-error {
+  color: var(--warning);
+}
+
+.joinGroupFeedback-pending {
+  color: var(--primary-muted-dark);
 }
 
 .groupButtonLabel {
@@ -96,9 +141,15 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
+  width: 144px;
+  margin-top: 8px;
   font-size: 0.85rem;
-  font-weight: 400;
-  color: inherit;
+  font-weight: 600;
+  color: var(--primary-foreground);
+}
+
+.groupButtonCodeLabel {
+  font-weight: 700;
 }
 
 .groupButtonCodeValueRow {
@@ -159,8 +210,8 @@
   left: 50%;
   transform: translate(-50%, -50%);
   animation: groupDialogShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
-  width: 500px;
-  max-height: 75vh;
+  width: 600px;
+  max-height: 85vh;
   padding: 32px;
   box-sizing: border-box;
   display: flex;
@@ -200,11 +251,18 @@
 }
 
 .groupDialogNameField {
+  position: relative;
   margin-top: 20px;
   border: 2px solid var(--primary-muted-dark);
   border-radius: 12px;
   transition: border-color 0.2s ease-in-out;
   flex-shrink: 0;
+  padding: 10px 0;
+}
+
+.groupDialogNameField .editDialogMessage {
+  top: 0;
+  transform: translate(4px, -24px);
 }
 
 .groupDialogNameField:hover {
@@ -233,8 +291,9 @@
 }
 
 .groupDialogPreview {
-  width: 88px;
-  height: 88px;
+  position: relative;
+  width: 144px;
+  height: 144px;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -247,12 +306,12 @@
 }
 
 .groupDialogPreviewEmoji {
-  font-size: 2rem;
+  font-size: 4.25rem;
   line-height: 1;
 }
 
 .groupDialogPreviewName {
-  font-size: 0.6rem;
+  font-size: 1rem;
   font-weight: 700;
   text-align: center;
   max-width: 100%;
@@ -262,6 +321,9 @@
 }
 
 .groupDialogEmojiPickerField {
+  position: absolute;
+  top: 4px;
+  right: 4px;
   transition: color 0.2s ease-in-out;
 }
 
@@ -279,25 +341,49 @@
 }
 
 .groupDialogFontColorSection {
+  margin-top: 20px;
   flex-shrink: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .groupDialogFontColorLabel {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--primary-muted-dark);
-  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0d3d38;
   line-height: 1.2;
 }
 
 .groupDialogFontColorButtons {
   display: flex;
   flex-direction: row;
+  gap: 16px;
+}
+
+.groupDialogFontColorOption {
+  display: flex;
+  align-items: center;
   gap: 8px;
+  padding: 8px 12px;
+  border: 2px solid var(--primary-muted-dark);
+  border-radius: 12px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.groupDialogFontColorOption:hover,
+.groupDialogFontColorOption[aria-pressed="true"] {
+  border-color: var(--primary-active);
+}
+
+.groupDialogFontColorName {
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .groupDialogFontColorBtn {
@@ -305,17 +391,7 @@
   height: 32px;
   border-radius: 50%;
   border: 2px solid var(--primary-muted);
-  box-shadow: 0 0 0 2px transparent;
-  transition: box-shadow 0.2s ease-in-out;
   cursor: pointer;
-}
-
-.groupDialogFontColorBtn:hover {
-  box-shadow: 0 0 0 2px var(--primary-active);
-}
-
-.groupDialogFontColorBtnSelected {
-  box-shadow: 0 0 0 2px var(--primary-active);
 }
 
 .groupDialogFontColorBtnBlack {
@@ -334,12 +410,7 @@
 }
 
 .groupDialogAdminHeader {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--primary-muted-dark);
-  margin: 0 0 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: #0d3d38;
 }
 
 .groupDialogAdminList {
@@ -354,7 +425,11 @@
   justify-content: space-between;
   padding: 8px 12px;
   border-radius: 8px;
-  background-color: var(--inner-background);
+  color: #0d3d38;
+}
+
+.groupDialogAdminLabel {
+  font-weight: 700;
 }
 
 .groupDialogAdminName {
@@ -364,7 +439,7 @@
 
 .groupDialogAdminEmail {
   font-size: 0.85rem;
-  color: var(--primary-muted-dark);
+  color: #0d3d38;
 }
 
 .groupDialogAddAdminRow {
@@ -376,7 +451,26 @@
 }
 
 .groupDialogEmailInput {
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.groupDialogAddBtn {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.groupDialogAddAdminRow .groupDialogEmailInput {
+  border: 2px solid var(--primary-muted-dark);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.groupDialogAddBtn,
+.groupDialogFinish {
+  background-color: var(--primary-active-lighter);
+  border-color: var(--primary-active);
+  color: var(--primary-active);
 }
 
 .groupDialogAddBtn {
@@ -385,8 +479,11 @@
 
 .groupDialogFinish {
   margin-top: 12px;
-  width: 100%;
+  width: auto;
+  align-self: flex-start;
   flex-shrink: 0;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .newGroupButtonLabel {
