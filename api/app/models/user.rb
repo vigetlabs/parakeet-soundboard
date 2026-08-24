@@ -4,7 +4,7 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :jwt_authenticatable, :omniauthable,
          jwt_revocation_strategy: self,
-         omniauth_providers: [:google_oauth2]
+         omniauth_providers: [ :google_oauth2 ]
 
   validates :email, presence: true, uniqueness: true
   validates :username, presence: true, uniqueness: true
@@ -53,5 +53,4 @@ class User < ApplicationRecord
     username
   end
   private_class_method :unique_placeholder_username
-
 end

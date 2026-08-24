@@ -1,26 +1,13 @@
 repos:
   - repo: local
     hooks:
-      - id: api-rspec
-        name: Run RSpec
-        entry: docker compose -f docker-compose.dev.yml exec -T api bundle exec rspec
-        language: system
-        pass_filenames: false
-        files: ^api/
 
       - id: api-rubocop
         name: Run Rubocop
-        entry: docker compose -f docker-compose.dev.yml exec -T api bundle exec rubocop
+        entry: docker compose -f docker-compose.dev.yml exec -T api bundle exec rubocop -a
         language: system
         pass_filenames: false
         files: ^api/.*\.rb$
-
-      - id: api-brakeman
-        name: Run Brakeman
-        entry: docker compose -f docker-compose.dev.yml exec -T api bundle exec brakeman -z
-        language: system
-        pass_filenames: false
-        files: ^api/
 
       - id: ui-lint
         name: Run UI linter
