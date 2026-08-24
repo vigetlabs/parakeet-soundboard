@@ -113,9 +113,12 @@ export default defineContentScript({
             function updatePosition() {
               if (!controlBar) return;
               const controlBarRect = controlBar.getBoundingClientRect();
-              // Position to the left of the control bar
+              const buttonSize = img.getBoundingClientRect().height || 47;
               img.style.left = Math.max(controlBarRect.left - 50, 10) + "px";
-              img.style.bottom = `${window.innerHeight - controlBarRect.bottom}px`;
+              img.style.top =
+                controlBarRect.top +
+                (controlBarRect.height - buttonSize) / 2 +
+                "px";
             }
 
             // Update position initially and on changes
