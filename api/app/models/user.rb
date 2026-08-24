@@ -32,11 +32,26 @@ class User < ApplicationRecord
 
     create!(
       email: auth.info.email,
-      username: auth.info.email.split("@").first,
+      username: unique_placeholder_username(auth.info.email),
       provider: auth.provider,
       uid: auth.uid,
-      password: Devise.friendly_token[0, 20]
+      password: Devise.friendly_token[0, 20],
+      needs_username: true
     )
   end
+
+  def self.unique_placeholder_username(email)
+    base = email.split("@").first
+    username = base
+    suffix = 1
+
+    while exists?(username: username)
+      suffix += 1
+      username = "#{base}#{suffix}"
+    end
+
+    username
+  end
+  private_class_method :unique_placeholder_username
 
 end

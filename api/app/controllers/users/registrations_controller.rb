@@ -2,6 +2,20 @@
 
 class Users::RegistrationsController < Devise::RegistrationsController
   respond_to :json
+  before_action :authenticate_user!, only: [ :set_username ]
+
+  def set_username
+    if current_user.update(username: params[:username], needs_username: false)
+      render json: {
+        status: { code: 200, message: "Username set successfully." },
+        data: UserSerializer.new(current_user).serializable_hash[:data][:attributes]
+      }, status: :ok
+    else
+      render json: {
+        status: { code: 422, message: current_user.errors.full_messages.to_sentence }
+      }, status: :unprocessable_entity
+    end
+  end
 
   def create
     build_resource(sign_up_params)

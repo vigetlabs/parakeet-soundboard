@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   }
   devise_scope :user do
     get "users/show", to: "users/sessions#show"
+    patch "users/username", to: "users/registrations#set_username"
   end
 
   post "/refresh", to: "refresh_tokens#refresh_jwt"
