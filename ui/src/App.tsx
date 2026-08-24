@@ -6,6 +6,7 @@ import {
   Routes,
 } from "react-router-dom";
 import "./App.css";
+import AuthCallback from "./AuthCallback";
 import Folders from "./components/Folders";
 import FolderView from "./components/FolderView";
 import Home from "./components/Home";
@@ -32,6 +33,7 @@ function App() {
           <Route path="/folders/:folder" element={<FolderView />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/logout" element={<LogoutPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Sidebar>
