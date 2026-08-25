@@ -11,6 +11,9 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     redirect_to "#{ENV.fetch('FRONTEND_URL')}/auth/callback" \
       "#token=#{token}&refresh_token=#{refresh_token.token}",
       allow_other_host: true
+  rescue User::UnverifiedEmailConflict
+    redirect_to "#{ENV.fetch('FRONTEND_URL')}/login?error=email_exists",
+      allow_other_host: true
   end
 
   def failure

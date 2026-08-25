@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  class UnverifiedEmailConflict < StandardError; end
+
   include Devise::JWT::RevocationStrategies::JTIMatcher
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
@@ -25,7 +27,9 @@ class User < ApplicationRecord
     email_verified = auth.extra&.raw_info&.[]("email_verified")
     existing = find_by(email: auth.info.email)
 
-    if existing && email_verified
+    if existing
+      raise UnverifiedEmailConflict unless email_verified
+
       existing.update!(provider: auth.provider, uid: auth.uid)
       return existing
     end

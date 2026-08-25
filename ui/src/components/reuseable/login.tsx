@@ -16,6 +16,7 @@ export interface LoginDialogProps
   open: boolean;
   onOpenChange: (open: boolean) => void;
   closeable?: boolean;
+  errorMessage?: string;
 }
 
 const LoginDialog = ({
@@ -23,6 +24,7 @@ const LoginDialog = ({
   open,
   onOpenChange,
   closeable = true,
+  errorMessage,
   className = "",
   children,
   ...props
@@ -142,6 +144,7 @@ const LoginDialog = ({
               {createAccount ? "Create Account" : "Log In"}
             </h3>
           </Dialog.Title>
+          {errorMessage && <p className="loginErrorBanner">{errorMessage}</p>}
           <Form.Root onSubmit={handleSubmit} className="loginForm">
             {createAccount && <h4 className="loginSectionTitle">Login Info</h4>}
             <Form.Field className="loginField" name="email">

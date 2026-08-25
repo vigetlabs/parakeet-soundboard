@@ -17,6 +17,17 @@
   margin-bottom: 24px;
 }
 
+.loginErrorBanner {
+  background-color: var(--elevated-background);
+  color: var(--warning);
+  border: 2px solid var(--warning);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: -8px 0 20px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
 .loginForm {
   display: flex;
   flex-direction: column;
