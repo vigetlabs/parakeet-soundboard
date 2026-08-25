@@ -57,7 +57,7 @@ end
 
 gem "aws-sdk-s3", "~> 1.193"
 
-gem "devise", "~> 4.9"
+gem "devise", "~> 5.0"
 gem "devise-jwt"
 
 gem "jsonapi-serializer"
