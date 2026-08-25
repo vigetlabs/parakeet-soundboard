@@ -46,7 +46,7 @@ class SoundsController < ApplicationController
     if sound.save
       render json: SoundSerializer.new(sound,  params: { scope: current_user }).serializable_hash.to_json, status: :created
     else
-      render json: { errors: sound.errors }, status: :unprocessable_entity
+      render json: { errors: sound.errors }, status: :unprocessable_content
     end
   end
 
@@ -58,7 +58,7 @@ class SoundsController < ApplicationController
       sound.folders = Folder.where(slug: sound_params[:folder_slugs], user: current_user) if sound_params[:folder_slugs].present?
       render json: SoundSerializer.new(sound,  params: { scope: current_user }).serializable_hash.to_json
     else
-      render json: { errors: sound.errors }, status: :unprocessable_entity
+      render json: { errors: sound.errors }, status: :unprocessable_content
     end
   end
 

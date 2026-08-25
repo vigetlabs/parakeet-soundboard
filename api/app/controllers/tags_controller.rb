@@ -13,7 +13,7 @@ class TagsController < ApplicationController
     if tag.save
       render json: TagSerializer.new(tag).serializable_hash.to_json, status: :created
     else
-      render json: { errors: tag.errors }, status: :unprocessable_entity
+      render json: { errors: tag.errors }, status: :unprocessable_content
     end
   end
 
@@ -21,7 +21,7 @@ class TagsController < ApplicationController
     if tag.update(tag_params)
       render json: TagSerializer.new(tag).serializable_hash.to_json
     else
-      render json: { errors: tag.errors }, status: :unprocessable_entity
+      render json: { errors: tag.errors }, status: :unprocessable_content
     end
   end
 
