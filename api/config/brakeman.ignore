@@ -1,0 +1,28 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "636fd8326e81267e1fc052473fe15411a4b09629844bccb2c043ad9d6a511f71",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/users/omniauth_callbacks_controller.rb",
+      "line": 12,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(\"#{ENV.fetch(\"FRONTEND_URL\")}/auth/callback#token=#{request.env[\"warden-jwt_auth.token\"]}&refresh_token=#{User.from_omniauth(request.env[\"omniauth.auth\"]).refresh_tokens.create!.token}\", :allow_other_host => true)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Users::OmniauthCallbacksController",
+        "method": "google_oauth2"
+      },
+      "user_input": "User.from_omniauth(request.env[\"omniauth.auth\"]).refresh_tokens.create!.token",
+      "confidence": "Weak",
+      "cwe_id": [
+        601
+      ],
+      "note": "redirect_to uses the frontend url env var, which we control"
+    }
+  ],
+  "brakeman_version": "8.0.6"
+}
