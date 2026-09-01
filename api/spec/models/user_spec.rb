@@ -41,6 +41,8 @@ RSpec.describe User, type: :model do
       expect(created_user).to be_present
       expect(created_user.email).to eq('user@company.com')
       expect(created_user.needs_username).to be true
+      expect(created_user.encrypted_password).to be_present
+      expect(created_user.valid_password?('')).to be false
     end
 
     it 'finds an existing user by email and updates provider and uid if email is verified' do

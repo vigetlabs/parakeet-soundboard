@@ -63,6 +63,25 @@ RSpec.describe 'Google OmniAuth', type: :request do
       expect(existing.refresh_tokens.count).to eq(1)
     end
 
+    it 'signs in an existing user matched by provider and uid even if their Google email has changed' do
+      existing = User.create!(
+        email: 'oldaddress@gmail.com', password: 'password123', username: 'changedemail',
+        provider: 'google_oauth2', uid: 'stable-uid-1'
+      )
+      mock_google_auth(email: 'newaddress@gmail.com', uid: 'stable-uid-1')
+
+      expect {
+        get '/auth/google_oauth2/callback'
+      }.not_to change(User, :count)
+
+      expect(response).to have_http_status(:found)
+      params = redirect_fragment_params
+      expect(params['token']).to be_present
+
+      existing.reload
+      expect(existing.email).to eq('oldaddress@gmail.com')
+    end
+
     it 'links an existing password account for a gmail.com address' do
       existing = User.create!(email: 'linkme@gmail.com', password: 'password123', username: 'linkme')
       mock_google_auth(email: 'linkme@gmail.com', uid: 'new-uid-999')
