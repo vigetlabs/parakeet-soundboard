@@ -19,7 +19,7 @@ services:
     environment:
       - DATABASE_HOST=db
     ports:
-      - "3001:8000"
+      - "3001:3001"
     depends_on:
       - db
     volumes:
