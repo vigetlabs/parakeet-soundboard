@@ -1,5 +1,9 @@
 class User < ApplicationRecord
   class UnverifiedEmailConflict < StandardError; end
+  class UntrustedGoogleAccount < StandardError; end
+
+  GMAIL_DOMAIN = "gmail.com"
+  private_constant :GMAIL_DOMAIN
 
   include Devise::JWT::RevocationStrategies::JTIMatcher
   devise :database_authenticatable, :registerable,
@@ -24,12 +28,14 @@ class User < ApplicationRecord
     user = find_by(provider: auth.provider, uid: auth.uid)
     return user if user
 
-    email_verified = auth.extra&.raw_info&.[]("email_verified")
     existing = find_by(email: auth.info.email)
 
-    if existing
-      raise UnverifiedEmailConflict unless email_verified
+    unless trusted_google_account?(auth)
+      raise UnverifiedEmailConflict if existing
+      raise UntrustedGoogleAccount
+    end
 
+    if existing
       existing.update!(provider: auth.provider, uid: auth.uid)
       return existing
     end
@@ -43,6 +49,21 @@ class User < ApplicationRecord
       needs_username: true
     )
   end
+
+  # A Google account is only trustworthy enough to sign in or claim a
+  # local account when Google is actually authoritative over the email
+  # address: gmail.com addresses always are, and custom domains only are
+  # while they're actively managed by Google Workspace (a live `hd`
+  # claim) - `email_verified` alone can be stale for a domain that has
+  # since moved off Google. See https://developers.google.com/identity/sign-in/android/backend-auth#verify-the-integrity-of-the-id-token
+  def self.trusted_google_account?(auth)
+    email = auth.info.email.to_s.downcase
+    return true if email.end_with?("@#{GMAIL_DOMAIN}")
+
+    raw_info = auth.extra&.raw_info
+    raw_info&.[]("email_verified") && raw_info&.[]("hd").present?
+  end
+  private_class_method :trusted_google_account?
 
   def self.unique_placeholder_username(email)
     base = email.split("@").first

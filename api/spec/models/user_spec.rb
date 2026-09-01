@@ -24,12 +24,13 @@ RSpec.describe User, type: :model do
         provider: 'google_oauth2',
         uid: '1234567890',
         info: {
-          email: 'user@example.com',
+          email: 'user@company.com',
           name: 'User Example'
         },
          extra: {
           raw_info: {
-            email_verified: true
+            email_verified: true,
+            hd: 'company.com'
           }
         }
       )
@@ -38,12 +39,12 @@ RSpec.describe User, type: :model do
       created_user = nil
       expect { created_user = User.from_omniauth(auth) }.to change { User.count }.by(1)
       expect(created_user).to be_present
-      expect(created_user.email).to eq('user@example.com')
+      expect(created_user.email).to eq('user@company.com')
       expect(created_user.needs_username).to be true
     end
 
     it 'finds an existing user by email and updates provider and uid if email is verified' do
-      existing_user = User.create!(email: 'user@example.com', password: 'password123', username: 'CoolUser')
+      existing_user = User.create!(email: 'user@company.com', password: 'password123', username: 'CoolUser')
       user = User.from_omniauth(auth)
       expect(user).to eq(existing_user)
       expect(user.provider).to eq('google_oauth2')
@@ -73,6 +74,26 @@ RSpec.describe User, type: :model do
       same_name_user = User.from_omniauth(same_name_auth)
       expect(same_name_user.username).to eq('user2') # The username should be unique
       expect(same_name_user.needs_username).to be true
+    end
+
+    it 'raises UntrustedGoogleAccount for a non-gmail address with no live Workspace hd' do
+      untrusted_auth = OmniAuth::AuthHash.new(
+        provider: 'google_oauth2',
+        uid: '5551234567',
+        info: {
+          email: 'user@example.com',
+          name: 'User Example'
+        },
+        extra: {
+          raw_info: {
+            email_verified: true
+          }
+        }
+      )
+
+      expect {
+        expect { User.from_omniauth(untrusted_auth) }.to raise_error(User::UntrustedGoogleAccount)
+      }.not_to change(User, :count)
     end
   end
 end

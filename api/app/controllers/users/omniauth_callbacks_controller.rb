@@ -14,6 +14,9 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   rescue User::UnverifiedEmailConflict
     redirect_to "#{ENV.fetch('FRONTEND_URL')}/login?error=email_exists",
       allow_other_host: true
+  rescue User::UntrustedGoogleAccount
+    redirect_to "#{ENV.fetch('FRONTEND_URL')}/login?error=untrusted_google_account",
+      allow_other_host: true
   end
 
   def failure

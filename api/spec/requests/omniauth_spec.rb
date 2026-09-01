@@ -9,12 +9,12 @@ RSpec.describe 'Google OmniAuth', type: :request do
     OmniAuth.config.mock_auth[:google_oauth2] = nil
   end
 
-  def mock_google_auth(email:, uid: '1234567890', email_verified: true)
+  def mock_google_auth(email:, uid: '1234567890', email_verified: true, hd: nil)
     OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new(
       provider: 'google_oauth2',
       uid: uid,
       info: { email: email, name: 'Test User' },
-      extra: { raw_info: { email_verified: email_verified } }
+      extra: { raw_info: { email_verified: email_verified, hd: hd } }
     )
   end
 
@@ -25,13 +25,13 @@ RSpec.describe 'Google OmniAuth', type: :request do
 
   describe 'GET /auth/google_oauth2/callback' do
     it 'creates a new user, signs them in, and redirects with a token' do
-      mock_google_auth(email: 'newuser@example.com')
+      mock_google_auth(email: 'newuser@gmail.com')
 
       expect {
         get '/auth/google_oauth2/callback'
       }.to change(User, :count).by(1)
 
-      user = User.find_by(email: 'newuser@example.com')
+      user = User.find_by(email: 'newuser@gmail.com')
       expect(user).to be_present
       expect(user.provider).to eq('google_oauth2')
       expect(user.uid).to eq('1234567890')
@@ -63,9 +63,9 @@ RSpec.describe 'Google OmniAuth', type: :request do
       expect(existing.refresh_tokens.count).to eq(1)
     end
 
-    it 'links an existing password account when the email is verified' do
-      existing = User.create!(email: 'linkme@example.com', password: 'password123', username: 'linkme')
-      mock_google_auth(email: 'linkme@example.com', uid: 'new-uid-999')
+    it 'links an existing password account for a gmail.com address' do
+      existing = User.create!(email: 'linkme@gmail.com', password: 'password123', username: 'linkme')
+      mock_google_auth(email: 'linkme@gmail.com', uid: 'new-uid-999')
 
       expect {
         get '/auth/google_oauth2/callback'
@@ -80,9 +80,25 @@ RSpec.describe 'Google OmniAuth', type: :request do
       expect(redirect_fragment_params['token']).to be_present
     end
 
+    it 'links an existing password account for a verified Google Workspace address' do
+      existing = User.create!(email: 'linkme@company.com', password: 'password123', username: 'linkme')
+      mock_google_auth(email: 'linkme@company.com', uid: 'new-uid-999', email_verified: true, hd: 'company.com')
+
+      expect {
+        get '/auth/google_oauth2/callback'
+      }.not_to change(User, :count)
+
+      existing.reload
+      expect(existing.provider).to eq('google_oauth2')
+      expect(existing.uid).to eq('new-uid-999')
+
+      expect(response).to have_http_status(:found)
+      expect(redirect_fragment_params['token']).to be_present
+    end
+
     it 'refuses to link an existing password account when the email is unverified' do
-      existing = User.create!(email: 'unverified@example.com', password: 'password123', username: 'unverified')
-      mock_google_auth(email: 'unverified@example.com', uid: 'new-uid-888', email_verified: false)
+      existing = User.create!(email: 'unverified@company.com', password: 'password123', username: 'unverified')
+      mock_google_auth(email: 'unverified@company.com', uid: 'new-uid-888', email_verified: false, hd: 'company.com')
 
       expect {
         get '/auth/google_oauth2/callback'
@@ -94,6 +110,44 @@ RSpec.describe 'Google OmniAuth', type: :request do
 
       expect(response).to have_http_status(:found)
       expect(response.headers['Location']).to eq("#{ENV.fetch('FRONTEND_URL')}/login?error=email_exists")
+    end
+
+    it 'refuses to link an existing password account when verified but with no live Workspace hd' do
+      existing = User.create!(email: 'spoofed@company.com', password: 'password123', username: 'spoofed')
+      mock_google_auth(email: 'spoofed@company.com', uid: 'new-uid-777', email_verified: true, hd: nil)
+
+      expect {
+        get '/auth/google_oauth2/callback'
+      }.not_to change(User, :count)
+
+      existing.reload
+      expect(existing.provider).to be_nil
+      expect(existing.uid).to be_nil
+
+      expect(response).to have_http_status(:found)
+      expect(response.headers['Location']).to eq("#{ENV.fetch('FRONTEND_URL')}/login?error=email_exists")
+    end
+
+    it 'creates a new user for a verified Google Workspace address' do
+      mock_google_auth(email: 'newhire@company.com', email_verified: true, hd: 'company.com')
+
+      expect {
+        get '/auth/google_oauth2/callback'
+      }.to change(User, :count).by(1)
+
+      expect(response).to have_http_status(:found)
+      expect(redirect_fragment_params['token']).to be_present
+    end
+
+    it 'refuses to create a new user for an untrusted domain' do
+      mock_google_auth(email: 'newuser@company.com', email_verified: true, hd: nil)
+
+      expect {
+        get '/auth/google_oauth2/callback'
+      }.not_to change(User, :count)
+
+      expect(response).to have_http_status(:found)
+      expect(response.headers['Location']).to eq("#{ENV.fetch('FRONTEND_URL')}/login?error=untrusted_google_account")
     end
 
     it 'redirects to login with an error when authentication fails' do
