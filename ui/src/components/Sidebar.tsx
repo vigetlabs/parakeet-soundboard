@@ -12,6 +12,7 @@ import {
   IconButton,
   LoginDialog,
   LogoutPopover,
+  SetUsernameDialog,
   TextInput,
 } from "./reuseable";
 import "./Sidebar.css";
@@ -97,6 +98,7 @@ const Sidebar = ({ children }: Props) => {
 
   return (
     <>
+      {user?.needs_username && <SetUsernameDialog />}
       <div className="sidebarWrapper">
         <div className="sidebarTop">
           <Link to="/">

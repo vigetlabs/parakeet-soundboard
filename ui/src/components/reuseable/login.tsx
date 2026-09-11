@@ -5,7 +5,9 @@ import * as React from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, PasswordInput, TextInput } from ".";
+import { GoogleIcon } from "../../icons/GoogleIcon";
 import { useAuth } from "../../util/auth";
+import { API_URL } from "../../util/db";
 import "./login.css";
 
 export interface LoginDialogProps
@@ -14,6 +16,7 @@ export interface LoginDialogProps
   open: boolean;
   onOpenChange: (open: boolean) => void;
   closeable?: boolean;
+  errorMessage?: string;
 }
 
 const LoginDialog = ({
@@ -21,6 +24,7 @@ const LoginDialog = ({
   open,
   onOpenChange,
   closeable = true,
+  errorMessage,
   className = "",
   children,
   ...props
@@ -140,6 +144,7 @@ const LoginDialog = ({
               {createAccount ? "Create Account" : "Log In"}
             </h3>
           </Dialog.Title>
+          {errorMessage && <p className="loginErrorBanner">{errorMessage}</p>}
           <Form.Root onSubmit={handleSubmit} className="loginForm">
             {createAccount && <h4 className="loginSectionTitle">Login Info</h4>}
             <Form.Field className="loginField" name="email">
@@ -255,6 +260,19 @@ const LoginDialog = ({
               </button>
             </Form.Submit>
           </Form.Root>
+          <div className="loginDivider">
+            <span>or</span>
+          </div>
+          <button
+            type="button"
+            className="googleButton"
+            onClick={() => {
+              window.location.href = `${API_URL}/auth/google_oauth2`;
+            }}
+          >
+            <GoogleIcon className="googleButtonIcon" />
+            Continue with Google
+          </button>
           <p className="loginFooter">
             {createAccount ? "Already have an account? " : "New to Parakeet? "}
             <button

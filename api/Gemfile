@@ -59,6 +59,9 @@ gem "aws-sdk-s3", "~> 1.193"
 
 gem "devise", "~> 5.0"
 gem "devise-jwt"
+gem "omniauth"
+gem "omniauth-google-oauth2"
+gem "omniauth-rails_csrf_protection"
 
 gem "jsonapi-serializer"
 

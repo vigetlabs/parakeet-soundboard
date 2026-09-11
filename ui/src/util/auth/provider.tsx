@@ -39,31 +39,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         token = res.authHeader.split(" ")[1];
       }
       if (!token) throw new Error("No token received");
-      setToken(token);
-      localStorage.setItem("jwt", token);
 
-      try {
-        const refreshToken = res.data.status.data.refresh_token;
-        if (refreshToken) {
-          localStorage.setItem("refreshToken", refreshToken);
-        }
-
-        window.postMessage({ command: "parakeet-setAuthToken", token, refreshToken }, origin);
-      }
-      catch (e) {
-        console.error('Error obtaining refresh token', e)
-      }
-
-      setUser(res.data.status.data.user);
-      queryClient.setQueryData(
-        ["auth", "user"],
-        res.data.status.data.user ?? null
-      );
-      queryClient.invalidateQueries();
-
-      window.location.reload();
+      applyAuthSuccess(token, res.data.status.data.refresh_token);
     },
   });
+
+  function applyAuthSuccess(jwt: string, refreshToken?: string) {
+    setToken(jwt);
+    localStorage.setItem("jwt", jwt);
+
+    if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+    window.postMessage(
+      { command: "parakeet-setAuthToken", token: jwt, refreshToken },
+      origin
+    );
+    queryClient.invalidateQueries();
+    window.location.reload();
+  }
+
+  const loginWithToken = useCallback(applyAuthSuccess, []);
 
   //   const logoutMut = useMutation({
   //     mutationFn: async () => {
@@ -123,11 +117,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ refresh_token: refreshToken }),
               });
-              
+
               if (refreshRes.ok) {
                 const refreshData = await refreshRes.json();
                 const newToken = refreshData.access_token;
-                
+
                 setToken(newToken);
                 localStorage.setItem("jwt", newToken);
 
@@ -212,6 +206,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     queryClient.setQueryData(["auth", "user"], null);
   }, []);
 
+
   const value: AuthContextValue = {
     user,
     token,
@@ -220,6 +215,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     login,
     logout,
     fetchWithAuth,
+    loginWithToken,
   };
 
   //   if (userQuery.isLoading) {

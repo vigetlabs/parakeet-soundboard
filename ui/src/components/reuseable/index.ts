@@ -7,4 +7,5 @@ export * from "./folder";
 export * from "./folderPicker";
 export * from "./input";
 export * from "./login";
+export * from "./setUsername";
 export * from "./tagPicker";

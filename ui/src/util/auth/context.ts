@@ -1,6 +1,12 @@
 import { createContext } from "react";
 
-export type User = { id: string; email: string; username: string, sounds_count: number };
+export type User = {
+  id: string;
+  email: string;
+  username: string;
+  sounds_count: number;
+  needs_username: boolean;
+};
 
 export type AuthContextValue = {
   user: User | null;
@@ -10,6 +16,7 @@ export type AuthContextValue = {
   login: (creds: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
   fetchWithAuth: (path: string, init?: RequestInit) => Promise<Response>;
+  loginWithToken: (jwt: string, refreshToken?: string) => void;
 };
 
 // createContext in its own non-component file

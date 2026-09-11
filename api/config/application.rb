@@ -28,5 +28,12 @@ module Api
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    # OmniAuth's google_oauth2 strategy stores its CSRF `state` param in the
+    # Rack session, which api_only mode omits by default. Add it back just
+    # for the OmniAuth request/callback round trip.
+    config.session_store :cookie_store, key: "_parakeet_session"
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use config.session_store, config.session_options
   end
 end

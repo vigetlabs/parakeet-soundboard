@@ -23,6 +23,9 @@ jobs:
       RAILS_ENV: test
       DATABASE_URL: postgres://postgres:password@localhost:5432/test_db
       DEVISE_JWT_SECRET_KEY: ${{ secrets.DEVISE_JWT_SECRET_KEY }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      FRONTEND_URL: http://localhost:3000
 
     steps:
       - uses: actions/checkout@v4
