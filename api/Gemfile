@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.0.2"
+gem "rails", "~> 8.1"
 
 gem "pg", "~> 1.5"
 
@@ -57,7 +57,7 @@ end
 
 gem "aws-sdk-s3", "~> 1.193"
 
-gem "devise", "~> 4.9"
+gem "devise", "~> 5.0"
 gem "devise-jwt"
 
 gem "jsonapi-serializer"

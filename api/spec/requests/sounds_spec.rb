@@ -66,7 +66,7 @@ RSpec.describe "Sounds API", type: :request do
 
     it "returns errors for missing audio file" do
       post "/sounds", params: { sound: { name: "No Audio" } }, headers: auth_headers
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body)["errors"]).to be_present
       expect(JSON.parse(response.body)["errors"]["audio_file"]).to include("must be attached")
     end

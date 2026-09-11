@@ -22,7 +22,7 @@ describe 'User API', type: :request do
   it 'fails to sign up a user because email is already used' do
     User.create!(email: 'testuser@example.com', password: 'password123', username: 'testuser')
     post '/signup', params: signup_params.to_json, headers: { 'Content-Type' => 'application/json' }
-    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response).to have_http_status(:unprocessable_content)
     expect(JSON.parse(response.body)['status']['code']).to eq(422)
     expect(response.headers['Authorization']).to be_blank
     expect(JSON.parse(response.body)['status']['message']).to include('has already been taken')

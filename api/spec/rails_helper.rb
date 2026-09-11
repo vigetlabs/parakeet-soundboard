@@ -12,9 +12,9 @@ require 'rspec/rails'
 
 require 'simplecov'
 SimpleCov.start 'rails' do
-  add_filter '/bin/'
-  add_filter '/db/'
-  add_filter '/spec/'
+  skip '/bin/'
+  skip '/db/'
+  skip '/spec/'
 end
 
 # Requires supporting ruby files with custom matchers and macros, etc, in

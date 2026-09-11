@@ -43,7 +43,7 @@ class FoldersController < ApplicationController
     if folder.save
       render json: FolderSerializer.new(folder).serializable_hash.to_json, status: :created
     else
-      render json: { errors: folder.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: folder.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -52,7 +52,7 @@ class FoldersController < ApplicationController
     if folder.update(folder_params)
       render json: FolderSerializer.new(folder).serializable_hash.to_json
     else
-      render json: { errors: folder.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: folder.errors.full_messages }, status: :unprocessable_content
     end
   end
 
