@@ -311,12 +311,17 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // If the selected folder is deleted
-    if (!folders.some((folder) => folder.slug === selectedFolder)) {
+    // If the selected folder is deleted (only once folders and the
+    // persisted selection have both actually loaded)
+    if (
+      folders.length > 0 &&
+      selectedFolder !== "" &&
+      !folders.some((folder) => folder.slug === selectedFolder)
+    ) {
       setSelectedFolder("");
       selectedFolderStorage.setValue("");
     }
-  }, [folders]);
+  }, [folders, selectedFolder]);
 
   useEffect(() => {
     async function loadSettings() {
