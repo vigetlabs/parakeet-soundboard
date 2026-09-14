@@ -1,5 +1,5 @@
 import { openDB } from "idb";
-export async function storeSound(id: string, blob: Blob) {
+export async function storeSound(id: number, blob: Blob) {
   const db = await openDB("SoundCacheDB", 1, {
     upgrade(db) {
       if (!db.objectStoreNames.contains("sounds")) {
@@ -10,7 +10,6 @@ export async function storeSound(id: string, blob: Blob) {
   const existing = await db.get("sounds", id);
   if (!existing) {
     await db.put("sounds", blob, id);
-  } else {
   }
 }
 
@@ -20,7 +19,7 @@ export async function retrieveSound(id: number): Promise<Blob> {
   return blob;
 }
 
-export async function isSoundCached(id: string): Promise<boolean> {
+export async function isSoundCached(id: number): Promise<boolean> {
   const db = await openDB("SoundCacheDB", 1, {
     upgrade(db) {
       if (!db.objectStoreNames.contains("sounds")) {

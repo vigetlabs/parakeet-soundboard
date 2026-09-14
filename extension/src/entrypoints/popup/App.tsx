@@ -7,7 +7,7 @@ import {
   stopLocalAudio,
 } from "@/utils";
 import { getSounds } from "@/utils/api";
-import { CrossFunctions } from "@/utils/constants";
+import { CrossFunctions, Folder, RawSound, Sound } from "@/utils/constants";
 import { isSoundCached, retrieveSound, storeSound } from "@/utils/db.ts";
 import { useEffect, useState } from "react";
 import "./App.css";
@@ -36,8 +36,8 @@ function App() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [isMeet, setIsMeet] = useState<boolean>(false);
-  const [soundButtons, setSoundButtons] = useState<any[]>([]);
-  const [folders, setFolders] = useState<{ name: string; slug: string }[]>([]);
+  const [soundButtons, setSoundButtons] = useState<Sound[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hideMeetIcon, setHideMeetIcon] = useState(false);
   const [hideMuteButton, setHideMuteButton] = useState(false);
@@ -80,9 +80,9 @@ function App() {
   async function fetchSounds() {
     setIsSyncing(true);
     try {
-      const response = await getSounds();
-      const sounds = await Promise.all(
-        response.data.map(async (sound: any) => {
+      const response: { data: RawSound[] } = await getSounds();
+      const sounds: Sound[] = await Promise.all(
+        response.data.map(async (sound) => {
           const id = sound.id;
           const { name, color, emoji, folders, audio_file_url, user_id } =
             sound.attributes;
@@ -93,7 +93,6 @@ function App() {
             const audioResponse = await fetch(fullUrl);
             const blob = await audioResponse.blob();
             await storeSound(id, blob);
-          } else {
           }
 
           return {
@@ -108,10 +107,10 @@ function App() {
       );
 
       // finds all folders that have sounds in them
-      const usedFolders: { name: string; slug: string }[] = [];
-      sounds.forEach((sound: any) => {
-        sound.folders.forEach((folder: any) => {
-          if (!usedFolders.some((f: any) => f.slug === folder.slug)) {
+      const usedFolders: Folder[] = [];
+      sounds.forEach((sound) => {
+        sound.folders.forEach((folder) => {
+          if (!usedFolders.some((f) => f.slug === folder.slug)) {
             usedFolders.push(folder);
           }
         });
@@ -176,7 +175,7 @@ function App() {
     micMutedStorage.setValue(muteMic);
     setMicMuted(muteMic);
     if (isMeet) {
-      let message = muteMic ? CrossFunctions.MUTE_MICROPHONE : CrossFunctions.UNMUTE_MICROPHONE;
+      const message = muteMic ? CrossFunctions.MUTE_MICROPHONE : CrossFunctions.UNMUTE_MICROPHONE;
       const tabs = await browser.tabs.query({ url: "https://meet.google.com/*" });
       tabs.forEach(tab => {
         if (tab.id) {
@@ -189,7 +188,7 @@ function App() {
   }
 
   function sortAndFilter() {
-    let outputSounds = soundButtons.sort((a: any, b: any) => {
+    let outputSounds = soundButtons.sort((a, b) => {
       // Sort by default vs user-uploaded, then alphabetically or by ID
       const aIsDefault = a.user_id === null;
       const bIsDefault = b.user_id === null;
@@ -207,7 +206,7 @@ function App() {
 
     if (selectedFolder !== "") {
       outputSounds = soundButtons.filter((sound) =>
-        sound.folders.some((folder: any) => folder.slug === selectedFolder)
+        sound.folders.some((folder) => folder.slug === selectedFolder)
       );
     } else {
       outputSounds = soundButtons;
@@ -244,7 +243,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const listener = (msg: any) => {
+    const listener = (msg: { type: CrossFunctions }) => {
       if (msg.type === CrossFunctions.AUDIO_ENDED) {
         setCurrentlyPlaying(null);
       }
@@ -290,7 +289,7 @@ function App() {
       const body = document.body;
       const originalOverflow = body.style.overflow;
       body.style.overflow = "hidden";
-      body.offsetHeight;
+      void body.offsetHeight;
       body.style.overflow = originalOverflow;
     };
 
@@ -591,7 +590,7 @@ function App() {
               className={
                 "iconButton" + (micMuted ? " unmuteButton" : " muteButton")
               }
-              onClick={(e) => handleMicMute(!micMuted)}
+              onClick={() => handleMicMute(!micMuted)}
             >
               {micMuted ? (
                 <MicOffIcon
