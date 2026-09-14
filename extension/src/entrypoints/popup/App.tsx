@@ -9,7 +9,7 @@ import {
 import { getSounds } from "@/utils/api";
 import { CrossFunctions, Folder, RawSound, Sound } from "@/utils/constants";
 import { isSoundCached, retrieveSound, storeSound } from "@/utils/db.ts";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
 import {
@@ -32,6 +32,19 @@ import fuzzysort from "fuzzysort";
 import { DropdownMenu, Separator, Slider, Tooltip } from "radix-ui";
 import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon } from "../../icons";
 
+const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
+  fallback: 25,
+});
+const micMutedStorage = storage.defineItem<boolean>("session:micMuted", {
+  fallback: false,
+});
+const selectedFolderStorage = storage.defineItem<string>(
+  "local:selectedFolder",
+  {
+    fallback: "",
+  }
+);
+
 function App() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null);
   const [searchInput, setSearchInput] = useState("");
@@ -49,23 +62,10 @@ function App() {
   const [selectedFolder, setSelectedFolder] = useState("");
   const [user, setUser] = useState<User>(null);
 
-  const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
-    fallback: 25,
-  });
-  const micMutedStorage = storage.defineItem<boolean>("session:micMuted", {
-    fallback: false,
-  });
-  const selectedFolderStorage = storage.defineItem<string>(
-    "local:selectedFolder",
-    {
-      fallback: "",
-    }
-  );
-
-  let loaded = false;
+  const loaded = useRef(false);
   useEffect(() => {
-    if (loaded) return;
-    loaded = true;
+    if (loaded.current) return;
+    loaded.current = true;
     async function startLogin() {
       const token = (await storage.getItem("local:jwt")) ?? null;
       if (token) {
@@ -279,7 +279,7 @@ function App() {
       const textWidth = context.measureText(selectedFolderText).width;
       setFolderSelectWidth(textWidth + 48);
     }
-  }, [selectedFolder]);
+  }, [selectedFolder, folders]);
 
   const [soundButtonOverflow, setSoundButtonOverflow] = useState("");
 
