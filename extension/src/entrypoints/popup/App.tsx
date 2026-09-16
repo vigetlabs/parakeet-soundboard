@@ -58,7 +58,7 @@ function App() {
   const selectedFolderStorage = storage.defineItem<string>(
     "local:selectedFolder",
     {
-      fallback: "favorites",
+      fallback: "",
     }
   );
 
