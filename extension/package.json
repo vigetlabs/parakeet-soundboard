@@ -13,6 +13,7 @@
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "postinstall": "wxt prepare"
   },
   "dependencies": {
