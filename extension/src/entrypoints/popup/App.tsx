@@ -9,7 +9,7 @@ import {
 import { getSounds } from "@/utils/api";
 import { CrossFunctions, Folder, RawSound, Sound } from "@/utils/constants";
 import { isSoundCached, retrieveSound, storeSound } from "@/utils/db.ts";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 
 import {
@@ -55,12 +55,26 @@ function App() {
   const [hideMeetIcon, setHideMeetIcon] = useState(false);
   const [hideMuteButton, setHideMuteButton] = useState(false);
 
-  const [folderSelectWidth, setFolderSelectWidth] = useState(0);
-
   const [fxVolume, setFxVolume] = useState(25);
   const [micMuted, setMicMuted] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState("");
   const [user, setUser] = useState<User>(null);
+
+  // Resize the folder selector on value change
+  const folderSelectWidth = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context) return 0;
+
+    context.font = `12px 'Instrument Sans', sans-serif`;
+    const selectedFolderText =
+      selectedFolder === ""
+        ? "All Sounds"
+        : folders.find((folder) => folder.slug === selectedFolder)?.name ??
+          "All Sounds";
+
+    return context.measureText(selectedFolderText).width + 48;
+  }, [selectedFolder, folders]);
 
   const loaded = useRef(false);
   useEffect(() => {
@@ -188,7 +202,15 @@ function App() {
   }
 
   function sortAndFilter() {
-    let outputSounds = soundButtons.sort((a, b) => {
+    let outputSounds =
+      selectedFolder !== ""
+        ? soundButtons.filter((sound) =>
+            sound.folders.some((folder) => folder.slug === selectedFolder)
+          )
+        : soundButtons;
+
+    // Copy before sorting so the soundButtons state isn't mutated
+    outputSounds = [...outputSounds].sort((a, b) => {
       // Sort by default vs user-uploaded, then alphabetically or by ID
       const aIsDefault = a.user_id === null;
       const bIsDefault = b.user_id === null;
@@ -202,15 +224,7 @@ function App() {
       }
 
       return aIsDefault ? -1 : 1;
-    }) ?? [];
-
-    if (selectedFolder !== "") {
-      outputSounds = soundButtons.filter((sound) =>
-        sound.folders.some((folder) => folder.slug === selectedFolder)
-      );
-    } else {
-      outputSounds = soundButtons;
-    }
+    });
 
     if (searchInput !== "") {
       outputSounds = fuzzysort
@@ -264,23 +278,6 @@ function App() {
     fetchSounds();
   }
 
-  useEffect(() => {
-    // Resize the folder selector on value change
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-
-    if (context) {
-      context.font = `12px 'Instrument Sans', sans-serif`;
-      const selectedFolderText =
-        selectedFolder === ""
-          ? "All Sounds"
-          : folders.find((folder) => folder.slug === selectedFolder)?.name ??
-            "All Sounds";
-      const textWidth = context.measureText(selectedFolderText).width;
-      setFolderSelectWidth(textWidth + 48);
-    }
-  }, [selectedFolder, folders]);
-
   const [soundButtonOverflow, setSoundButtonOverflow] = useState("");
 
   useEffect(() => {
@@ -317,6 +314,8 @@ function App() {
       selectedFolder !== "" &&
       !folders.some((folder) => folder.slug === selectedFolder)
     ) {
+      // Clearing a deleted folder is a rare, data-driven render
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedFolder("");
       selectedFolderStorage.setValue("");
     }
