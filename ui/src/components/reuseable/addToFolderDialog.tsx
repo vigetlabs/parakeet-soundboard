@@ -88,6 +88,8 @@ export const AddToFolderDialog = ({
 
   useEffect(() => {
     if (open) {
+      // Resetting on open is a rare, user-driven render
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEditingFolders(sound?.folders || []);
     }
   }, [open, sound]);
