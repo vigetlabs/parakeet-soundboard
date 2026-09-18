@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { API_URL } from "./db";
 
 export class AudioPlayer {
@@ -73,14 +73,10 @@ export class AudioPlayer {
   }
 }
 
+const subscribe = (onStoreChange: () => void) =>
+  AudioPlayer.subscribe(onStoreChange);
+const getSnapshot = () => AudioPlayer.isPlaying();
+
 export function useAudioPlaying() {
-  const [isPlaying, setIsPlaying] = useState(AudioPlayer.isPlaying());
-
-  useEffect(() => {
-    const unsubscribe = AudioPlayer.subscribe(setIsPlaying);
-    setIsPlaying(AudioPlayer.isPlaying());
-    return unsubscribe;
-  }, []);
-
-  return isPlaying;
+  return useSyncExternalStore(subscribe, getSnapshot);
 }

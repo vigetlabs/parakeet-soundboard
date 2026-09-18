@@ -7,9 +7,9 @@ import {
   stopLocalAudio,
 } from "@/utils";
 import { getSounds } from "@/utils/api";
-import { CrossFunctions } from "@/utils/constants";
+import { CrossFunctions, Folder, RawSound, Sound } from "@/utils/constants";
 import { isSoundCached, retrieveSound, storeSound } from "@/utils/db.ts";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 
 import {
@@ -32,40 +32,54 @@ import fuzzysort from "fuzzysort";
 import { DropdownMenu, Separator, Slider, Tooltip } from "radix-ui";
 import { MicIcon, MicOffIcon, VideoIcon, VideoOffIcon } from "../../icons";
 
+const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
+  fallback: 25,
+});
+const micMutedStorage = storage.defineItem<boolean>("session:micMuted", {
+  fallback: false,
+});
+const selectedFolderStorage = storage.defineItem<string>(
+  "local:selectedFolder",
+  {
+    fallback: "",
+  }
+);
+
 function App() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [isMeet, setIsMeet] = useState<boolean>(false);
-  const [soundButtons, setSoundButtons] = useState<any[]>([]);
-  const [folders, setFolders] = useState<{ name: string; slug: string }[]>([]);
+  const [soundButtons, setSoundButtons] = useState<Sound[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hideMeetIcon, setHideMeetIcon] = useState(false);
   const [hideMuteButton, setHideMuteButton] = useState(false);
-
-  const [folderSelectWidth, setFolderSelectWidth] = useState(0);
 
   const [fxVolume, setFxVolume] = useState(25);
   const [micMuted, setMicMuted] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState("");
   const [user, setUser] = useState<User>(null);
 
-  const fxVolumeStorage = storage.defineItem<number>("local:fxVolume", {
-    fallback: 25,
-  });
-  const micMutedStorage = storage.defineItem<boolean>("session:micMuted", {
-    fallback: false,
-  });
-  const selectedFolderStorage = storage.defineItem<string>(
-    "local:selectedFolder",
-    {
-      fallback: "",
-    }
-  );
+  // Resize the folder selector on value change
+  const folderSelectWidth = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context) return 0;
 
-  let loaded = false;
+    context.font = `12px 'Instrument Sans', sans-serif`;
+    const selectedFolderText =
+      selectedFolder === ""
+        ? "All Sounds"
+        : folders.find((folder) => folder.slug === selectedFolder)?.name ??
+          "All Sounds";
+
+    return context.measureText(selectedFolderText).width + 48;
+  }, [selectedFolder, folders]);
+
+  const loaded = useRef(false);
   useEffect(() => {
-    if (loaded) return;
-    loaded = true;
+    if (loaded.current) return;
+    loaded.current = true;
     async function startLogin() {
       const token = (await storage.getItem("local:jwt")) ?? null;
       if (token) {
@@ -80,9 +94,9 @@ function App() {
   async function fetchSounds() {
     setIsSyncing(true);
     try {
-      const response = await getSounds();
-      const sounds = await Promise.all(
-        response.data.map(async (sound: any) => {
+      const response: { data: RawSound[] } = await getSounds();
+      const sounds: Sound[] = await Promise.all(
+        response.data.map(async (sound) => {
           const id = sound.id;
           const { name, color, emoji, folders, audio_file_url, user_id } =
             sound.attributes;
@@ -93,7 +107,6 @@ function App() {
             const audioResponse = await fetch(fullUrl);
             const blob = await audioResponse.blob();
             await storeSound(id, blob);
-          } else {
           }
 
           return {
@@ -108,10 +121,10 @@ function App() {
       );
 
       // finds all folders that have sounds in them
-      const usedFolders: { name: string; slug: string }[] = [];
-      sounds.forEach((sound: any) => {
-        sound.folders.forEach((folder: any) => {
-          if (!usedFolders.some((f: any) => f.slug === folder.slug)) {
+      const usedFolders: Folder[] = [];
+      sounds.forEach((sound) => {
+        sound.folders.forEach((folder) => {
+          if (!usedFolders.some((f) => f.slug === folder.slug)) {
             usedFolders.push(folder);
           }
         });
@@ -176,7 +189,7 @@ function App() {
     micMutedStorage.setValue(muteMic);
     setMicMuted(muteMic);
     if (isMeet) {
-      let message = muteMic ? CrossFunctions.MUTE_MICROPHONE : CrossFunctions.UNMUTE_MICROPHONE;
+      const message = muteMic ? CrossFunctions.MUTE_MICROPHONE : CrossFunctions.UNMUTE_MICROPHONE;
       const tabs = await browser.tabs.query({ url: "https://meet.google.com/*" });
       tabs.forEach(tab => {
         if (tab.id) {
@@ -189,7 +202,15 @@ function App() {
   }
 
   function sortAndFilter() {
-    let outputSounds = soundButtons.sort((a: any, b: any) => {
+    let outputSounds =
+      selectedFolder !== ""
+        ? soundButtons.filter((sound) =>
+            sound.folders.some((folder) => folder.slug === selectedFolder)
+          )
+        : soundButtons;
+
+    // Copy before sorting so the soundButtons state isn't mutated
+    outputSounds = [...outputSounds].sort((a, b) => {
       // Sort by default vs user-uploaded, then alphabetically or by ID
       const aIsDefault = a.user_id === null;
       const bIsDefault = b.user_id === null;
@@ -203,15 +224,7 @@ function App() {
       }
 
       return aIsDefault ? -1 : 1;
-    }) ?? [];
-
-    if (selectedFolder !== "") {
-      outputSounds = soundButtons.filter((sound) =>
-        sound.folders.some((folder: any) => folder.slug === selectedFolder)
-      );
-    } else {
-      outputSounds = soundButtons;
-    }
+    });
 
     if (searchInput !== "") {
       outputSounds = fuzzysort
@@ -244,7 +257,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const listener = (msg: any) => {
+    const listener = (msg: { type: CrossFunctions }) => {
       if (msg.type === CrossFunctions.AUDIO_ENDED) {
         setCurrentlyPlaying(null);
       }
@@ -265,23 +278,6 @@ function App() {
     fetchSounds();
   }
 
-  useEffect(() => {
-    // Resize the folder selector on value change
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-
-    if (context) {
-      context.font = `12px 'Instrument Sans', sans-serif`;
-      const selectedFolderText =
-        selectedFolder === ""
-          ? "All Sounds"
-          : folders.find((folder) => folder.slug === selectedFolder)?.name ??
-            "All Sounds";
-      const textWidth = context.measureText(selectedFolderText).width;
-      setFolderSelectWidth(textWidth + 48);
-    }
-  }, [selectedFolder]);
-
   const [soundButtonOverflow, setSoundButtonOverflow] = useState("");
 
   useEffect(() => {
@@ -290,7 +286,7 @@ function App() {
       const body = document.body;
       const originalOverflow = body.style.overflow;
       body.style.overflow = "hidden";
-      body.offsetHeight;
+      void body.offsetHeight;
       body.style.overflow = originalOverflow;
     };
 
@@ -318,6 +314,8 @@ function App() {
       selectedFolder !== "" &&
       !folders.some((folder) => folder.slug === selectedFolder)
     ) {
+      // Clearing a deleted folder is a rare, data-driven render
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedFolder("");
       selectedFolderStorage.setValue("");
     }
@@ -591,7 +589,7 @@ function App() {
               className={
                 "iconButton" + (micMuted ? " unmuteButton" : " muteButton")
               }
-              onClick={(e) => handleMicMute(!micMuted)}
+              onClick={() => handleMicMute(!micMuted)}
             >
               {micMuted ? (
                 <MicOffIcon

@@ -304,6 +304,8 @@ const EditFolderDialog = ({
 
   useEffect(() => {
     if (open) {
+      // Resetting on open is a rare, user-driven render
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       resetOnOpen();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

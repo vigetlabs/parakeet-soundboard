@@ -1,4 +1,3 @@
-import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import "./App.css";
 
 function App() {

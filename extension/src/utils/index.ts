@@ -1,4 +1,3 @@
-import { PublicPath } from "wxt/browser";
 import { CrossFunctions } from "./constants";
 
 export async function getActiveTabID() {
@@ -9,10 +8,13 @@ export async function getActiveTabID() {
   return tab.id ?? -1;
 }
 
-export async function postMessage(command: CrossFunctions, args?: {}) {
+export async function postMessage(
+  command: CrossFunctions,
+  args?: Record<string, unknown>
+) {
   browser.scripting.executeScript({
     target: { tabId: await getActiveTabID() },
-    func: function (command: string, args?: {}) {
+    func: function (command: string, args?: Record<string, unknown>) {
       window.postMessage(
         {
           command: command,
