@@ -23,7 +23,8 @@ export default defineBackground(() => {
       return true; // tells the caller that there will be a response
     } else if (msg.type === CrossFunctions.OPEN_POPUP) {
       try {
-        browser.action.openPopup();
+        // Firefox builds as MV2, which exposes browserAction instead of action
+        (browser.action ?? browser.browserAction).openPopup();
       } catch (e) {
         console.warn("openPopup failed:", e);
       }

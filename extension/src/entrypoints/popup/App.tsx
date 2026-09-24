@@ -236,7 +236,7 @@ function App() {
   }
 
   useEffect(() => {
-    browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       const url = tabs[0]?.url ?? "";
       setIsMeet(url.startsWith("https://meet.google.com"));
     });
