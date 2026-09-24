@@ -20,3 +20,29 @@ export type User = {
   email: string;
   id: number;
 } | null;
+
+export type Folder = {
+  name: string;
+  slug: string;
+};
+
+export type Sound = {
+  id: number;
+  label: string;
+  color: string;
+  emoji: string;
+  folders: Folder[];
+  user_id: number | null;
+};
+
+export type RawSound = {
+  id: number;
+  attributes: {
+    name: string;
+    color: string | null;
+    emoji: string | null;
+    folders: Folder[] | null;
+    audio_file_url: string;
+    user_id: number | null;
+  };
+};

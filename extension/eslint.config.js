@@ -4,9 +4,10 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { globalIgnores } from 'eslint/config'
+import wxtAutoImports from './.wxt/eslint-auto-imports.mjs'
 
 export default tseslint.config([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', '.wxt', '.output']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -14,6 +15,7 @@ export default tseslint.config([
       tseslint.configs.recommended,
       reactHooks.configs.flat['recommended-latest'],
       reactRefresh.configs.vite,
+      wxtAutoImports,
     ],
     languageOptions: {
       ecmaVersion: 2020,

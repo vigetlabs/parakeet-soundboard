@@ -24,10 +24,15 @@ interface Props {
 const Sidebar = ({ children }: Props) => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [search, setSearch] = useState("");
-  const [filterTags, setFilterTags] = useState<Tag[]>([]);
+  // The URL is the source of truth for the search and filters
+  const search = searchParams.get("search") ?? "";
+  const filterTags = searchParams
+    .getAll("filter")
+    .map((tag) => ({ name: tag }));
   const isPlaying = useAudioPlaying();
-  const [volume, setVolume] = useState(50);
+  const [volume, setVolume] = useState(() =>
+    parseInt(localStorage.getItem("volume") ?? "50")
+  );
   const [uploadOpen, setUploadOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const { user, userLoading, fetchWithAuth } = useAuth();
@@ -63,38 +68,36 @@ const Sidebar = ({ children }: Props) => {
     AudioPlayer.setVolume(value);
   }
 
-  useEffect(() => {
+  function updateSearchParams(nextSearch: string, nextFilterTags: Tag[]) {
     // Prevent this from running on unknown pages (so it can redirect back to home)
     if (location.pathname !== "/" && !location.pathname.startsWith("/folders"))
       return;
 
-    if (search.trim() === "") {
-      setSearchParams({ filter: filterTags.map((tag) => tag.name) });
-    } else {
-      setSearchParams({
-        search: search.trim(),
-        filter: filterTags.map((tag) => tag.name),
-      });
-    }
-  }, [search, filterTags, setSearchParams, location.pathname]);
-
-  useEffect(() => {
-    setSearch("");
-    setFilterTags([]);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    setSearch(searchParams.get("search") ?? "");
-    setFilterTags(
-      searchParams.getAll("filter").map((tag) => ({ name: tag })) ?? []
+    const filter = nextFilterTags.map((tag) => tag.name);
+    setSearchParams(
+      nextSearch.trim() === "" ? { filter } : { search: nextSearch, filter },
+      { replace: true }
     );
-  }, [searchParams]);
+  }
+
+  function setSearch(value: string) {
+    updateSearchParams(value, filterTags);
+  }
+
+  const setFilterTags: React.Dispatch<React.SetStateAction<Tag[]>> = (
+    action
+  ) => {
+    updateSearchParams(
+      search,
+      typeof action === "function" ? action(filterTags) : action
+    );
+  };
 
   useEffect(() => {
-    const localVolume = parseInt(localStorage.getItem("volume") ?? "50");
-    setVolume(localVolume);
-    AudioPlayer.setVolume(localVolume);
-  }, [setVolume]);
+    // Push the saved volume into the player on mount
+    AudioPlayer.setVolume(volume);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>

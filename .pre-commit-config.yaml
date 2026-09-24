@@ -11,7 +11,7 @@ repos:
 
       - id: ui-lint
         name: Run UI linter
-        entry: bash -lc 'cd ui && pnpm run lint'
+        entry: bash -lc 'cd ui && pnpm run lint:fix'
         language: system
         pass_filenames: false
         files: ^ui/
@@ -25,7 +25,7 @@ repos:
 
       - id: extension-lint
         name: Run extension linter
-        entry: bash -lc 'cd extension && pnpm run lint'
+        entry: bash -lc 'cd extension && pnpm run lint:fix'
         language: system
         pass_filenames: false
         files: ^extension/
