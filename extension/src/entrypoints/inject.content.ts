@@ -67,14 +67,17 @@ export default defineContentScript({
     // returned tracks, so there's no reliable way to guess which one feeds the call.
     // Every call is served from this one graph instead, so whichever track Meet
     // uses carries the same mix.
-    let graph: {
+    type Graph = {
       audioCtx: AudioContext;
       destNode: MediaStreamAudioDestinationNode;
       micGain: GainNode;
       srcNode: MediaStreamAudioSourceNode;
       realStream: MediaStream;
+      // The deviceId Meet last asked for, not what getSettings() reports: Chrome
+      // reports the real ID when Meet asks for "default", which never matches
       deviceId?: string;
-    } | null = null;
+    };
+    let graphPromise: Promise<Graph> | null = null;
 
     const originalGUM = MediaDevices.prototype.getUserMedia.bind(
       navigator.mediaDevices
@@ -95,23 +98,35 @@ export default defineContentScript({
     async function ensureGraph(constraints?: MediaStreamConstraints) {
       const wantedDeviceId = requestedDeviceId(constraints);
 
-      if (graph) {
-        // New device: swap only the input so every track Meet already holds
-        // stays live and still carries our mix
-        if (wantedDeviceId && wantedDeviceId !== graph.deviceId) {
-          const realStream = await captureRealMic(wantedDeviceId);
-          graph.srcNode.disconnect();
-          graph.realStream.getTracks().forEach((t) => t.stop());
-          graph.realStream = realStream;
-          graph.srcNode = graph.audioCtx.createMediaStreamSource(realStream);
-          graph.srcNode.connect(graph.micGain);
-          graph.deviceId =
-            realStream.getAudioTracks()[0]?.getSettings().deviceId;
-        }
-        return graph;
+      if (!graphPromise) {
+        // Store the promise, not the graph: Meet makes a second call before the
+        // first capture resolves, and it must wait for this graph, not build its own
+        graphPromise = buildGraph(wantedDeviceId);
+        // Let a later call retry if this one fails, e.g. mic permission denied
+        graphPromise.catch(() => {
+          graphPromise = null;
+        });
+        return graphPromise;
       }
 
-      const realStream = await captureRealMic(wantedDeviceId);
+      const graph = await graphPromise;
+
+      // New device: swap only the input so every track Meet already holds
+      // stays live and still carries our mix
+      if (wantedDeviceId && wantedDeviceId !== graph.deviceId) {
+        const realStream = await captureRealMic(wantedDeviceId);
+        graph.srcNode.disconnect();
+        graph.realStream.getTracks().forEach((t) => t.stop());
+        graph.realStream = realStream;
+        graph.srcNode = graph.audioCtx.createMediaStreamSource(realStream);
+        graph.srcNode.connect(graph.micGain);
+        graph.deviceId = wantedDeviceId;
+      }
+      return graph;
+    }
+
+    async function buildGraph(deviceId?: string): Promise<Graph> {
+      const realStream = await captureRealMic(deviceId);
       const audioCtx = new AudioContext();
       const srcNode = audioCtx.createMediaStreamSource(realStream);
       const destNode = audioCtx.createMediaStreamDestination();
@@ -119,13 +134,13 @@ export default defineContentScript({
       micGain.gain.value = micMuted ? 0 : 1;
       srcNode.connect(micGain).connect(destNode);
 
-      graph = {
+      const graph = {
         audioCtx,
         destNode,
         micGain,
         srcNode,
         realStream,
-        deviceId: realStream.getAudioTracks()[0]?.getSettings().deviceId,
+        deviceId,
       };
 
       async function playSoundEffect(base64: string, volume: number) {
