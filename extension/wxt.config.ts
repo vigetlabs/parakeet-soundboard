@@ -4,24 +4,34 @@ import { defineConfig } from "wxt";
 export default defineConfig({
   modules: ["@wxt-dev/module-react"],
   srcDir: "src",
-  manifest: {
+  manifest: ({ browser }) => ({
     name: "Parakeet Soundboard",
     version: "1.3.6",
     permissions: ["scripting", "activeTab", "storage", "unlimitedStorage"],
-    host_permissions: ["https://meet.google.com/*"],
+    host_permissions: [
+      "https://meet.google.com/*",
+      // Firefox needs the API host granted explicitly for popup fetches.
+      ...(browser === "firefox" ? [`${process.env.VITE_API_HOST}/*`] : []),
+    ],
+    browser_specific_settings: {
+      gecko: {
+        id: "parakeet-soundboard@vigetx.com",
+        // 128+ is required for the "world": "MAIN" content script
+        strict_min_version: "128.0",
+        // The JWT and refresh token are sent to the Parakeet API
+        data_collection_permissions: {
+          required: ["authenticationInfo"],
+        },
+      },
+    },
     web_accessible_resources: [
       {
         resources: ["images/*", "svgs/*"],
         matches: ["<all_urls>"],
       },
-
-      {
-        resources: ["inject.js"],
-        matches: ["https://meet.google.com/*"],
-      },
     ],
     key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA13fgU4joRpSr2xzzqS7y1XB4EvJquG95jKV2seh5DKMKWPN8ULHON3npeikAVyffGG48nKFAsMml0detH8fxMozfAMeBxeET32ZMoJdspZKYn22AYCIy+RBMRZQKeTlckjI5lrpJ/mS206IkzBtZ3d9LGfL7tkjS/ejV/5yKFyAOBlHLbZOGIcYnOxdgxDszfWEnl/L2qk58ODuM4I/c5gIB+qKs4d0lvUmIkRKgKq5T92c1NLKTIdxybKpaUN8MDT+5wxswCVTE1DdymEbOYr18f7nvCH63wlVNkAwW7ky63XHBo7lypWkQysXQ0PW6YTEYeHnMbjb/P9ax4IG4rwIDAQAB",
-  },
+  }),
   dev: {
     server: {
       port: 3002,
