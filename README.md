@@ -10,7 +10,7 @@
 
 ### Prerequisites
 
-- Ruby 3.4.4 (asdf)
+- Ruby 3.4.13 (asdf)
 - Node.js
 - Docker
 
